@@ -58,3 +58,4 @@ Theory contribution, chosen to avoid duplicating Goel & Bartlett / Cole et al. /
 - an exact Bayes-risk expression and context-length law for in-context prediction of linear systems with a Gaussian prior, giving a parameter-free target curve (n·p·σ²/t asymptotically);
 - a closed-loop non-identifiability lower bound: under any exploration-free linear feedback, the posterior along the unexcited directions never contracts, whatever the context length;
 - a two-layer construction that puts the *exact* sufficient statistics in the residual stream, which motivates the "statistics first, solve later" probing hypothesis.
+- Hill, Eyre, Creager (2025), *Transformers Don't In-Context Learn Least Squares Regression*, arXiv:2507.09440 (added after Experiment A showed an approximation floor; verified 2026-11-05).

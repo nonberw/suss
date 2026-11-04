@@ -1,0 +1,59 @@
+\section{Introduction}
+
+A robot picking up an unfamiliar object, or a legged robot stepping onto ice, must adapt to physics it does not
+know from a few seconds of interaction. A popular recipe trains a sequence model across randomised physics and lets it
+adapt \emph{in context}, from its own history, with no gradient steps at deployment~\citep{kumar2021rma,duan2016rl2,forgione2023from,busetto2024one}.
+These models work, but it is not clear what they compute. Do they identify the plant and then plan? Do they
+implement a classical estimator? Do they explore?
+
+For linear-Gaussian dynamics these questions have exact answers, so they can be tested. Transformers trained on
+random linear systems are known to \emph{behave} like the Kalman filter or least
+squares~\citep{balim2023can,akram2026transformers}. They are also known to be \emph{able to represent} such
+estimators~\citep{goel2024can,cole2025incontext,vladarean2026learning}. What has not been measured is what is inside
+a trained in-context system-identifier, or what an in-context \emph{controller} does about the dual effect. The second
+question matters because, under exploration-free feedback, closed-loop data do not identify the plant~\citep{feldbaum1960dual,astrom1995adaptive,ljung1999system}.
+\citet{akram2026transformers} list the first question as future work.
+
+We study both questions in a pre-registered design. Hypotheses, metrics, seeds and tests were committed before the
+main experiments, and deviations are logged. The design combines exact optimal references, causal interventions and
+three settings of increasing difficulty: linear prediction, MuJoCo contact physics~\citep{todorov2012mujoco}, and adaptive control.
+Our contributions:
+\begin{itemize}
+\item \textbf{Theory (\S\ref{sec:theory}).} An exact Bayes-risk identity for in-context prediction under any
+non-anticipating policy, with a parameter-free context-length law $t\,\mathcal{R}^\star_t\to np\sigma^2$. A
+closed-loop non-identifiability identity: the information gained along unexcited directions equals the excitation energy, and is
+exactly zero under pure feedback. A two-layer construction that gathers the exact sufficient statistics, which turns
+``statistics first, solve later'' into a falsifiable probing prediction.
+\item \textbf{What the trained predictor computes (\S\ref{sec:expa}).} RESULTS_A_SUMMARY
+\item \textbf{Contact physics (\S\ref{sec:expb}).} RESULTS_B_SUMMARY
+\item \textbf{In-context control (\S\ref{sec:expc}).} RESULTS_C_SUMMARY
+\end{itemize}
+
+\section{Related work}
+
+\paragraph{In-context learning of function classes.} Transformers trained on random regression tasks match least
+squares~\citep{garg2022what}. Behaviourally they interpolate between ridge and OLS, and probes recover intermediate
+quantities in static regression~\citep{akyurek2022learning}. They can implement GD~\citep{vonoswald2023transformers,ahn2023transformers,zhang2023trained},
+higher-order iterations~\citep{fu2023transformers} and algorithm selection~\citep{bai2023transformers}, and they
+approximate posterior predictives~\citep{muller2022transformers,raventos2023pretraining}. We move these questions to
+dynamical, closed-loop data, where the regressors depend on the past and on the policy. There the dual effect has no analogue in i.i.d.\ regression.
+
+\paragraph{In-context learning of dynamical systems.} Meta-trained transformers predict and filter unseen linear and
+nonlinear systems~\citep{forgione2023from,piga2023adaptation,busetto2023incontext,balim2023can,akram2026transformers}
+and can serve as contextual controllers for a system class~\citep{busetto2024one}. Constructions and approximation
+theory exist for Kalman filtering~\citep{goel2024can}, for least-squares learning of LDS with depth
+separation~\citep{cole2025incontext}, and for single linear-attention layers~\citep{vladarean2026learning}. All of these are
+either behavioural or representational. None of them intervenes on a trained model.
+
+\paragraph{Adaptation from history and in-context RL.} RMA~\citep{kumar2021rma} regresses a history encoding onto
+privileged physical parameters. Probing such latents gives mixed results~\citep{chamachot2026evaluating}, and decoding
+them can need a learned generative model~\citep{zhang2026interpreting}. Meta-RL agents can learn to
+explore~\citep{duan2016rl2,zintgraf2020varibad}; algorithm distillation imitates learning
+histories~\citep{laskin2022incontext}; and in-context RL algorithms are provably representable in tabular
+MDPs~\citep{liang2026transformers}. In adaptive LQR, certainty equivalence with dithering is
+rate-optimal~\citep{mania2019certainty,simchowitz2020naive}. We use these results as baselines and ask whether a
+transformer trained only on cost discovers the excitation they prescribe.
+
+\paragraph{Interpretability tools.} We use linear probes~\citep{alain2016understanding} and activation
+patching~\citep{zhang2024towards,heimersheim2024how}. Our probes are always paired with interventions, and the probe
+targets are \emph{estimator} quantities, which are distinct from the ground truth.
