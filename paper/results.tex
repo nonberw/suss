@@ -21,8 +21,8 @@ settles about $\Afloor\times10^{-3}$ above Bayes. Meanwhile $t\,\mathcal{R}^\sta
 Theorem~\ref{thm:bayes} gives \AtTheory\ and Corollary~\ref{cor:law} predicts $np\sigma^2{=}0.06$. The pre-registered
 tolerance H1c is \textbf{rejected}: the mean excess ratio is \Aratio\ \Aratioci, against a threshold of $1.25$. This is
 the dynamical analogue of the observation that trained transformers fall short of least-squares
-rates~\citep{hill2025transformers,cole2025incontext}. Longer training and larger models narrow the gap but do not
-close it (\S\ref{sec:scale}).
+rates~\citep{hill2025transformers,cole2025incontext}. Section~\ref{sec:scale} tests whether longer training or
+larger models close the gap.
 
 \paragraph{The pre-registered mechanism is rejected: no estimate in the residual stream.} The best linear probe of
 the residual stream for $\hat\theta_t$ reaches only $R^2{=}\ARtheta$ \ARthetaci\ (H2a, threshold $0.8$:
@@ -82,8 +82,8 @@ can fail even when adaptation works.
 \centering\includegraphics[width=\linewidth]{figs/fig_b.pdf}
 \vspace{-6mm}
 \caption{\textbf{B} (3 seeds). (a, b)~Normalised one-step error vs.\ context length. On the pendulum the transformer
-beats physics-feature RLS, even though RLS has the true model class up to discretisation. On the stick--slip block it beats RLS by $3\times$. (c)~Residual-stream probes
-(fixed final-position probe applied at every $t$).}
+beats physics-feature RLS, even though RLS has the true model class up to discretisation. On the stick--slip block it beats RLS by $\BKratio\times$. (c)~Probe $R^2$ at $t{=}47$ for each physical
+parameter, from the key--value fast weights (best block) vs.\ from the residual stream (P: pendulum, K: block, B: bouncing ball).}
 \label{fig:b}
 \vspace{-3mm}
 \end{figure}
@@ -92,7 +92,7 @@ beats physics-feature RLS, even though RLS has the true model class up to discre
 \BKTF\ for the transformer and \BKRLS\ for physics-feature RLS (H4a: difference \HfourA\ \HfourAci, Holm $p\PHfoura$).
 For comparison, the no-context MLP gets \BKMLP, nominal-parameter simulation \BKNom, and simulation with the true parameters
 \BKOrc. On the pendulum, where feature RLS has the right model class up to discretisation, the transformer
-(\BPTF) still beats it (\BPRLS). Nominal simulation (\BPNom) and the no-context MLP (\BPMLP) are $\sim$60$\times$ worse,
+(\BPTF) still beats it (\BPRLS). Nominal simulation (\BPNom) and the no-context MLP (\BPMLP) are $\approx\BPratio\times$ worse,
 so the gain comes from in-context adaptation.
 
 \paragraph{Mechanism.} The pre-registered probes again fail for the parameters that enter the dynamics
@@ -111,4 +111,4 @@ key--value fast weights decode $1/m$ with $R^2{=}\BfwPinvm$ (residual: \BresPinv
 \PENDING{resScale}
 
 \section{Discussion and limitations}\label{sec:disc}
-\PENDING{discussion}
+\input{discussion}

@@ -172,3 +172,61 @@ def test_holm_and_bootstrap():
     assert out["a"][2] and not out["b"][2] and not out["c"][2]
     pt, dist = hier_boot([np.ones(50), 2 * np.ones(50)], n_boot=200)
     assert pt == 1.5 and dist.min() >= 1 and dist.max() <= 2
+
+
+# ---------------- exploratory-analysis machinery
+def test_query_jacobian_matches_finite_differences():
+    from scripts.mech_a3 import query_jacobian
+    torch.manual_seed(1)
+    m = GPT(GPTConfig(d_in=3, d_out=2, T=8)).eval()
+    for p in m.parameters():
+        p.requires_grad_(False)
+    x = torch.randn(4, 8, 3)
+    J = query_jacobian(m, x)
+    t, j, eps = 5, 1, 1e-3
+    x2 = x.clone(); x2[:, t, j] += eps
+    fd = (m(x2)[:, t] - m(x)[:, t]) / eps
+    assert torch.allclose(J[:, t, :, j], fd, atol=2e-3)
+
+
+def test_kv_patch_identity_and_full_transfer():
+    from scripts.mech_a4 import run
+    torch.manual_seed(2)
+    m = GPT(GPTConfig(d_in=3, d_out=2, T=10)).eval()
+    a, b = torch.randn(3, 10, 3), torch.randn(3, 10, 3)
+    with torch.no_grad():
+        y_b, kv_b = run(m, b)
+        assert torch.allclose(y_b, m(b), atol=1e-5)  # manual forward == model forward
+        y_same, _ = run(m, b, kv_b, tuple(range(4)), "kv")
+        assert torch.allclose(y_same, y_b, atol=1e-5)  # patching with own K,V is a no-op
+        a2 = torch.cat([a[:, :-1], b[:, -1:]], 1)
+        y_a2, kv_a2 = run(m, a2)
+        y_p, _ = run(m, b, kv_a2, tuple(range(4)), "kv")
+        assert torch.allclose(y_p[:, -1], y_a2[:, -1], atol=1e-4)  # all-block KV patch transfers the query output fully
+
+
+def test_fast_weights_shape():
+    from scripts.mech_a3 import fast_weights
+    m = GPT(GPTConfig(d_in=3, d_out=2, T=10)).eval()
+    F = fast_weights(m, torch.randn(5, 10, 3), 2, 9)
+    assert F.shape == (5, 4 * 32 * 32 + 4 * 32)
+
+
+def test_thompson_sampling_runs_and_explores():
+    gen = g(9)
+    A, B = C.sample_plants(64, gen)
+    x0, w = C.sample_noise(64, gen)
+    J, X, U = C.simulate(A, B, x0, w, C.ts_policy(1.0, g(10)))
+    assert torch.isfinite(J).all()
+    Jce, Xce, Uce = C.simulate(A, B, x0, w, C.ce_policy(1.0))
+    assert (C.info_gain(X, U) > C.info_gain(Xce, Uce)).float().mean() > 0.9  # CE without dither never excites u
+
+
+def test_bouncer_bounces_and_params_matter():
+    D = mj.gen_episodes("bouncer", 30, 0)
+    z = D["obs"][..., 0] + 1.0
+    assert z.min() > 0.0 and z.max() < 5.0  # no energy blow-up from soft contact
+    v = D["obs"][..., 1]
+    assert ((v[:, :-1] < -0.2) & (v[:, 1:] > 0.2)).any()  # at least one bounce
+    nxt = D["obs"][:, 1:]
+    assert ((D["oracle"] - nxt) ** 2).mean() < ((D["nominal"] - nxt) ** 2).mean()

@@ -29,17 +29,20 @@ Taking expectations yields \eqref{eq:bayes}, with equality iff $\hat y_t=mz_t$.
 \end{proof}
 
 \begin{corollary}[A parameter-free context-length law]\label{cor:law}
-Suppose that, conditionally on $\theta$, the closed-loop process is ergodic with $S_t/t\to\Sigma_\theta\succ0$ a.s., the
-query satisfies $\mathbb{E}[z_tz_t^\top\mid\theta]\to\Sigma_\theta$, and the family
-$\{t\,z_t^\top(\sigma^2\Lambda_0+S_t)^{-1}z_t\}_t$ is uniformly integrable. Then
-$t\,\mathcal{R}^\star_t\to n\,p\,\sigma^2$. The limit does not depend on the prior, on $\theta$, or on the input
-distribution. The rate also holds for open-loop excitation of any stable plant (as in Experiment~A), because
-$\operatorname{tr}(\Sigma_\theta^{-1}\Sigma_\theta)=p$ whatever $\Sigma_\theta$ is.
+Fix $\theta$ and suppose that, conditionally on $\theta$: (a)~$S_t/t\to\Sigma_\theta\succ0$ almost surely; (b)~$\mathbb{E}[z_tz_t^\top\mid\theta]\to\Sigma_\theta$;
+(c)~the families $\{t\,z_t^\top(\sigma^2\Lambda_0+S_t)^{-1}z_t\}_t$ and $\{\|z_t\|^2\}_t$ are uniformly integrable. Then
+the conditional Bayes risk satisfies $t\,\mathcal{R}^\star_t(\theta)\to n\,p\,\sigma^2$. If, in addition,
+$\sup_t t\,\mathcal{R}^\star_t(\theta)$ is integrable over the prior, then $t\,\mathcal{R}^\star_t\to np\sigma^2$. The limit
+does not depend on the prior, on $\theta$, or on the input distribution, because
+$\operatorname{tr}(\Sigma_\theta^{-1}\Sigma_\theta)=p$ whatever $\Sigma_\theta$ is. Conditions (a)--(b) are standard
+for stable plants driven by i.i.d.\ inputs (as in Experiment~A); we check the limit numerically rather than verify (c).
 \end{corollary}
 \begin{proof}
-$t(\sigma^2\Lambda_0+S_t)^{-1}\to\Sigma_\theta^{-1}$ a.s. Uniform integrability lets us exchange the limit and the
-expectation, which gives $\mathbb{E}[t\,z_t^\top(\sigma^2\Lambda_0+S_t)^{-1}z_t\mid\theta]\to\operatorname{tr}(\Sigma_\theta^{-1}\Sigma_\theta)=p$.
-Multiply by $n\sigma^2$ and integrate over $\theta$.
+Let $M_t=t(\sigma^2\Lambda_0+S_t)^{-1}$, so $M_t\to\Sigma_\theta^{-1}$ a.s.\ by (a). Then
+$|z_t^\top(M_t-\Sigma_\theta^{-1})z_t|\le\|z_t\|^2\|M_t-\Sigma_\theta^{-1}\|$, which tends to $0$ in probability because $\|z_t\|^2$ is tight by (c). The difference
+is uniformly integrable as a difference of uniformly integrable families, so its expectation vanishes. Hence
+$\mathbb{E}[z_t^\top M_tz_t\mid\theta]=\operatorname{tr}(\Sigma_\theta^{-1}\mathbb{E}[z_tz_t^\top\mid\theta])+o(1)\to p$ by (b).
+Multiply by $n\sigma^2$. The unconditional statement follows by dominated convergence.
 \end{proof}
 
 Theorem~\ref{thm:bayes} turns ``is the transformer Bayes-optimal?'' into a measurable gap. Corollary~\ref{cor:law}
@@ -54,9 +57,10 @@ $\varepsilon_s$. For any $b\in\mathbb{R}^m$, let $v_b=(-K^\top b,\;b)\in\mathbb{
 v_b^\top \Sigma_t^{-1} v_b \;=\; v_b^\top\Lambda_0 v_b+\sigma^{-2}\textstyle\sum_{s<t}(b^\top\varepsilon_s)^2 .
 \end{equation}
 In particular, without excitation ($\varepsilon\equiv0$), the posterior precision of every row along $v_b$
-stays at its prior value for every context length. By Cauchy--Schwarz, the posterior variance
-$v_b^\top\Sigma_tv_b\ge\|v_b\|^4/(v_b^\top\Lambda_0v_b)$ never shrinks below the prior level. So the combination
-$\theta v_b=(B-AK^\top)b$ is not learned, and no in-context learner can do better than the prior along it.
+stays at its prior value for every context length. By Cauchy--Schwarz, the posterior variance satisfies
+$v_b^\top\Sigma_tv_b\ge\|v_b\|^4/(v_b^\top\Lambda_0v_b)$ for every $t$. This bound does not depend on $t$, and it equals the
+prior variance when $\Lambda_0$ is isotropic. So the combination $\theta v_b=(B-AK^\top)b$ is never learned, and no
+in-context learner can predict along it better than a constant above the noise floor.
 \end{proposition}
 \begin{proof}
 $v_b^\top z_s=-b^\top Kx_s+b^\top(Kx_s+\varepsilon_s)=b^\top\varepsilon_s$, so
@@ -74,12 +78,12 @@ Let token $t$ be $e_t=(z_t,1,\pi_t)$, with $\pi_t\in\{0,1\}^T$ a one-hot positio
 \emph{linear}-attention network (one head in layer~1, $p$ heads in layer~2, no MLPs) whose residual stream at every
 position $t$ contains $S_t$ and $C_t$ \emph{exactly}, together with $z_t$ and $t$. Consequently,
 the Bayes predictor of Theorem~\ref{thm:bayes} is a fixed continuous function $\phi(S_t,C_t,z_t)$ of the token-$t$
-residual alone. A token-wise MLP approximates it uniformly on any compact set, and every additional layer can only serve
-the ``solve'' $\phi$, not the gathering.
+residual alone. A token-wise MLP approximates it uniformly on any compact set, so in this construction all
+further depth is free for the ``solve'' $\phi$ rather than for gathering data.
 \end{proposition}
 \begin{proof}
 \emph{Layer 1 (previous-token head).} Set $q_t=\Pi\pi_t=\pi_{t-1}$, with $\Pi$ the down-shift and $\pi_{-1}=0$; set $k_s=\pi_s$ and
-$v_s=(z_s,x_s)$, where $x_s$ is read off $z_s$. Linear attention outputs
+$v_s=z_s$. Linear attention outputs
 $\sum_{s\le t}v_s\,k_s^\top q_t=v_{t-1}$. The residual becomes $(z_t,1,\pi_t,z_{t-1})$, with $z_{-1}=0$.
 \emph{Layer 2 (moment heads).} Head $j\in\{1..p\}$ uses the constant query $q_t=1$, the key
 $k_s=(z_{s-1})_j$, and the value $v_s=(z_{s-1},x_s)$. It outputs $\sum_{s\le t}(z_{s-1},x_s)(z_{s-1})_j$, which is the

@@ -51,6 +51,9 @@ if os.path.exists("results/a/eval_seed0.npz"):
         return float((num / den).mean())
     pt, d = boot_custom([len(x) for x in tf], ratio)
     rec("H1c", pt, d, p_less(d, 1.25), "mean_t excess_TF/excess_Bayes < 1.25 (t=4..47)")
+    Rref = torch.load("results/a/references.pt", map_location="cpu", weights_only=False)
+    out["A_bayes_acceptance"] = [float(Rref["acc"][:, 0].mean()), float(Rref["acc"][:, -1].mean())]
+    out["A_gd1_eta"] = float(Rref["eta"])
     out["A_curves"] = dict(
         tf=[float(np.concatenate([x[:, t] for x in tf]).mean()) for t in range(48)],
         **{k: [float(ref[k][:, t].mean()) for t in range(48)] for k in ["bayes", "ridge", "ols", "gd1", "zero", "theory_ridge"]},

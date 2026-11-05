@@ -1,0 +1,7 @@
+step      0 loss 1.43699 val(mean,median,fail) (203.81304931640625, 2.6860883235931396, 0.1943359375) (1s)
+step    250 loss 1.46751 val(mean,median,fail) None (79s)
+step    500 loss 4.80854 val(mean,median,fail) None (157s)
+step    750 loss 1.55249 val(mean,median,fail) None (235s)
+step   1000 loss 1.40297 val(mean,median,fail) (1070.0943603515625, 2.0932724475860596, 0.2412109375) (313s)
+step   1250 loss 1.88008 val(mean,median,fail) None (391s)
+step   1499 loss 1.31322 val(mean,median,fail) (250.01771545410156, 1.9853689670562744, 0.16015625) (457s)

@@ -47,6 +47,8 @@ put("Ataurand", lambda: S["A_mech"]["tau_rand"], "{:.3f}")
 put("AtauLastThree", lambda: "{:.2f}--{:.2f}".format(*sorted([x[3] for x in S["A_mech"]["tau_last"]])[::2]))
 put("AtauCtxTwo", lambda: min(x[2] for x in S["A_mech"]["tau_ctx"]))
 put("Aprev", lambda: "{:.2f}--{:.2f}".format(min(np.max(np.array(p)) for p in S["A_mech"]["prev_token"]), max(np.max(np.array(p)) for p in S["A_mech"]["prev_token"])))
+put("AaccZero", lambda: S["A_bayes_acceptance"][0]); put("AaccLast", lambda: S["A_bayes_acceptance"][1], "{:.3f}")
+put("Aeta", lambda: S["A_gd1_eta"])
 # ---- A, exploratory mechanism
 m2 = S.get("A_mech2", {})
 put("AyhatLthree", lambda: rng_seeds({s: {"v": m2[s]["lin_yhat"][3]} for s in m2}, "v"))
@@ -75,6 +77,8 @@ for name, P in (("block", "K"), ("pendulum", "P"), ("bouncer", "Q")):
                 return np.mean([d[f"{k}_err_seed{s}"] for s in range(3)])
             return d[f"{k}_err"]
         put(f"B{P}{lab}", f, "{:.2g}")
+put("BKratio", lambda: S["B_block_mse"]["feature_rls_err"] / np.mean([S["B_block_mse"][f"tf_err_seed{s}"] for s in range(3)]), "{:.1f}")
+put("BPratio", lambda: S["B_pendulum_mse"]["nominal_err"] / np.mean([S["B_pendulum_mse"][f"tf_err_seed{s}"] for s in range(3)]), "{:.0f}")
 put("HfourA", lambda: S["H4a"]["point"], "{:.4f}"); put("HfourAci", ci("H4a", "{:.4f}"))
 for name, P, tg in (("pendulum", "P", "g"), ("pendulum", "P", "inv_m"), ("pendulum", "P", "c_over_m"), ("block", "K", "mu"), ("block", "K", "inv_m"),
                     ("bouncer", "Q", "g"), ("bouncer", "Q", "inv_m"), ("bouncer", "Q", "zeta")):

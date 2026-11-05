@@ -1,0 +1,20 @@
+\begin{table}[h]
+\centering\small
+\caption{Controller-training pilots (seed 99, 1024 held-out plants). Cost is $J/J_{\rm oracle}$; ``fail'' means $J/J_{\rm oracle}{>}10$.}\label{tab:pilots}
+\begin{tabular}{lrrrr}
+\toprule
+variant & step & median & mean & fail \\
+\midrule
+BPTT, $J/J_{\rm oracle}$, lr $3{\cdot}10^{-4}$ & 1000 & 10.49 & 298 & 51\% \\
+ & 1999 & 84.89 & 1146 & 96\% \\
+BPTT, $\log(J/J_{\rm oracle})$, lr $3{\cdot}10^{-4}$ & 1000 & 2.41 & 300 & 21\% \\
+ & 1999 & 11.67 & 976 & 52\% \\
+BPTT, $\log$, lr $10^{-4}$, squashed inputs & 1000 & 137.67 & 76387 & 98\% \\
+ & 1999 & 156.09 & 51593 & 98\% \\
+same, 8-step truncated BPTT & 1000 & 4.35 & 6542 & 36\% \\
+DAgger warm start (3000) + BPTT fine-tune (1500) & 0 & 2.69 & 204 & 19\% \\
+ & 1000 & 2.09 & 1070 & 24\% \\
+ & 1499 & 1.99 & 250 & 16\% \\
+\bottomrule
+\end{tabular}
+\end{table}

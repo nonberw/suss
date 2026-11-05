@@ -22,7 +22,7 @@ Every change made after the pre-registration commit (`d134c5a`), with its reason
     They are motivated by Remark 1 in the paper, which was written after the probes failed, and are reported as exploratory.
 11. **Third MuJoCo system, bouncing ball (exploratory).** Pilots were used to tune it before any training: smaller physics timestep and a damping-ratio range of [0.2, 1.0], because low damping ratios made MuJoCo's soft contact inject energy; and forcing kept below the ball's weight. Its feature-RLS baseline uses a linear spring–damper contact model.
 12. **Thompson-sampling baseline for C1 (exploratory).** A classical Bayesian dual-control heuristic, tuned on the same tuning plants as the other baselines.
-13. **Scale study (exploratory, `scripts/scale_a.py`).** Longer training (60k steps), deeper (8 layers), wider (d=256) and smaller (d=64, 2 layers) models, plus a larger system (n=4, m=2, 18 unknown parameters). The reference there is ridge (= Bayes up to the truncation of the prior).
+13. **Scale study (exploratory, `scripts/scale_a.py`).** Longer training (60k steps), deeper (8 layers), wider (d=256) and smaller (d=64, 2 layers) models, plus a larger system (n=4, m=2, 24 unknown parameters). The reference there is ridge (= Bayes up to the truncation of the prior).
 14. **Controller training (C1).** Pure closed-loop BPTT on the cost, as pre-registered, did not train reliably in pilots (seed 99, 2000 steps; validation on 1024 held-out plants, normalised cost J/J_oracle):
 
     | Variant | Validation result |

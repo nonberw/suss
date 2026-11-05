@@ -5,12 +5,19 @@ expectation and ours has lower variance. (2)~$\Lambda_0{=}I$ in the information 
 2$\times$256 units and 5000 steps. (4)~The controller uses a KV-cached incremental forward to fit in 4\,GB. It is
 numerically identical to the full forward. (5)~With a prior mean $B{=}0$, pre-registered CE degenerates to $u\equiv0$;
 we report it as specified. (6)~On the pendulum the parameter effects are small (nominal-parameter simulation already
-has 0.5\% normalised error); we kept the design unchanged. \PENDING{devextra}
+has 0.5\% normalised error); we kept the design unchanged.
+(7)~All analyses labelled \emph{exploratory} were added after the pre-registered probes failed: the query Jacobian,
+fast-weight probes, KV-only patching, answer probes, MLP probes, the bouncing-ball system, the Thompson-sampling
+baseline and the scale study. (8)~\emph{Controller training.} Pure closed-loop BPTT on the cost, as pre-registered, was
+unstable in pilots (Table~\ref{tab:pilots}). The final controller uses a DAgger warm start (imitating the oracle LQR
+action from its own history) followed by BPTT fine-tuning on $\log(J/J_{\rm oracle})$, with 8-step truncation and
+learning rate $10^{-4}$, for the pre-registered 6000 BPTT steps. (9)~Execution only: BPTT is replayed as a CUDA graph; the
+constant-gain baselines are trained on the CPU. The full log is in \texttt{docs/DEVIATIONS.md}.
 
 \section{Implementation details}\label{app:impl}
 \textbf{Exact Bayes predictor (A).} Each row of $\theta$ has the Gaussian posterior of Theorem~\ref{thm:bayes}, and
 the rows share their covariance. We draw 2048 joint samples, discard those with $\rho(A)\ge0.95$, and average. The
-acceptance rate is \PENDING{accz} at $t{=}0$ and \PENDING{accl} at $t{=}47$.
+acceptance rate is \AaccZero{} at $t{=}0$ and \AaccLast{} at $t{=}47$.
 \textbf{Probes.} Ridge regression on standardised residuals, with $\alpha$ chosen by 5-fold CV grouped by episode,
 fitted on 2048 test episodes and scored on the other 2048. \textbf{Steering.} Let $D$ be the probe readout matrix. The
 minimal-norm residual change that moves readout coordinate $k$ by $\delta$ while leaving the others unchanged is
@@ -19,4 +26,5 @@ $\tau=\langle\hat y_{\rm patch}-\hat y_B,\hat y_{A'}-\hat y_B\rangle/\|\hat y_{A
 episode $A$'s context followed by episode $B$'s query token. \textbf{Compute.} Everything runs on a laptop RTX~3050\,Ti
 (4\,GB) with a 20-thread CPU, in about \PENDING{hours} hours end to end.
 
+\input{pilot_table}
 \PENDING{appextra}

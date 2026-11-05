@@ -22,10 +22,19 @@ Our contributions:
 \item \textbf{Theory (\S\ref{sec:theory}).} An exact Bayes-risk identity for in-context prediction under any
 non-anticipating policy, with a parameter-free context-length law $t\,\mathcal{R}^\star_t\to np\sigma^2$. A
 closed-loop non-identifiability identity: the information gained along unexcited directions equals the excitation energy, and is
-exactly zero under pure feedback. A two-layer construction that gathers the exact sufficient statistics, which turns
-``statistics first, solve later'' into a falsifiable probing prediction.
-\item \textbf{What the trained predictor computes (\S\ref{sec:expa}).} \PENDING{introA}
-\item \textbf{Contact physics (\S\ref{sec:expb}).} \PENDING{introB}
+exactly zero under pure feedback. A two-layer construction that gathers the exact sufficient statistics, and a
+first-order account of how a near-uniform attention head can apply a parameter estimate that is stored only in its
+key--value memory (Remark~\ref{rem:fw}).
+\item \textbf{What the trained predictor computes (\S\ref{sec:expa}).} It is Bayes-optimal while data are scarce, and
+then it settles at an approximation floor. Our pre-registered mechanism, a linearly readable and causally used parameter estimate in the
+residual stream, is \emph{rejected}: the probe reaches $R^2{=}\ARtheta$, and steering and subspace patching have no effect. Exploratory analyses show instead that the estimate lives
+in the \emph{key--value memory} of the last two blocks. It is readable from the fast weights ($R^2{=}\AfwR$), it equals the predictor's
+query Jacobian ($R^2{=}\AjacBayes$ against the Bayes estimate), and patching only context keys and values transfers
+$\AkvThreeFour$ of the behaviour.
+\item \textbf{Contact physics (\S\ref{sec:expb}).} On a pushed block with Coulomb friction the transformer beats
+physics-feature RLS by $\BKratio\times$, and on a pendulum it beats RLS even though RLS has the true model class. Physical parameters follow the same pattern:
+they are weakly readable from activations ($1/m$: $R^2{=}\BprobePinvm$), but strongly readable from the key--value memory ($\BfwPinvm$) and from the model's
+input sensitivity ($r{=}\BfuncP$).
 \item \textbf{In-context control (\S\ref{sec:expc}).} \PENDING{introC}
 \end{itemize}
 
@@ -51,9 +60,12 @@ them can need a learned generative model~\citep{zhang2026interpreting}. Meta-RL 
 explore~\citep{duan2016rl2,zintgraf2020varibad}; algorithm distillation imitates learning
 histories~\citep{laskin2022incontext}; and in-context RL algorithms are provably representable in tabular
 MDPs~\citep{liang2026transformers}. In adaptive LQR, certainty equivalence with dithering is
-rate-optimal~\citep{mania2019certainty,simchowitz2020naive}. We use these results as baselines and ask whether a
-transformer trained only on cost discovers the excitation they prescribe.
+rate-optimal~\citep{mania2019certainty,simchowitz2020naive}. We use these methods as baselines and ask whether a
+transformer controller, trained by imitation and then on cost, discovers the excitation they prescribe.
 
-\paragraph{Interpretability tools.} We use linear probes~\citep{alain2016understanding} and activation
+\paragraph{Interpretability tools and fast weights.} We use linear probes~\citep{alain2016understanding} and activation
 patching~\citep{zhang2024towards,heimersheim2024how}. Our probes are always paired with interventions, and the probe
-targets are \emph{estimator} quantities, which are distinct from the ground truth.
+targets are \emph{estimator} quantities, which are distinct from the ground truth. The view of attention as reading and writing
+\emph{fast weights}~\citep{ba2016using,schlag2021linear}, and its dual form as implicit gradient
+descent~\citep{dai2023why,vonoswald2023transformers}, motivates our key--value analysis. To our knowledge, it has not
+been used to localise a physical parameter estimate in a trained model.
