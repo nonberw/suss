@@ -57,13 +57,27 @@ if "B_block_curves" in S:
         ax[j].set_yscale("log"); ax[j].set_xlabel("context length t"); ax[j].set_ylabel("normalised MSE")
         ax[j].set_title(f"({'ab'[j]}) {name}", fontsize=8)
     ax[0].legend(frameon=False, fontsize=5.5)
-    for name, tg, col, lab in [("pendulum", "g", COL["bayes"], "pendulum: g"), ("pendulum", "inv_m", COL["ols"], "pendulum: 1/m"),
-                               ("block", "mu", COL["tf"], r"block: $\mu$"), ("block", "inv_m", COL["gd1"], "block: 1/m")]:
-        cur = S.get(f"B_{name}_probe_by_t", {}).get(tg)
-        if cur:
-            ax[2].plot(np.mean(cur, 0), color=col, label=lab)
-    ax[2].set_ylim(-0.1, 1.0); ax[2].set_xlabel("context length t"); ax[2].set_ylabel("probe $R^2$ (fixed probe)")
-    ax[2].legend(frameon=False, fontsize=6); ax[2].set_title("(c) physical parameters in the residual", fontsize=8)
+    bm = S.get("B_mech2", {})
+    items = [("pendulum", "g", "P: g"), ("pendulum", "inv_m", "P: 1/m"), ("pendulum", "c_over_m", "P: c/m"),
+             ("block", "mu", r"K: $\mu$"), ("block", "inv_m", "K: 1/m"), ("bouncer", "g", "B: g"), ("bouncer", "inv_m", "B: 1/m"), ("bouncer", "zeta", r"B: $\zeta$")]
+    fwv, rsv, labs = [], [], []
+    for name, tg, lab in items:
+        ks = [k for k in bm if k.startswith(name + "|") and k.endswith("|" + tg)]
+        if not ks:
+            continue
+        per_seed = {}
+        for k in ks:
+            s_ = k.split("|")[1]
+            per_seed.setdefault(s_, []).append(bm[k])
+        fwv.append(np.mean([max(v[0] for v in vs) for vs in per_seed.values()]))
+        rsv.append(np.mean([max(v[1] for v in vs) for vs in per_seed.values()]))
+        labs.append(lab)
+    xb = np.arange(len(labs))
+    ax[2].bar(xb - 0.2, fwv, 0.4, color=COL["tf"], label="K,V fast weights")
+    ax[2].bar(xb + 0.2, rsv, 0.4, color=COL["ridge"], label="residual stream")
+    ax[2].set_xticks(xb); ax[2].set_xticklabels(labs, rotation=45, fontsize=6); ax[2].set_ylim(0, 1)
+    ax[2].set_ylabel(r"probe $R^2$ at $t{=}47$"); ax[2].legend(frameon=False, fontsize=6)
+    ax[2].set_title("(c) where the physics is readable", fontsize=8)
     fig.tight_layout(); fig.savefig("paper/figs/fig_b.pdf"); plt.close(fig)
 
 # ---- Figure 3: Experiment C
@@ -88,4 +102,47 @@ if os.path.exists("results/c/eval.pt"):
     ax[2].set_xticks(range(1, 6)); ax[2].set_xticklabels(["CE", "CE+dither", "expl.-then-CE", "transformer", "oracle LQR"], rotation=30, fontsize=6)
     ax[2].set_ylabel(r"$\log\det(\Lambda_0+\sigma^{-2}S_8)$"); ax[2].set_title("(c) information after 8 steps", fontsize=8)
     fig.tight_layout(); fig.savefig("paper/figs/fig_c.pdf"); plt.close(fig)
+# ---- Figure 4: mechanism (exploratory): Jacobian = Bayes estimate; estimate lives in key-value memory
+if "A_mech3" in S and "A_mech4" in S:
+    fig, ax = plt.subplots(1, 3, figsize=(7.0, 2.2))
+    M3 = S["A_mech3"]; t = np.arange(48)
+    jb = np.array([M3[s]["jac_r2_bayes_by_t"] for s in M3])
+    ax[0].plot(t[4:], jb.mean(0)[4:], color=COL["tf"], label=r"$R^2(J_t,\ \hat\theta^{\rm Bayes}_t)$ (left)")
+    et = np.array([M3[s]["jac_err_true_by_t"] for s in M3]).mean(0)
+    bt = np.array([M3[s]["bayes_err_true_by_t"] for s in M3]).mean(0)
+    ax0 = ax[0].twinx()
+    ax0.plot(t[4:], et[4:], color=COL["ridge"], ls="--", lw=0.9, label=r"$\|J_t-\theta\|^2$")
+    ax0.plot(t[4:], bt[4:], color=COL["bayes"], ls=":", lw=0.9, label=r"$\|\hat\theta^{\rm Bayes}_t-\theta\|^2$")
+    ax0.set_yscale("log"); ax0.set_ylabel("squared error", fontsize=6); ax0.tick_params(labelsize=6)
+    ax0.legend(frameon=False, fontsize=5.5, loc="upper right", bbox_to_anchor=(1.0, 0.82))
+    ax[0].set_ylim(0, 1); ax[0].set_xlabel("context length t"); ax[0].set_ylabel(r"$R^2$")
+    ax[0].legend(frameon=False, fontsize=5.5, loc="upper right", bbox_to_anchor=(1.0, 0.98))
+    ax[0].set_title(r"(a) Jacobian $J_t=\partial\hat y_t/\partial z_t$", fontsize=8)
+    fw = np.array([M3[s]["fw_r2"] for s in M3]); rr = np.array([M3[s]["resid_r2"] for s in M3])
+    xs = np.arange(1, fw.shape[1] + 1)
+    ax[1].plot(xs, fw.mean(0), marker="o", ms=3, color=COL["tf"], label="key-value fast weights")
+    ax[1].plot(xs, rr.mean(0), marker="s", ms=3, color=COL["ridge"], label="residual stream (query)")
+    ax[1].set_ylim(-0.05, 1); ax[1].set_xlabel("block"); ax[1].set_ylabel(r"probe $R^2$ for $\hat\theta_{47}$")
+    ax[1].legend(frameon=False, fontsize=6); ax[1].set_title("(b) where the estimate is readable", fontsize=8)
+    M4 = S["A_mech4"]
+    keys = [("kv-0", "1"), ("kv-1", "2"), ("kv-2", "3"), ("kv-3", "4"), ("kv-2-3", "3+4"), ("kv-1-2-3", "2-4"), ("k-2-3", "K 3+4"), ("v-2-3", "V 3+4")]
+    vals = np.array([[M4[s][k] for k, _ in keys] for s in M4])
+    ax[2].bar(range(len(keys)), vals.mean(0), yerr=[vals.mean(0) - vals.min(0), vals.max(0) - vals.mean(0)], color=COL["ols"], capsize=2)
+    ax[2].set_xticks(range(len(keys))); ax[2].set_xticklabels([l for _, l in keys], rotation=40, fontsize=6)
+    ax[2].set_ylabel(r"transfer $\tau$"); ax[2].set_ylim(0, 1.05); ax[2].set_xlabel("context K,V patched (blocks)")
+    ax[2].set_title("(c) causal: patch only K,V", fontsize=8)
+    fig.tight_layout(); fig.savefig("paper/figs/fig_mech.pdf"); plt.close(fig)
+
+# ---- Figure 5: scale study (exploratory)
+if "scale" in S and S["scale"]:
+    fig, ax = plt.subplots(1, 2, figsize=(5.5, 2.1))
+    for tag, r in S["scale"].items():
+        ex_tf, ex_r = np.array(r["excess_tf"]), np.array(r["excess_ridge"])
+        ax[0].plot(np.arange(1, 48), (ex_tf / ex_r)[1:], label=f"{tag} ({r['params'] / 1e6:.1f}M)", lw=1)
+    ax[0].axhline(1, color="k", lw=0.6); ax[0].set_xscale("log"); ax[0].set_xlabel("context length t")
+    ax[0].set_ylabel("excess / Bayes excess"); ax[0].legend(frameon=False, fontsize=5); ax[0].set_title("(a) approximation floor", fontsize=8)
+    tags = list(S["scale"]); jr = [np.mean(list(S["scale"][k]["jac_r2"].values())) for k in tags]
+    ax[1].bar(range(len(tags)), jr, color=COL["tf"]); ax[1].set_xticks(range(len(tags))); ax[1].set_xticklabels(tags, rotation=40, fontsize=6)
+    ax[1].set_ylabel(r"$R^2$(Jacobian, ridge $\hat\theta$)"); ax[1].set_ylim(0, 1); ax[1].set_title("(b) Jacobian = estimate", fontsize=8)
+    fig.tight_layout(); fig.savefig("paper/figs/fig_scale.pdf"); plt.close(fig)
 print("figures written")

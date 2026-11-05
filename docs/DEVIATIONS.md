@@ -14,3 +14,23 @@ Every change made after the pre-registration commit (`d134c5a`), with its reason
 7. **Exploratory follow-up for A (added after seeing seed-0 mechanistic results).** The pre-registered probes found θ̂ weakly decodable (R² ≈ 0.2), and steering/patching along them had no effect. We therefore added `scripts/mech_a2.py`: probes for the query-specific Bayes prediction, MLP probes, position-specific probes, a logit lens, and patching/steering along the prediction subspace. All of it is labelled exploratory, and the pre-registered tests are reported unchanged.
 8. **Controller training uses CUDA-graph replay.** The machine was shared with other GPU jobs, which made eager-mode closed-loop BPTT take more than 3 s/step. The same loss, optimiser and schedule are captured once as a CUDA graph and replayed. Fresh plants are sampled each step into static buffers. Same algorithm, different execution.
 9. **Fixed-controller seeds 1–2 were trained on CPU** (identical code, `--device cpu`) because of GPU contention.
+10. **Exploratory mechanism analyses for A and B** (added after the pre-registered probes failed):
+    - query-Jacobian analysis (`scripts/mech_a3.py`);
+    - key–value fast-weight probes (`mech_a3.py`, `mech_b2.py`);
+    - KV-only activation patching (`mech_a4.py`);
+    - functional 1/m readout from the model's input sensitivity (`analyze.py`).
+    They are motivated by Remark 1 in the paper, which was written after the probes failed, and are reported as exploratory.
+11. **Third MuJoCo system, bouncing ball (exploratory).** Pilots were used to tune it before any training: smaller physics timestep and a damping-ratio range of [0.2, 1.0], because low damping ratios made MuJoCo's soft contact inject energy; and forcing kept below the ball's weight. Its feature-RLS baseline uses a linear spring–damper contact model.
+12. **Thompson-sampling baseline for C1 (exploratory).** A classical Bayesian dual-control heuristic, tuned on the same tuning plants as the other baselines.
+13. **Scale study (exploratory, `scripts/scale_a.py`).** Longer training (60k steps), deeper (8 layers), wider (d=256) and smaller (d=64, 2 layers) models, plus a larger system (n=4, m=2, 18 unknown parameters). The reference there is ridge (= Bayes up to the truncation of the prior).
+14. **Controller training (C1).** Pure closed-loop BPTT on the cost, as pre-registered, did not train reliably in pilots (seed 99, 2000 steps; validation on 1024 held-out plants, normalised cost J/J_oracle):
+
+    | Variant | Validation result |
+    |---|---|
+    | raw cost | loss oscillated between 25 and 4700 |
+    | J/J_oracle | median 85, 96% failures |
+    | log(J/J_oracle), lr 3e-4 | median 2.4 at step 1000, then collapsed to median 11.7 and 52% failures |
+    | same with lr 1e-4 and input squashing | 98% failures |
+    | with truncated BPTT (8 steps) | median 4.3, 36% failures at step 1000 |
+
+    The cause is exploding gradients through open-loop-unstable plants. The final controller therefore uses a DAgger warm start (`scripts/train_c2.py`), imitating the oracle LQR action from its own history, followed by BPTT fine-tuning on the cost (`train_c.py --init`). Both stages are evaluated, so the paper can say what cost-driven fine-tuning adds to imitation.

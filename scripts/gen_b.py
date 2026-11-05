@@ -9,7 +9,7 @@ from suss import mj
 
 if __name__ == "__main__":
     os.makedirs("data", exist_ok=True)
-    for name in ["pendulum", "block"]:
+    for name in ["pendulum", "block", "bouncer"]:
         for split, n, seed in [("train", 60_000, 1), ("test", 4096, 10002)]:
             path = f"data/{name}_{split}.npz"
             if os.path.exists(path):

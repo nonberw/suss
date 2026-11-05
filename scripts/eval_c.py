@@ -60,16 +60,21 @@ best_d = min(scores, key=scores.get)
 grid2 = list(itertools.product([2, 4, 8], [0.5, 1.0, 2.0]))
 scores2 = {g: cost(run(lambda sl, g=g: C.ce_policy(best_ce, 0.0, dgen(2), g[0], g[1]), tuneP)[0]) for g in grid2}
 best_e = min(scores2, key=scores2.get)
+grid3 = list(itertools.product([0.01, 0.1, 1.0], [0.5, 1.0, 2.0]))
+scores3 = {g: cost(run(lambda sl, g=g: C.ts_policy(g[0], dgen(5), g[1]), tuneP)[0]) for g in grid3}
+best_ts = min(scores3, key=scores3.get)
+print("tuned TS (lam, inflate)", best_ts)
 print("tuned: CE lam", best_ce, "CE+dither (s0, lam)", best_d, "ETC (k, s_e)", best_e)
 
 # ---- test
 P = plants(a.n_test, 10003)
 Jo, Xo, Uo = run(oracle(P), P)
-res = {"tuning": dict(ce_lam=best_ce, dither=best_d, etc=best_e, dither_scores=scores, etc_scores=scores2)}
+res = {"tuning": dict(ce_lam=best_ce, dither=best_d, etc=best_e, ts=best_ts, dither_scores=scores, etc_scores=scores2, ts_scores=scores3)}
 ctrl = {
     "ce": lambda sl: C.ce_policy(best_ce),
     "ce_dither": lambda sl: C.ce_policy(best_d[1], best_d[0], dgen(3)),
     "etc": lambda sl: C.ce_policy(best_ce, 0.0, dgen(4), best_e[0], best_e[1]),
+    "ts": lambda sl: C.ts_policy(best_ts[0], dgen(6), best_ts[1]),  # exploratory baseline (added post hoc)
 }
 traj = {}
 for k, pol in ctrl.items():
@@ -81,10 +86,17 @@ for s in a.seeds:
     Kc = torch.load(f"runs/c/fixed_seed{s}.pt")["K"].to(dev)
     J, X, U = run(lambda sl: C.fixed_policy(Kc), P)
     res[f"fixed_seed{s}"] = dict(norm=(J / Jo).cpu().numpy(), K=Kc.cpu().numpy())
+    if os.path.exists(f"runs/c/bc_seed{s}.pt"):  # stage-1 (imitation only) controller, for the ablation
+        ckb = torch.load(f"runs/c/bc_seed{s}.pt")
+        mb = GPT(GPTConfig(**ckb["cfg"])).to(dev).eval()
+        mb.load_state_dict(ckb["state"])
+        Jb, Xb, Ub = run(lambda sl: C.tf_policy(mb), P)
+        res[f"bc_seed{s}"] = dict(norm=(Jb / Jo).cpu().numpy(), info8=C.info_gain(Xb, Ub).cpu().numpy())
     ck = torch.load(f"runs/c/seed{s}.pt")
     model = GPT(GPTConfig(**ck["cfg"])).to(dev).eval()
     model.load_state_dict(ck["state"])
-    J, X, U = run(lambda sl: C.tf_policy(model), P)
+    sq = bool(ck.get("args", {}).get("squash", 0))
+    J, X, U = run(lambda sl: C.tf_policy(model, sq), P)
     # deviation of TF action from the CE action computed on TF's own history (excitation beyond CE)
     dev_ce = []
     with torch.no_grad():
@@ -97,7 +109,7 @@ for s in a.seeds:
     res[f"tf_seed{s}"] = dict(norm=(J / Jo).cpu().numpy(), info8=C.info_gain(X, U).cpu().numpy(),
                               dev_ce=torch.stack(dev_ce, 1).cpu().numpy(), u_abs=U.abs()[..., 0].cpu().numpy())
     # implicit system identification probes (H5e): residual stream on own trajectories
-    tok = C.tokens_from_traj(X, U)
+    tok = C.tokens_from_traj(X, U, sq)
     with torch.no_grad():
         _, rs = model(tok, return_resid=True)
     E = tok.shape[0]; half = E // 2; t0 = 4

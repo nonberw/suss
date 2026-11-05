@@ -5,18 +5,18 @@ expectation and ours has lower variance. (2)~$\Lambda_0{=}I$ in the information 
 2$\times$256 units and 5000 steps. (4)~The controller uses a KV-cached incremental forward to fit in 4\,GB. It is
 numerically identical to the full forward. (5)~With a prior mean $B{=}0$, pre-registered CE degenerates to $u\equiv0$;
 we report it as specified. (6)~On the pendulum the parameter effects are small (nominal-parameter simulation already
-has 0.5\% normalised error); we kept the design unchanged. DEVIATIONS_EXTRA
+has 0.5\% normalised error); we kept the design unchanged. \PENDING{devextra}
 
 \section{Implementation details}\label{app:impl}
 \textbf{Exact Bayes predictor (A).} Each row of $\theta$ has the Gaussian posterior of Theorem~\ref{thm:bayes}, and
 the rows share their covariance. We draw 2048 joint samples, discard those with $\rho(A)\ge0.95$, and average. The
-acceptance rate is ACC0 at $t{=}0$ and ACC47 at $t{=}47$.
+acceptance rate is \PENDING{accz} at $t{=}0$ and \PENDING{accl} at $t{=}47$.
 \textbf{Probes.} Ridge regression on standardised residuals, with $\alpha$ chosen by 5-fold CV grouped by episode,
 fitted on 2048 test episodes and scored on the other 2048. \textbf{Steering.} Let $D$ be the probe readout matrix. The
 minimal-norm residual change that moves readout coordinate $k$ by $\delta$ while leaving the others unchanged is
 $\delta\,(D^+)_k$. \textbf{Patching transfer} is
 $\tau=\langle\hat y_{\rm patch}-\hat y_B,\hat y_{A'}-\hat y_B\rangle/\|\hat y_{A'}-\hat y_B\|^2$, where $A'$ is
 episode $A$'s context followed by episode $B$'s query token. \textbf{Compute.} Everything runs on a laptop RTX~3050\,Ti
-(4\,GB) with a 20-thread CPU, in about COMPUTE_HOURS hours end to end.
+(4\,GB) with a 20-thread CPU, in about \PENDING{hours} hours end to end.
 
-APPENDIX_EXTRA
+\PENDING{appextra}

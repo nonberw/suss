@@ -130,6 +130,35 @@ if os.path.exists("results/b/block_eval.npz"):
         out[f"H4d_{name}"] = dict(point=float(pt), ci=list(ci(d)), frac_correct=float(np.mean(np.concatenate(dsens) > 0)),
                                   base_sens=float(np.mean(np.concatenate([x["base"] for x in st]))))
         dists.append(p_greater(d))
+    # EXPLORATORY: functional readout. The model's own sensitivity d v'/d u at the last token is its implicit
+    # estimate of dt/m (pendulum: dt/(m l^2)); compare to the truth on the evaluation half.
+    for name in ["pendulum", "block", "bouncer"]:
+        if not os.path.exists(f"results/b/{name}_mech.pt"):
+            continue
+        Mb = torch.load(f"results/b/{name}_mech.pt", weights_only=False)
+        Dp = np.load(f"data/{name}_test.npz")["params"]
+        invm = 1 / Dp[len(Dp) // 2:, 0]
+        cors, slopes = [], []
+        for s_ in SEEDS:
+            b = Mb[f"steer_seed{s_}"]["base"]
+            cors.append(float(np.corrcoef(b, invm)[0, 1]))
+            slopes.append(float(np.polyfit(invm, b, 1)[0]))
+        phys = 0.05 / (0.25 if name == "pendulum" else 1.0)
+        out[f"B_{name}_functional_invm"] = dict(corr=cors, slope=slopes, physics_slope=phys,
+                                               desc="corr(d v'/d u, 1/m) over episodes; physics slope dt/(l^2) or dt")
+        if name == "bouncer":
+            E_ = np.load("results/b/bouncer_eval.npz")
+            out["B_bouncer_mse"] = {k: float(E_[k][:, 24:48].mean()) for k in E_.files if "_err" in k}
+            out["B_bouncer_vel"] = {k: float(E_[k][:, 24:48].mean()) for k in E_.files if "_vel" in k}
+            out["B_bouncer_curves"] = {k: E_[k].mean(0).tolist() for k in E_.files if "_err" in k}
+            out["B_bouncer_probe"] = {f"seed{s_}": {k: [round(v[0], 4), v[1]] for k, v in Mb[f"best_seed{s_}"].items()} for s_ in SEEDS}
+            vals = [(E_["nominal_err"][:, 24:48] - E_[f"tf_err_seed{s_}"][:, 24:48]).mean(1) for s_ in SEEDS]
+            pt, d = hier_boot(vals, n_boot=NB)
+            out["B_bouncer_nominal_minus_tf"] = dict(point=float(pt), ci=list(ci(d)), desc="exploratory")
+            st = [Mb[f"steer_seed{s_}"] for s_ in SEEDS]
+            dsens = [x["steered"] - x["base"] for x in st]
+            pt, d = hier_boot(dsens, n_boot=NB)
+            out["B_bouncer_steer"] = dict(point=float(pt), ci=list(ci(d)), frac_correct=float(np.mean(np.concatenate(dsens) > 0)))
     out["H4c"] = dict(p=float(max(pp)), desc="all identifiable targets R2 > 0.5 (intersection-union: max p)")
     pvals["H4c"] = max(pp)
     out["H4d"] = dict(p=float(max(dists)), desc="steering 1/m increases d v/d u on both systems (max p)")
@@ -145,18 +174,45 @@ if os.path.exists("results/c/eval.pt"):
     pt, d = hier_boot([R[f"tf_seed{s}"]["info8"] - R["ce"]["info8"] for s in SEEDS], n_boot=NB)
     rec("H5d", pt, d, p_greater(d), "info gain at t=8: TF - CE > 0")
     summ = {}
-    for k in ["ce", "ce_dither", "etc"] + [f"fixed_seed{s}" for s in SEEDS] + [f"tf_seed{s}" for s in SEEDS]:
+    for k in [x for x in ["ce", "ce_dither", "etc", "ts"] if x in R] + [f"fixed_seed{s}" for s in SEEDS] + [f"tf_seed{s}" for s in SEEDS] + [f"bc_seed{s}" for s in SEEDS if f"bc_seed{s}" in R]:
         v = R[k]["norm"]
         summ[k] = dict(mean=float(v.mean()), median=float(np.median(v)), fail=float((v > 10).mean()),
                        info8=float(R[k]["info8"].mean()) if "info8" in R[k] else None)
     out["C_summary"] = summ
-    for k in ["ce_dither", "etc"]:
+    for k in [x for x in ["ce_dither", "etc", "ts"] if x in R]:
         pt, d = hier_boot([R[k]["norm"] - t for t in tfn], n_boot=NB)
-        out[f"H5c_{k}_minus_tf"] = dict(point=float(pt), ci=list(ci(d)), desc="exploratory two-sided")
+        out[f"H5c_{k}_minus_tf"] = dict(point=float(pt), ci=list(ci(d)), desc="exploratory two-sided, mean")
+        pt, d = hier_boot([R[k]["norm"] - t for t in tfn], stat=np.median, n_boot=2000)
+        out[f"H5c_{k}_minus_tf_median"] = dict(point=float(pt), ci=list(ci(d)), desc="median of paired differences")
+        out[f"H5c_{k}_tf_wins"] = float(np.mean(np.concatenate([t < R[k]["norm"] for t in tfn])))
+        pt, d = hier_boot([R[f"tf_seed{s}"]["info8"] - R[k]["info8"] for s in SEEDS], n_boot=NB)
+        out[f"C_info8_tf_minus_{k}"] = dict(point=float(pt), ci=list(ci(d)))
+    if all(f"bc_seed{s}" in R for s in SEEDS):
+        pt, d = hier_boot([R[f"bc_seed{s}"]["norm"] - R[f"tf_seed{s}"]["norm"] for s in SEEDS], n_boot=NB)
+        out["C_bc_minus_ft"] = dict(point=float(pt), ci=list(ci(d)), desc="imitation-only minus fine-tuned, mean normalised cost")
+        pt, d = hier_boot([R[f"tf_seed{s}"]["info8"] - R[f"bc_seed{s}"]["info8"] for s in SEEDS], n_boot=NB)
+        out["C_info8_ft_minus_bc"] = dict(point=float(pt), ci=list(ci(d)), desc="does cost fine-tuning add excitation beyond imitation?")
     out["C_tuning"] = {k: (v if not isinstance(v, dict) else {str(kk): vv for kk, vv in v.items()}) for k, v in R["tuning"].items()}
     out["C_probe"] = {f"seed{s}": {f"{k[0]}@{k[1]}": round(v[0], 4) for k, v in R[f"tf_seed{s}"]["probe"].items()} for s in SEEDS}
     out["C_dev_ce"] = [R[f"tf_seed{s}"]["dev_ce"].mean(0).tolist() for s in SEEDS]
     out["C_steer_flip"] = [float(np.mean(np.sign(R[f"tf_seed{s}"]["steer_flip"]["u0"]) != np.sign(R[f"tf_seed{s}"]["steer_flip"]["u1"]))) for s in SEEDS]
+
+# ---------------- Exploratory mechanism (A) and scale study
+if os.path.exists("results/a/mech2.pt"):
+    M2 = torch.load("results/a/mech2.pt", weights_only=False)
+    out["A_mech2"] = {str(s): v for s, v in M2.items()}
+if os.path.exists("results/a/mech3.pt"):
+    M3 = torch.load("results/a/mech3.pt", weights_only=False)
+    out["A_mech3"] = {str(s): v for s, v in M3.items()}
+if os.path.exists("results/a/mech4.pt"):
+    M4 = torch.load("results/a/mech4.pt", weights_only=False)
+    out["A_mech4"] = {str(s): {"-".join(map(str, k)): v for k, v in r.items()} for s, r in M4.items()}
+if os.path.exists("results/b/mech2.pt"):
+    MB2 = torch.load("results/b/mech2.pt", weights_only=False)
+    out["B_mech2"] = {"|".join(map(str, k)): v for k, v in MB2.items()}
+if os.path.isdir("results/scale"):
+    out["scale"] = {f[:-5]: {k: v for k, v in json.load(open(f"results/scale/{f}")).items() if k != "hist"}
+                    for f in sorted(os.listdir("results/scale")) if f.endswith(".json")}
 
 hol = holm(pvals)
 out["holm"] = {k: dict(p=v[0], p_holm=v[1], reject=bool(v[2])) for k, v in hol.items()}

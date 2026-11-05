@@ -55,7 +55,7 @@ def lqr_gains(A, B, horizon, Q=1.0, R=R_U, Qf=1.0):
     return torch.stack(Ks[::-1], 1)
 
 
-def simulate(A, B, x0, w, policy):
+def simulate(A, B, x0, w, policy, tbptt=0):
     """policy(t, xs, us) -> u_t (n,1), where xs: list of past states incl. x_t, us: list of past actions.
     Returns J (n,), X (n,H+1,2), U (n,H,1)."""
     x = x0
@@ -65,6 +65,8 @@ def simulate(A, B, x0, w, policy):
         u = policy(t, xs, us).clamp(-U_MAX, U_MAX)
         J = J + stage_cost(x, u)
         x = (torch.einsum("bij,bj->bi", A, x) + torch.einsum("bij,bj->bi", B, u) + w[:, t]).clamp(-X_CLIP, X_CLIP)
+        if tbptt and (t + 1) % tbptt == 0:
+            x = x.detach()  # truncated BPTT through the plant (the policy still sees the full history)
         xs.append(x)
         us.append(u)
     J = J + (x ** 2).sum(-1)
@@ -115,23 +117,57 @@ def ce_policy(lam, s0=0.0, gen=None, explore_steps=0, s_e=0.0):
     return pol
 
 
-def tf_policy(model):
+def ts_policy(lam, gen, inflate=1.0):
+    """Thompson sampling: sample (A,B) from the Gaussian ridge posterior each step, act with its LQR gain.
+    A classical Bayesian dual-control heuristic (exploration comes from posterior sampling)."""
+    def pol(t, xs, us):
+        n = xs[-1].shape[0]
+        dev = xs[-1].device
+        th0 = torch.zeros(n, N, N + M, device=dev)
+        th0[:, 0, 0] = A0; th0[:, 1, 1] = A0
+        if t == 0:
+            mean = th0
+            cov = torch.eye(N + M, device=dev).expand(n, -1, -1) * SIGMA ** 2 / lam
+        else:
+            X = torch.stack(xs[:-1], 1); U = torch.stack(us, 1); Xn = torch.stack(xs[1:], 1)
+            Z = torch.cat([X, U], -1)
+            S = Z.transpose(1, 2) @ Z + lam * torch.eye(N + M, device=dev)
+            mean = torch.linalg.solve(S, Z.transpose(1, 2) @ Xn + lam * th0.transpose(1, 2)).transpose(1, 2)
+            cov = SIGMA ** 2 * torch.linalg.inv(S)
+        Lc = torch.linalg.cholesky(0.5 * (cov + cov.transpose(1, 2))) * inflate
+        eps = torch.randn(n, N, N + M, generator=gen, device=dev)
+        th = mean + torch.einsum("bij,bkj->bki", Lc, eps)
+        K = lqr_gains(th[:, :, :N], th[:, :, N:], H - t)[:, 0]
+        return -(K @ xs[-1].unsqueeze(-1)).squeeze(-1)
+    return pol
+
+
+def squash(x):
+    """Soft input compression for the controller's tokens (states can reach 1e3 on unstable plants)."""
+    return torch.sign(x) * torch.log1p(x.abs())
+
+
+def tf_policy(model, squash_in=False):
     """Transformer controller: token t = (x_t, u_{t-1}), output u_t = U_MAX * tanh(head)."""
     cache = model.new_cache()
 
     def pol(t, xs, us):
         n = xs[-1].shape[0]
         uprev = us[-1] if us else torch.zeros(n, 1, device=xs[-1].device)
-        out = model.step(torch.cat([xs[-1], uprev], -1), t, cache)
+        tok = torch.cat([xs[-1], uprev], -1)
+        if squash_in:
+            tok = squash(tok)
+        out = model.step(tok, t, cache)
         return U_MAX * torch.tanh(out)
     return pol
 
 
-def tokens_from_traj(X, U):
+def tokens_from_traj(X, U, squash_in=False):
     """Tokens (x_t, u_{t-1}) for t=0..H-1 from a finished trajectory."""
     n = X.shape[0]
     uprev = torch.cat([torch.zeros(n, 1, 1, device=X.device), U[:, :-1]], 1)
-    return torch.cat([X[:, :H], uprev], -1)
+    tok = torch.cat([X[:, :H], uprev], -1)
+    return squash(tok) if squash_in else tok
 
 
 def info_gain(X, U, k=8, prior_prec=1.0):

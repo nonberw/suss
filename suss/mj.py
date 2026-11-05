@@ -35,12 +35,28 @@ BLOCK_XML = """
   <actuator><motor joint="x" gear="1" ctrllimited="false"/></actuator>
 </mujoco>"""
 
+BOUNCER_XML = """
+<mujoco>
+  <option timestep="0.002" gravity="0 0 -9.81"/>
+  <worldbody>
+    <geom name="floor" type="plane" size="5 5 0.1" solref="0.02 0.3"/>
+    <body name="ball" pos="0 0 1">
+      <joint name="z" type="slide" axis="0 0 1"/>
+      <geom name="ballg" type="sphere" size="0.1" mass="1" solref="0.02 0.3"/>
+    </body>
+  </worldbody>
+  <actuator><motor joint="z" gear="1" ctrllimited="false"/></actuator>
+</mujoco>"""
+
 L_POLE = 0.5
 SYSTEMS = {
     "pendulum": dict(xml=PENDULUM_XML, params=dict(m=(0.5, 2.0), c=(0.02, 0.3), g=(4.0, 16.0)), u_sd=2.0, u_clip=5.0, s_p=0.2),
     "block": dict(xml=BLOCK_XML, params=dict(m=(0.5, 3.0), mu=(0.1, 1.0)), u_lim=15.0, s_p=0.2),
+    # EXPLORATORY third system (added post hoc, see DEVIATIONS.md): a ball bouncing on the floor, with
+    # unknown mass, gravity and contact damping ratio (sets the restitution), pushed by a random vertical force.
+    "bouncer": dict(xml=BOUNCER_XML, params=dict(m=(0.5, 2.0), g=(4.0, 16.0), zeta=(0.2, 1.0)), u_lim=None, s_p=0.2, skip=25),
 }
-NOMINAL = {"pendulum": dict(m=1.25, c=0.16, g=10.0), "block": dict(m=1.75, mu=0.55)}
+NOMINAL = {"pendulum": dict(m=1.25, c=0.16, g=10.0), "block": dict(m=1.75, mu=0.55), "bouncer": dict(m=1.25, g=10.0, zeta=0.6)}
 
 
 def build(name):
@@ -52,10 +68,15 @@ def set_params(model, name, p):
         model.body_mass[1] = p["m"]
         model.dof_damping[0] = p["c"]
         model.opt.gravity[2] = -p["g"]
-    else:
+    elif name == "block":
         model.body_mass[1] = p["m"]
         for gid in range(model.ngeom):
             model.geom_friction[gid, 0] = p["mu"]
+    else:
+        model.body_mass[1] = p["m"]
+        model.opt.gravity[2] = -p["g"]
+        for gid in range(model.ngeom):
+            model.geom_solref[gid] = [0.02, p["zeta"]]
 
 
 def observe(name, d):
@@ -67,7 +88,7 @@ def observe(name, d):
 
 def step(model, d, u, noise=None):
     d.ctrl[0] = u
-    for k in range(SKIP):
+    for k in range(len(noise) if noise is not None else round(DT / model.opt.timestep)):
         if noise is not None:
             d.qfrc_applied[0] = noise[k]
         mujoco.mj_step(model, d)
@@ -79,6 +100,9 @@ def reset(name, model, d, rng):
     if name == "pendulum":
         d.qpos[0] = rng.uniform(-np.pi, np.pi)
         d.qvel[0] = rng.normal()
+    elif name == "bouncer":
+        d.qpos[0] = rng.uniform(0.5, 2.0) - 1.0  # joint offset from body pos z=1
+        d.qvel[0] = rng.normal(0, 2.0)
     else:
         d.qpos[:] = 0
         for _ in range(30):  # settle onto the floor
@@ -96,7 +120,13 @@ def sample_u(name, rng, n):
     s = SYSTEMS[name]
     if name == "pendulum":
         return np.clip(rng.normal(0, s["u_sd"], n), -s["u_clip"], s["u_clip"])
+    if name == "bouncer":  # small random push (|u| <= 1 N < min weight 2 N): the ball bounces under gravity
+        return rng.uniform(-1.0, 1.0, n)
     return rng.uniform(-s["u_lim"], s["u_lim"], n)
+
+
+def n_sub(name):
+    return SYSTEMS[name].get("skip", SKIP)
 
 
 def gen_episodes(name, n, seed):
@@ -126,7 +156,7 @@ def gen_episodes(name, n, seed):
                 mujoco.mj_forward(mm, dd)
                 step(mm, dd, u[t])
                 buf[e, t] = observe(name, dd)
-            step(m_true, d, u[t], rng.normal(0, s_p, SKIP))
+            step(m_true, d, u[t], rng.normal(0, s_p, n_sub(name)))
         obs[e, T] = observe(name, d)
     return dict(obs=obs, u=us, params=prm, oracle=orc, nominal=nom, keys=np.array(keys))
 
@@ -154,9 +184,15 @@ def feature_rls(name, obs, u, lam=1e-2):
         q = np.arctan2(obs[..., 0], obs[..., 1]); w = obs[..., 2]
         phi = np.stack([u, w[:, :T], np.sin(q[:, :T]), np.ones_like(u)], -1)
         dv = w[:, 1:] - w[:, :T]
-    else:
+    elif name == "block":
         x, w = obs[..., 0], obs[..., 1]
         phi = np.stack([u, np.sign(w[:, :T]), w[:, :T], np.ones_like(u)], -1)
+        dv = w[:, 1:] - w[:, :T]
+    else:  # bouncer: ballistic flight + linear spring-damper contact model (contact indicator c)
+        x, w = obs[..., 0], obs[..., 1]
+        pen = (x[:, :T] + 1.0) - 0.1  # height of the ball's bottom above the floor
+        c = (pen < 0.02).astype(float)
+        phi = np.stack([u, np.ones_like(u), c, c * w[:, :T], c * pen], -1)
         dv = w[:, 1:] - w[:, :T]
     k = phi.shape[-1]
     S = np.cumsum(phi[..., :, None] * phi[..., None, :], 1) - phi[..., :, None] * phi[..., None, :]

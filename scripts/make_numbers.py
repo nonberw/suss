@@ -1,0 +1,126 @@
+"""Write paper/numbers.tex: every number quoted in the paper, as LaTeX macros computed from results/summary.json.
+Missing results render as '??' so nothing is ever typed by hand."""
+import json
+
+import numpy as np
+
+S = json.load(open("results/summary.json"))
+M = {}
+
+
+def put(name, fn, fmt="{:.2f}"):
+    try:
+        v = fn()
+        M[name] = v if isinstance(v, str) else fmt.format(v)
+    except Exception:
+        M[name] = "??"
+
+
+def ci(key, fmt="{:.2f}"):
+    return lambda: "[" + fmt.format(S[key]["ci"][0]) + ", " + fmt.format(S[key]["ci"][1]) + "]"
+
+
+def mean_seeds(d, key):
+    return np.mean([d[s][key] for s in d])
+
+
+def rng_seeds(d, key, fmt="{:.2f}"):
+    v = [d[s][key] for s in d]
+    return fmt.format(min(v)) + "--" + fmt.format(max(v))
+
+
+# ---- A, confirmatory
+put("AdOLS", lambda: S["H1a"]["point"], "{:.3f}"); put("AdOLSci", ci("H1a", "{:.3f}"))
+put("AdGD", lambda: S["H1b"]["point"], "{:.3f}"); put("AdGDci", ci("H1b", "{:.3f}"))
+put("Aratio", lambda: S["H1c"]["point"]); put("Aratioci", ci("H1c"))
+put("AtBayes", lambda: 47 * S["A_curves"]["bayes"][47], "{:.3f}")
+put("AtTheory", lambda: 47 * S["A_curves"]["theory_ridge"][47], "{:.3f}")
+put("Ashort", lambda: max(S["A_curves"]["tf"][t] / S["A_curves"]["bayes"][t] for t in range(1, 5)))
+put("Afloor", lambda: (S["A_curves"]["tf"][47] - S["A_curves"]["bayes"][47]) * 1e3, "{:.1f}")
+put("ARtheta", lambda: S["H2a"]["point"]); put("ARthetaci", ci("H2a"))
+put("AdR", lambda: S["H2b"]["point"], "{:.3f}"); put("AdRci", ci("H2b", "{:.3f}"))
+put("Amom", lambda: max(np.mean(np.array(S["A_mech"]["r2_layers"]["moments"]), 0)))
+put("Alogtr", lambda: max(np.mean(np.array(S["A_mech"]["r2_layers"]["post_logtrace"]), 0)))
+put("Aslope", lambda: S["H3a"]["point"], "{:.4f}"); put("Ar", lambda: S["H3a"]["r"], "{:.3f}")
+put("Atausub", lambda: S["H3b"]["point"], "{:.4f}"); put("Atausubci", ci("H3b", "{:.4f}"))
+put("Ataurand", lambda: S["A_mech"]["tau_rand"], "{:.3f}")
+put("AtauLastThree", lambda: "{:.2f}--{:.2f}".format(*sorted([x[3] for x in S["A_mech"]["tau_last"]])[::2]))
+put("AtauCtxTwo", lambda: min(x[2] for x in S["A_mech"]["tau_ctx"]))
+put("Aprev", lambda: "{:.2f}--{:.2f}".format(min(np.max(np.array(p)) for p in S["A_mech"]["prev_token"]), max(np.max(np.array(p)) for p in S["A_mech"]["prev_token"])))
+# ---- A, exploratory mechanism
+m2 = S.get("A_mech2", {})
+put("AyhatLthree", lambda: rng_seeds({s: {"v": m2[s]["lin_yhat"][3]} for s in m2}, "v"))
+put("AyhatLfour", lambda: rng_seeds({s: {"v": m2[s]["lin_yhat"][4]} for s in m2}, "v"))
+put("AmlpTheta", lambda: np.mean([max(m2[s]["mlp_theta"]) for s in m2]))
+put("AsteerYhat", lambda: np.mean([m2[s]["steer_yhat"][4][0] for s in m2]))
+put("AtauYhat", lambda: np.mean([m2[s]["tau_yhat_sub"][4] for s in m2]))
+m3 = S.get("A_mech3", {})
+put("AjacBayes", lambda: rng_seeds(m3, "jac_r2_bayes")); put("AjacTrue", lambda: rng_seeds(m3, "jac_r2_true"))
+put("AjacOLS", lambda: rng_seeds(m3, "jac_r2_ols"))
+put("AcfLin", lambda: rng_seeds(m3, "cf_r2_linear_jac")); put("AcfSlope", lambda: rng_seeds(m3, "cf_slope_bayes"))
+put("AcfBayes", lambda: rng_seeds(m3, "cf_r2_bayes"))
+put("AfwR", lambda: rng_seeds({s: {"v": m3[s]["fw_r2"][-1]} for s in m3}, "v"))
+put("AfwRthree", lambda: rng_seeds({s: {"v": m3[s]["fw_r2"][-2]} for s in m3}, "v"))
+put("AresidR", lambda: rng_seeds({s: {"v": max(m3[s]["resid_r2"])} for s in m3}, "v"))
+m4 = S.get("A_mech4", {})
+put("AkvThreeFour", lambda: rng_seeds(m4, "kv-2-3")); put("AkvTwoFour", lambda: rng_seeds(m4, "kv-1-2-3"))
+put("AkOnly", lambda: rng_seeds(m4, "k-2-3")); put("AvOnly", lambda: rng_seeds(m4, "v-2-3"))
+put("AkvOne", lambda: rng_seeds(m4, "kv-0"))
+# ---- B
+for name, P in (("block", "K"), ("pendulum", "P"), ("bouncer", "Q")):
+    for k, lab in (("tf", "TF"), ("feature_rls", "RLS"), ("nominal", "Nom"), ("oracle", "Orc"), ("mlp", "MLP"), ("persistence", "Per")):
+        def f(name=name, k=k):
+            d = S[f"B_{name}_mse"]
+            if k in ("tf", "mlp"):
+                return np.mean([d[f"{k}_err_seed{s}"] for s in range(3)])
+            return d[f"{k}_err"]
+        put(f"B{P}{lab}", f, "{:.2g}")
+put("HfourA", lambda: S["H4a"]["point"], "{:.4f}"); put("HfourAci", ci("H4a", "{:.4f}"))
+for name, P, tg in (("pendulum", "P", "g"), ("pendulum", "P", "inv_m"), ("pendulum", "P", "c_over_m"), ("block", "K", "mu"), ("block", "K", "inv_m"),
+                    ("bouncer", "Q", "g"), ("bouncer", "Q", "inv_m"), ("bouncer", "Q", "zeta")):
+    put(f"Bprobe{P}{tg.replace('_', '')}", lambda name=name, tg=tg: "{:.2f}--{:.2f}".format(
+        min(S[f"B_{name}_probe"][f"seed{s}"][tg][0] for s in range(3)), max(S[f"B_{name}_probe"][f"seed{s}"][tg][0] for s in range(3))))
+for name, P in (("pendulum", "P"), ("block", "K")):
+    put(f"Bsteer{P}", lambda name=name: S[f"H4d_{name}"]["frac_correct"] * 100, "{:.0f}")
+for name, P in (("pendulum", "P"), ("block", "K"), ("bouncer", "Q")):
+    put(f"Bfunc{P}", lambda name=name: "{:.2f}--{:.2f}".format(min(S[f"B_{name}_functional_invm"]["corr"]), max(S[f"B_{name}_functional_invm"]["corr"])))
+bm = S.get("B_mech2", {})
+
+
+def bfw(name, tg, which):
+    vals = []
+    for s in range(3):
+        best = max((bm[k][which] for k in bm if k.startswith(f"{name}|{s}|") and k.endswith(f"|{tg}")), default=np.nan)
+        vals.append(best)
+    return "{:.2f}--{:.2f}".format(min(vals), max(vals))
+
+
+for name, P, tg in (("pendulum", "P", "inv_m"), ("pendulum", "P", "g"), ("block", "K", "mu"), ("block", "K", "inv_m"), ("bouncer", "Q", "inv_m"), ("bouncer", "Q", "zeta")):
+    put(f"Bfw{P}{tg.replace('_', '')}", lambda name=name, tg=tg: bfw(name, tg, 0))
+    put(f"Bres{P}{tg.replace('_', '')}", lambda name=name, tg=tg: bfw(name, tg, 1))
+# ---- C
+cs = S.get("C_summary", {})
+for k, lab in (("ce", "CE"), ("ce_dither", "CED"), ("etc", "ETC"), ("ts", "TS")):
+    put(f"C{lab}mean", lambda k=k: cs[k]["mean"]); put(f"C{lab}med", lambda k=k: cs[k]["median"])
+    put(f"C{lab}fail", lambda k=k: cs[k]["fail"] * 100, "{:.1f}"); put(f"C{lab}info", lambda k=k: cs[k]["info8"], "{:.1f}")
+put("CTFmean", lambda: np.mean([cs[f"tf_seed{s}"]["mean"] for s in range(3)]))
+put("CTFmed", lambda: np.mean([cs[f"tf_seed{s}"]["median"] for s in range(3)]))
+put("CTFfail", lambda: np.mean([cs[f"tf_seed{s}"]["fail"] for s in range(3)]) * 100, "{:.1f}")
+put("CTFinfo", lambda: np.mean([cs[f"tf_seed{s}"]["info8"] for s in range(3)]), "{:.1f}")
+put("CFIXmean", lambda: np.mean([cs[f"fixed_seed{s}"]["mean"] for s in range(3)]), "{:.0f}")
+put("CFIXmed", lambda: np.mean([cs[f"fixed_seed{s}"]["median"] for s in range(3)]))
+for h in ("H5a", "H5b", "H5d"):
+    put(h.replace("5", "five"), lambda h=h: S[h]["point"]); put(h.replace("5", "five") + "ci", ci(h))
+for k, lab in (("ce_dither", "CED"), ("etc", "ETC"), ("ts", "TS")):
+    put(f"Cvs{lab}", lambda k=k: S[f"H5c_{k}_minus_tf"]["point"]); put(f"Cvs{lab}ci", ci(f"H5c_{k}_minus_tf"))
+    put(f"Cvs{lab}med", lambda k=k: S[f"H5c_{k}_minus_tf_median"]["point"]); put(f"Cvs{lab}medci", ci(f"H5c_{k}_minus_tf_median"))
+    put(f"Cwins{lab}", lambda k=k: S[f"H5c_{k}_tf_wins"] * 100, "{:.0f}")
+    put(f"Cinfo{lab}", lambda k=k: S[f"C_info8_tf_minus_{k}"]["point"]); put(f"Cinfo{lab}ci", ci(f"C_info8_tf_minus_{k}"))
+# ---- Holm
+for k, v in S.get("holm", {}).items():
+    put("P" + k.replace("1", "one").replace("2", "two").replace("3", "three").replace("4", "four").replace("5", "five"),
+        lambda v=v: ("<10^{-3}" if v["p_holm"] < 1e-3 else "{:.3f}".format(v["p_holm"])))
+out = "% AUTO-GENERATED by scripts/make_numbers.py from results/summary.json. Do not edit.\n"
+out += "\n".join(f"\\newcommand{{\\{k}}}{{{v}}}" for k, v in sorted(M.items())) + "\n"
+open("paper/numbers.tex", "w").write(out)
+print(f"{len(M)} macros, {sum(v == '??' for v in M.values())} missing")

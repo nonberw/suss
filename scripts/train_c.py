@@ -18,6 +18,14 @@ ap.add_argument("--steps", type=int, default=6000)
 ap.add_argument("--fixed", action="store_true")
 ap.add_argument("--out", default="runs/c")
 ap.add_argument("--device", default="cuda")
+ap.add_argument("--loss", default="norm", choices=["raw", "norm", "lognorm"],
+                help="raw: mean J/H (pre-registered, unstable); norm: mean J/J_oracle (= evaluation metric); lognorm: mean log(J/J_oracle)")
+ap.add_argument("--lr", type=float, default=3e-4)
+ap.add_argument("--tbptt", type=int, default=0, help="if >0, stop state gradients every k steps (truncated BPTT)")
+ap.add_argument("--batch", type=int, default=256)
+ap.add_argument("--squash", type=int, default=0, help="1: soft log-compression of the controller's input tokens")
+ap.add_argument("--init", default="", help="checkpoint to start from (stage-2 fine-tuning after the DAgger warm start)")
+ap.add_argument("--tag", default="", help="checkpoint name suffix")
 a = ap.parse_args()
 dev = a.device
 torch.manual_seed(a.seed)
@@ -40,6 +48,8 @@ if a.fixed:
 
 cfg = GPTConfig(d_in=C.N + C.M, d_out=C.M, T=C.H)
 model = GPT(cfg).to(dev)
+if a.init:
+    model.load_state_dict(torch.load(a.init, map_location=dev)["state"])
 
 
 def loss_fn(step):
@@ -55,15 +65,38 @@ if dev == "cuda":
     import math
     import time
     from suss.train import lr_at
-    sA, sB = C.sample_plants(256, gen, dev)
-    sx0, sw = C.sample_noise(256, gen, dev)
-    opt = torch.optim.AdamW(model.parameters(), lr=3e-4, weight_decay=0.01, betas=(0.9, 0.95))
+    NB_ = a.batch
+    sA, sB = C.sample_plants(NB_, gen, dev)
+    sx0, sw = C.sample_noise(NB_, gen, dev)
+    sJo = torch.ones(NB_, device=dev)
+    opt = torch.optim.AdamW(model.parameters(), lr=a.lr, weight_decay=0.01, betas=(0.9, 0.95))
+
+    def oracle_cost(A, B, x0, w):
+        with torch.no_grad():
+            return C.simulate(A, B, x0, w, C.oracle_policy(A, B))[0]
 
     def fwd_bwd():
-        J, _, _ = C.simulate(sA, sB, sx0, sw, C.tf_policy(model))
-        loss = (J / C.H).mean()
+        J, _, _ = C.simulate(sA, sB, sx0, sw, C.tf_policy(model, bool(a.squash)), tbptt=a.tbptt)
+        if a.loss == "raw":
+            loss = (J / C.H).mean()
+        elif a.loss == "norm":
+            loss = (J / sJo).mean()
+        else:
+            loss = torch.log(J / sJo).mean()
         loss.backward()
         return loss
+
+    # held-out validation plants for monitoring only (normalised cost, never used for training)
+    vgen = torch.Generator(device=dev).manual_seed(777)
+    vA, vB = C.sample_plants(1024, vgen, dev)
+    vx0, vw = C.sample_noise(1024, vgen, dev)
+    vJo = oracle_cost(vA, vB, vx0, vw)
+
+    def validate():
+        with torch.no_grad():
+            J, _, _ = C.simulate(vA, vB, vx0, vw, C.tf_policy(model, bool(a.squash)))
+            r = J / vJo
+        return float(r.mean()), float(r.median()), float((r > 10).float().mean())
 
     s = torch.cuda.Stream()
     s.wait_stream(torch.cuda.current_stream())
@@ -78,9 +111,11 @@ if dev == "cuda":
         static_loss = fwd_bwd()
     hist, t0 = [], time.time()
     for step in range(a.steps):
-        A, B = C.sample_plants(256, gen, dev)
-        x0, w = C.sample_noise(256, gen, dev)
+        A, B = C.sample_plants(NB_, gen, dev)
+        x0, w = C.sample_noise(NB_, gen, dev)
         sA.copy_(A); sB.copy_(B); sx0.copy_(x0); sw.copy_(w)
+        if a.loss != "raw":
+            sJo.copy_(oracle_cost(A, B, x0, w))
         graph.replay()
         for gp in opt.param_groups:
             gp["lr"] = lr_at(step, a.steps)
@@ -88,9 +123,10 @@ if dev == "cuda":
         opt.step()
         if step % 250 == 0 or step == a.steps - 1:
             lv = float(static_loss)
-            hist.append((step, lv))
-            print(f"step {step:6d} loss {lv:.5f} ({time.time() - t0:.0f}s)", flush=True)
+            val = validate() if (step % 1000 == 0 or step == a.steps - 1) else None
+            hist.append((step, lv, val))
+            print(f"step {step:6d} loss {lv:.5f} val(mean,median,fail) {val} ({time.time() - t0:.0f}s)", flush=True)
 else:
     hist = fit(model, loss_fn, a.steps, log_every=250)
-torch.save({"cfg": cfg.__dict__, "state": model.state_dict()}, f"{a.out}/seed{a.seed}.pt")
-json.dump(hist, open(f"{a.out}/seed{a.seed}_hist.json", "w"))
+torch.save({"cfg": cfg.__dict__, "state": model.state_dict(), "args": vars(a)}, f"{a.out}/seed{a.seed}{a.tag}.pt")
+json.dump(hist, open(f"{a.out}/seed{a.seed}{a.tag}_hist.json", "w"))

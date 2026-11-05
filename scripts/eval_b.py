@@ -19,7 +19,7 @@ ap.add_argument("--out", default="results/b")
 a = ap.parse_args()
 dev = "cuda"
 os.makedirs(a.out, exist_ok=True)
-VEL = {"pendulum": 2, "block": 1}
+VEL = {"pendulum": 2, "block": 1, "bouncer": 1}
 
 
 def load_model(path, d_in, d_out):
@@ -32,7 +32,9 @@ def load_model(path, d_in, d_out):
     return m.to(dev).eval(), {k: v.to(dev) for k, v in ck["norm"].items()}
 
 
-for name in ["pendulum", "block"]:
+for name in ["pendulum", "block", "bouncer"]:
+    if not all(os.path.exists(f"runs/b/{name}_{k}_seed{s}.pt") for k in ("tf", "mlp") for s in a.seeds):
+        print("skip", name); continue
     D, tok, nxt = load(name, "test")
     obs = D["obs"]
     Y = nxt.cpu().numpy()
@@ -51,8 +53,10 @@ for name in ["pendulum", "block"]:
     prm = D["params"]
     if name == "pendulum":
         targets = {"g": prm[:, 2], "inv_m": 1 / prm[:, 0], "c_over_m": prm[:, 1] / prm[:, 0], "log_m": np.log(prm[:, 0]), "c": prm[:, 1]}
-    else:
+    elif name == "block":
         targets = {"mu": prm[:, 1], "inv_m": 1 / prm[:, 0], "log_m": np.log(prm[:, 0])}
+    else:
+        targets = {"g": prm[:, 1], "inv_m": 1 / prm[:, 0], "zeta": prm[:, 2], "log_m": np.log(prm[:, 0])}
     E = tok.shape[0]; half = E // 2
     mech = {"r2": {}, "parts": {}}
     for s in a.seeds:

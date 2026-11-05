@@ -88,6 +88,23 @@ the $p$ head outputs to disjoint residual coordinates gives $S_t$ and $C_t$. The
 $\{\sigma^2\Lambda_0+S\succ0\}$, so the universal approximation theorem applies on compacta.
 \end{proof}
 
+\begin{remark}[Where an estimate can live without appearing in any activation]\label{rem:fw}
+Consider a softmax head with keys $k_s$, values $v_s$ and query $q$, and suppose its scores are small,
+$|q^\top k_s|/\sqrt{d_h}\ll1$. This is the near-uniform regime, with normalised attention entropy close to 1. Expanding
+the softmax to first order,
+\begin{equation}
+\textstyle\sum_s \mathrm{softmax}_s\,v_s \;\approx\; \bar v + \tfrac{1}{\sqrt{d_h}}\,\widehat{\mathrm{Cov}}(v,k)\,q,
+\qquad \widehat{\mathrm{Cov}}(v,k)=\tfrac1{t+1}\textstyle\sum_{s\le t}(v_s-\bar v)k_s^\top .
+\label{eq:fw}
+\end{equation}
+The head is therefore an affine map of the query, and its matrix is the key--value covariance (``fast
+weights''~\citep{vonoswald2023transformers}), which is spread over all context positions. A transformer can thus apply
+a parameter estimate to the query, with the predictor's Jacobian $\partial\hat y_t/\partial z_t$ playing the role of
+$\hat\theta_t$, while $\hat\theta_t$ never appears as a vector in the residual stream. Two predictions follow. A residual
+probe for $\hat\theta$ can fail even when the model is near Bayes-optimal; a probe on $\widehat{\mathrm{Cov}}(v,k)$, and
+patching of keys and values alone, should succeed. Section~\ref{sec:expa} confirms both.
+\end{remark}
+
 Proposition~\ref{prop:construct} is in the spirit of earlier
 constructions~\citep{akyurek2022learning,bai2023transformers,vonoswald2023transformers}, and we do not claim it as a
 contribution in itself. Its role is to make a \emph{falsifiable} mechanistic prediction for trained models. If a

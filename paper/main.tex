@@ -1,13 +1,16 @@
 \documentclass{l4dc2027}
 % camera-ready: \documentclass[final]{l4dc2027}
-\usepackage{times}
+\usepackage{fontspec}
+\setmainfont{texgyretermes}[Extension=.otf, UprightFont=*-regular, BoldFont=*-bold, ItalicFont=*-italic, BoldItalicFont=*-bolditalic]
 \usepackage{booktabs}
 \usepackage{multirow}
-\newtheorem{assumption}{Assumption}
+\input{numbers}
+\newcommand{\PENDING}[1]{\textbf{[#1 pending]}}
 
-\title[What algorithm does an in-context adaptive controller learn?]{Sufficient Statistics, Then Solve, Then Excite:\\ What a Transformer Learns When It Adapts to Unknown Physics In-Context}
+\title[The estimate lives in the keys]{The Estimate Lives in the Keys: What a Transformer Learns\\ When It Adapts to Unknown Physics In-Context}
 
-\coltauthor{\Name{nonberw} \Email{github.com/nonberw/suss}\\
+% TODO(author): put your full name here before submitting (L4DC is single-blind), e.g. \Name{First Last}
+\coltauthor{\Name{nonberw {\relax}} \Email{https://github.com/nonberw/suss}\\
  \addr Independent researcher}
 
 \begin{document}
@@ -15,7 +18,7 @@
 \maketitle
 
 \begin{abstract}%
-ABSTRACT_TEXT
+\PENDING{abstract}
 \end{abstract}
 
 \begin{keywords}%
