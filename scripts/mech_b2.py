@@ -11,8 +11,10 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from suss.model import GPT, GPTConfig
 from suss.probes import RidgeProbe, r2_from_parts, r2_parts
 from scripts.mech_a3 import fast_weights
+from scripts.mech_a5 import dual_ridge_r2
 
 dev = os.environ.get("SUSS_DEV", "cuda")
+torch.set_num_threads(int(os.environ.get("SUSS_THREADS", "6")))
 out = {}
 for name in ["pendulum", "block", "bouncer"]:
     if not os.path.exists(f"runs/b/{name}_tf_seed2.pt"):
@@ -40,11 +42,9 @@ for name in ["pendulum", "block", "bouncer"]:
             F = fast_weights(model, X, l, T - 1)
             for tn, yv in targets.items():
                 Y = torch.tensor(yv, dtype=torch.float64, device=dev).view(-1, 1)
-                pr = RidgeProbe(alphas=[1e-1, 1, 10, 100, 1e3, 1e4]).fit(F[:half], Y[:half], np.arange(half))
-                fw = r2_from_parts(r2_parts(pr.predict(F[half:]), Y[half:], np.arange(half, E)))
+                fw = dual_ridge_r2(F[:half].cpu(), Y[:half].cpu(), F[half:].cpu(), Y[half:].cpu())[0]  # dual form: n=2048 < d=4224
                 h = res[l + 1][:, -1]  # residual after block l (same depth as the block's output)
-                pr = RidgeProbe().fit(h[:half], Y[:half], np.arange(half))
-                rs = r2_from_parts(r2_parts(pr.predict(h[half:]), Y[half:], np.arange(half, E)))
+                rs = dual_ridge_r2(h[:half].cpu(), Y[:half].cpu(), h[half:].cpu(), Y[half:].cpu())[0]
                 out[(name, s, l, tn)] = (fw, rs)
         print(name, s, {f"{tn}@{l}": tuple(round(x, 3) for x in out[(name, s, l, tn)]) for l in range(model.cfg.n_layer) for tn in targets}, flush=True)
 torch.save(out, "results/b/mech2.pt")

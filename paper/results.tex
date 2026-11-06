@@ -121,9 +121,10 @@ key--value fast weights decode $1/m$ with $R^2{=}\BfwPinvm$ (residual: \BresPinv
 a ball with unknown mass, gravity and contact damping ratio $\zeta$, pushed by random vertical forces. The transformer
 reaches \BQTF\ against \BQNom\ for nominal-parameter simulation, \BQMLP\ for the no-context MLP and \BQRLS\ for a
 spring--damper feature RLS, which is worse than persistence (\BQPer): a linear contact model is the wrong class. The
-pattern of \S\ref{sec:expa} repeats. Residual-stream probes at $t{=}47$ read $\zeta$ at $R^2{=}\BprobeQzeta$ but $g$ and
-$1/m$ only at \BprobeQg\ and \BprobeQinvm; from the key--value memory, $1/m$ reads at \BfwQinvm\ and $\zeta$ at \BfwQzeta\
-(residual stream at the same depth: \BresQinvm, \BresQzeta); and steering along the $1/m$ probe is inert (\BsteerQ\% correct sign).
+pattern of \S\ref{sec:expa} repeats only in part. The key--value memory reads the damping ratio better than the residual
+stream at the same depth ($\zeta$: \BfwQzeta\ vs.\ \BresQzeta), but $1/m$ is weakly readable from both (\BfwQinvm\ vs.\
+\BresQinvm), and steering along the $1/m$ probe is inert (\BsteerQ\% correct sign). We read this as support for the
+inertness of residual probes, and as weak support only for the key--value localisation on this system.
 
 \input{resC}
 
