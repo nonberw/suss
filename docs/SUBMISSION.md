@@ -21,6 +21,10 @@ Format rules (from the author-information page and the official template):
 6. Submit **before Nov 13, 2026**. The time zone is not stated on the site, so treat it as "end of Nov 12 AoE" to be safe.
 7. Optional, recommended after submission: arXiv. You need an arXiv account and an endorsement for `cs.LG` / `eess.SY` (first-time submitters often need one). Upload `submission/arxiv_source.zip` (LaTeX source + figures + .bbl). L4DC is single-blind, so an arXiv preprint is fine.
 
+## Pre-registration timestamp (recommended, 10 minutes)
+
+The pre-registration lives in the git history (tag `prereg-d134c5a`). To give it an independent timestamp: make the GitHub repo public, connect it to Zenodo (https://zenodo.org/account/settings/github/), create a GitHub release from the tag, and Zenodo will mint a DOI for that snapshot. Add the DOI to the paper's pre-registration paragraph.
+
 ## Backup venues if L4DC is missed or the paper is rejected
 
 - **ICML 2027.** Expected deadline late January 2027; check icml.cc when the call appears. It needs the ICML style and 8 pages, so the paper would need reformatting.

@@ -38,7 +38,7 @@ def run(model, tok, kv_src=None, blocks=(), mode="kv", heads=None):
         kvs[l] = (k, v)
         if kv_src is not None and l in blocks:
             ks, vs = kv_src[l]
-            hs = list(range(H)) if heads is None else heads
+            hs = heads[l] if isinstance(heads, dict) else (list(range(H)) if heads is None else heads)
             k = k.clone(); v = v.clone()
             if "k" in mode:
                 k[:, hs, :-1] = ks[:, hs, :-1]

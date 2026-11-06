@@ -27,7 +27,8 @@ than dither (\CinfoCED\ \CinfoCEDci) and Thompson sampling (\CinfoTS\ \CinfoTSci
 \paragraph{Cost: competitive in the typical case, unsafe in the tail.} The median normalised cost is \CTFmed\ (seeds
 \CTFmedRange), against \CCEDmed\ for dither and \CTSmed\ for Thompson sampling; per plant, the transformer wins against
 Thompson sampling \CwinsTS\% of the time and against dither \CwinsCED\% (paired median differences \CvsTSmed\ \CvsTSmedci\ and
-\CvsCEDmed\ \CvsCEDmedci). But it fails on \CTFfail\% of plants against \CCEDfail\%. The failures sit almost
+\CvsCEDmed\ \CvsCEDmedci). But its tail is heavier: CVaR$_{95}$, the mean cost of the worst 5\% of plants, is \CTFcvar\ against \CCEDcvar\ for
+dither and \CTScvar\ for Thompson sampling, and it fails on \CTFfail\% of plants against \CCEDfail\%. The failures sit almost
 entirely on the \CfracUnst\% of plants that are open-loop unstable: \CfailUnstTF\% there against \CfailStabTF\% on stable
 plants (dither: \CfailUnstCED\% and \CfailStabCED\%), Fig.~\ref{fig:c}b. Controllability is not the issue. Because the
 mean is dominated by these failures, the transformer beats the constant gain (H5a, Holm $p\PHfivea$) but \emph{not} CE on

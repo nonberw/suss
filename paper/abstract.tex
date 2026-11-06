@@ -1,16 +1,13 @@
-Sequence models that adapt to unknown dynamics from their own history are widely used in robot learning, but
-what they compute is unclear. We study this question in small transformers trained from scratch, in a
-pre-registered design with exact optimal references and causal interventions, in the smallest settings where the
-question has exact answers: linear systems with unknown parameters, one-degree-of-freedom MuJoCo systems with
-contact, and linear adaptive control. The trained predictors are Bayes-optimal while data are scarce, then settle at
-an approximation floor. Our pre-registered mechanism, a linearly readable and causally used parameter estimate in the
-residual stream, is rejected: the best linear probe reaches $R^2{=}\ARtheta$, and steering and patching along it have no
-effect. Exploratory analyses, labelled as such, locate the context information in the attention key--value memory of
-the last two blocks: replacing only those keys and values with another episode's transfers $\AkvThreeFour$ of its
-behaviour, while the same operation on the first two blocks transfers $\AkvOne$; the predictor is near-linear in its
-query, and its input Jacobian matches the Bayes estimate ($R^2{=}\AjacBayes$). In MuJoCo, physical parameters are
-likewise more readable from the key--value memory than from the residual stream, most clearly on the pendulum. A
-transformer controller trained by imitation and then on closed-loop cost learns to excite the plant without any
-identification objective, though less than dithered certainty equivalence (\CinfoCED\ nats less); its median cost is
-comparable to classical adaptive controllers, but it fails on \CTFfail\% of plants, almost all open-loop unstable,
-against \CCEDfail\% for dithered certainty equivalence. Code, pre-registration, deviation log and every number are public.
+Sequence models that adapt to unknown dynamics from their own history are common in robot learning, but what they
+compute is unclear. We study small transformers trained from scratch, in a pre-registered design with exact optimal
+references and causal interventions, in the smallest settings where the question has exact answers: linear systems
+with unknown parameters, one-degree-of-freedom MuJoCo systems with contact, and linear adaptive control. The predictors
+are Bayes-optimal while data are scarce, then settle at an approximation floor (\Aratio$\times$ the Bayes excess risk).
+Our pre-registered mechanism, a linearly readable and causally used parameter estimate in the residual stream, is
+rejected (probe $R^2{=}\ARtheta$; steering and patching have no effect). Exploratory analyses locate the sufficient
+statistics of the context in the attention key--value memory of the last two blocks: they are read from it with
+$R^2{=}\AcFwMom$, against \AcCtxMom\ from the residual stream over all positions, and replacing only those keys and values
+with another episode's transfers $\AkvThreeFour$ of its behaviour. The same holds for physical parameters in MuJoCo. A
+controller trained by imitation and then on closed-loop cost excites the plant without an identification objective,
+though less than dithered certainty equivalence, and is competitive in median cost but fails on \CTFfail\% of plants,
+almost all open-loop unstable, against \CCEDfail\%. Code, pre-registration and every number are public.

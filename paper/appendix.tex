@@ -34,7 +34,7 @@ expectation and ours has lower variance. (2)~$\Lambda_0{=}I$ in the information 
 2$\times$256 units and 5000 steps. (4)~The controller uses a KV-cached incremental forward to fit in 4\,GB. It is
 numerically identical to the full forward. (5)~With a prior mean $B{=}0$, pre-registered CE degenerates to $u\equiv0$;
 we report it as specified. (6)~On the pendulum the parameter effects are small (nominal-parameter simulation already
-has 0.5\% normalised error); we kept the design unchanged.
+has \BPNom\ normalised error); we kept the design unchanged.
 (7)~All analyses labelled \emph{exploratory} were added after the pre-registered probes failed: the query Jacobian,
 fast-weight probes, KV-only patching, answer probes, MLP probes, the bouncing-ball system, the Thompson-sampling
 baseline and the scale study. (8)~\emph{Controller training.} Pure closed-loop BPTT on the cost, as pre-registered, was

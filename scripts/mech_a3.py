@@ -67,7 +67,7 @@ if __name__ == "__main__":
     tho = L.ols_theta(R["S"], R["C"]).clamp(-5, 5)
     ev = slice(half, E)
     out = {}
-    for s in [0, 1, 2]:
+    for s in [int(x) for x in os.environ.get("SUSS_SEEDS", "0,1,2").split(",")]:
         ck = torch.load(f"runs/a/seed{s}.pt", map_location=dev)
         model = GPT(GPTConfig(**ck["cfg"])).to(dev).eval()
         model.load_state_dict(ck["state"])
@@ -116,4 +116,4 @@ if __name__ == "__main__":
             r["resid_r2"].append(r2_from_parts(r2_parts(pr.predict(Xr[hh:]), Y[hh:], grp_te)))
         out[s] = r
         print(f"seed {s}:", {k: (np.round(v, 3).tolist() if isinstance(v, list) and len(v) < 10 else (round(v, 4) if isinstance(v, float) else '...')) for k, v in r.items()}, flush=True)
-    torch.save(out, "results/a/mech3.pt")
+    torch.save(out, os.environ.get("SUSS_OUT", "results/a/mech3.pt"))

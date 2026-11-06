@@ -188,6 +188,7 @@ if os.path.exists("results/c/eval.pt"):
     for k in [x for x in ["ce", "ce_dither", "etc", "ts"] if x in R] + [f"fixed_seed{s}" for s in SEEDS] + [f"tf_seed{s}" for s in SEEDS] + [f"bc_seed{s}" for s in SEEDS if f"bc_seed{s}" in R]:
         v = R[k]["norm"]
         summ[k] = dict(mean=float(v.mean()), median=float(np.median(v)), fail=float((v > 10).mean()),
+                       cvar95=float(np.sort(v)[-max(1, len(v) // 20):].mean()), p90=float(np.percentile(v, 90)),
                        info8=float(R[k]["info8"].mean()) if "info8" in R[k] else None)
     out["C_summary"] = summ
     out["C_oracle_info8"] = float(R["oracle"]["info8"].mean())
@@ -244,6 +245,21 @@ if os.path.exists("results/a/mech5.pt"):
                                      by_block=[[M5[s_][(fn, l, tn)] for l in range(4)] for s_ in M5])
         agg[f"{fn}|dim"] = int(M5[0][("dim", fn, 0)])
     out["A_mech5"] = agg
+if os.path.exists("results/a/mech6.pt"):
+    M6 = torch.load("results/a/mech6.pt", weights_only=False)
+    seeds6 = [k for k in M6 if isinstance(k, int)]
+    agg = dict(ceiling_linear=M6["ceiling_linear"], ceiling_mlp=M6["ceiling_mlp"])
+    agg["shuffled_max"] = [max(M6[s_][("shuffled", l)] for l in range(4)) for s_ in seeds6]
+    for fn in ["resid_mean", "resid_last_ctx"]:
+        for tn in ["theta_bayes", "moments"]:
+            agg[f"{fn}|{tn}"] = [max(M6[s_][(fn, l, tn)] for l in range(4)) for s_ in seeds6]
+    agg["remark_r2_blocks34"] = [float(np.mean(M6[s_][("remark_r2", 2)] + M6[s_][("remark_r2", 3)])) for s_ in seeds6]
+    agg["remark_r2_by_block"] = [[float(np.mean(M6[s_][("remark_r2", l)])) for l in range(4)] for s_ in seeds6]
+    agg["entropy_by_block"] = [[float(np.mean(M6[s_][("entropy", l)])) for l in range(4)] for s_ in seeds6]
+    for kk in (2, 3):
+        agg[f"top{kk}"] = [M6[s_][("top", kk)] for s_ in seeds6]
+        agg[f"random{kk}"] = [M6[s_][("random", kk)] for s_ in seeds6]
+    out["A_mech6"] = agg
 if os.path.exists("results/c/variants.pt"):
     V = torch.load("results/c/variants.pt", weights_only=False)
     rho = V["rho"]

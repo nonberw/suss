@@ -84,7 +84,7 @@ if __name__ == "__main__":
         "theta_true": theta.reshape(E, -1),
     }
     out = {}
-    for s in [0, 1, 2]:
+    for s in [int(x) for x in os.environ.get("SUSS_SEEDS", "0,1,2").split(",")]:
         ck = torch.load(f"runs/a/seed{s}.pt", map_location=dev)
         model = GPT(GPTConfig(**ck["cfg"])).to(dev).eval()
         model.load_state_dict(ck["state"])
@@ -113,4 +113,4 @@ if __name__ == "__main__":
             print(f"seed {s} block {l}: " + ", ".join(f"{fn}/{tn}={r[(fn, l, tn)]:.3f}" for fn in feats for tn in targets), flush=True)
         out[s] = r
     os.makedirs("results/a", exist_ok=True)
-    torch.save(out, "results/a/mech5.pt")
+    torch.save(out, os.environ.get("SUSS_OUT", "results/a/mech5.pt"))

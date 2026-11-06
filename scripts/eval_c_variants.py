@@ -10,8 +10,9 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from suss import control as C
 from suss.model import GPT, GPTConfig
 
-dev = "cuda"
-N_TEST = 4096
+dev = os.environ.get("SUSS_DEV", "cuda")  # on CPU the generator stream differs, so the plants differ from eval_c.py; comparisons are paired within this script
+torch.set_num_threads(int(os.environ.get("SUSS_THREADS", "6")))
+N_TEST = int(os.environ.get("SUSS_NTEST", "4096"))
 gen = torch.Generator(device=dev).manual_seed(10003)
 A, B = C.sample_plants(N_TEST, gen, dev)
 x0, w = C.sample_noise(N_TEST, gen, dev)

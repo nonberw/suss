@@ -116,6 +116,12 @@ cs = S.get("C_summary", {})
 for k, lab in (("ce", "CE"), ("ce_dither", "CED"), ("etc", "ETC"), ("ts", "TS")):
     put(f"C{lab}mean", lambda k=k: cs[k]["mean"]); put(f"C{lab}med", lambda k=k: cs[k]["median"])
     put(f"C{lab}fail", lambda k=k: cs[k]["fail"] * 100, "{:.1f}"); put(f"C{lab}info", lambda k=k: cs[k]["info8"], "{:.1f}")
+for k, lab in (("ce", "CE"), ("ce_dither", "CED"), ("etc", "ETC"), ("ts", "TS")):
+    put(f"C{lab}cvar", lambda k=k: cs[k]["cvar95"], "{:.1f}"); put(f"C{lab}pninety", lambda k=k: cs[k]["p90"], "{:.1f}")
+put("CTFcvar", lambda: np.mean([cs[f"tf_seed{s}"]["cvar95"] for s in range(3)]), "{:.0f}")
+put("CTFpninety", lambda: np.mean([cs[f"tf_seed{s}"]["p90"] for s in range(3)]), "{:.1f}")
+put("CBCcvar", lambda: np.mean([cs[f"bc_seed{s}"]["cvar95"] for s in range(3)]), "{:.0f}")
+put("CBCpninety", lambda: np.mean([cs[f"bc_seed{s}"]["p90"] for s in range(3)]), "{:.1f}")
 put("CTFmean", lambda: np.mean([cs[f"tf_seed{s}"]["mean"] for s in range(3)]))
 put("CTFmed", lambda: np.mean([cs[f"tf_seed{s}"]["median"] for s in range(3)]))
 put("CTFfail", lambda: np.mean([cs[f"tf_seed{s}"]["fail"] for s in range(3)]) * 100, "{:.1f}")
@@ -182,6 +188,22 @@ def m5blk(fn, tn, blk):
 
 put("AcFwMomBtwo", lambda: m5blk("fw", "moments", 1)); put("AcFwThetaBtwo", lambda: m5blk("fw", "theta_bayes", 1))
 put("AcFwMomBone", lambda: m5blk("fw", "moments", 0)); put("AcFwThetaBone", lambda: m5blk("fw", "theta_bayes", 0))
+m6 = S.get("A_mech6", {})
+
+
+def rng_list(v, fmt="{:.2f}"):
+    lo, hi = fmt.format(min(v)), fmt.format(max(v))
+    return lo if lo == hi else lo + "--" + hi
+
+
+put("AcShuffled", lambda: rng_list(m6["shuffled_max"]))
+put("AcMeanTheta", lambda: rng_list(m6["resid_mean|theta_bayes"])); put("AcLastTheta", lambda: rng_list(m6["resid_last_ctx|theta_bayes"]))
+put("AcMeanMom", lambda: rng_list(m6["resid_mean|moments"])); put("AcLastMom", lambda: rng_list(m6["resid_last_ctx|moments"]))
+put("AcCeilLin", lambda: m6["ceiling_linear"]); put("AcCeilMlp", lambda: m6["ceiling_mlp"])
+put("ARemarkR", lambda: rng_list(m6["remark_r2_blocks34"]))
+put("ARemarkRone", lambda: rng_list([b[0] for b in m6["remark_r2_by_block"]]))
+put("ATopTwo", lambda: rng_list(m6["top2"])); put("ARandTwo", lambda: rng_list(m6["random2"]))
+put("ATopThree", lambda: rng_list(m6["top3"])); put("ARandThree", lambda: rng_list(m6["random3"]))
 cv = S.get("C_variants", {})
 for name, lab in (("imitation", "Imi"), ("log-cost", "Log"), ("raw-cost", "Raw"), ("cvar", "Cvar")):
     put(f"Cv{lab}Med", lambda name=name: cv[f"{name}|0"]["median"]); put(f"Cv{lab}Fail", lambda name=name: cv[f"{name}|0"]["fail"] * 100, "{:.1f}")

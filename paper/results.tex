@@ -69,7 +69,12 @@ statistics accumulate in the key--value memory, not in the residual stream. \emp
 episode's, with the query's residual stream, its attention queries and all MLPs untouched, transfers $\tau{=}\AkvThreeFour$
 of that episode's behaviour; the same operation on block~1 alone transfers \AkvOne, keys alone \AkOnly, values alone
 \AvOnly\ (Fig.~\ref{fig:mech}c). That context information transfers through keys and values is expected; what the
-experiment adds is \emph{where}: blocks 3--4, and within them 2--3 near-uniform heads per block, as in Remark~\ref{rem:fw}. \emph{Probe directions are not the model's directions:} even for the well-decoded
+experiment adds is \emph{where}: blocks 3--4, and within them 2--3 near-uniform heads per block, as in Remark~\ref{rem:fw}. Shuffled labels give $R^2{=}\AcShuffled$; the mean-pooled and last-context-token residuals give \AcMeanTheta\ and
+\AcLastTheta\ for $\hat\theta$; and the true statistics predict the estimate linearly with $R^2{=}\AcCeilLin$ (MLP: \AcCeilMlp), so
+linear readability of $\hat\theta$ from the memory is what linear readability of $(S,C)$ implies at this context length.
+The first-order picture of Remark~\ref{rem:fw} explains $R^2{=}\ARemarkR$ of the head outputs in blocks 3--4 (block~1:
+\ARemarkRone). Patching the keys and values of the two highest-transfer heads per block gives $\tau{=}\ATopTwo$, against
+\ARandTwo\ for two random heads. \emph{Probe directions are not the model's directions:} even for the well-decoded
 prediction, steering along the probe has slope \AsteerYhat\ and subspace patching transfers \AtauYhat. In short, the
 transformer implements near-Bayes system identification without a linearly readable $\hat\theta$ in the residual stream:
 the sufficient statistics are held in the key--value memory and applied to the query by attention. This is one reason why
@@ -93,7 +98,10 @@ parameter, from the key--value fast weights (best block) vs.\ from the residual 
 For comparison, the no-context MLP gets \BKMLP, nominal-parameter simulation \BKNom, and simulation with the true parameters
 \BKOrc. Feature RLS is linear in its parameters and cannot represent stick--slip, so we add a structured identifier
 with the true model class: a grid search over $(m,\mu)$ with the exact simulator, choosing at each $t$ the parameters
-that best explain the context so far. It reaches \BKSys\ (\BKSysNote). On the pendulum, where feature RLS has the right model class up to discretisation, the transformer
+that best explain the context so far. It reaches \BKSys, no better than the exact simulator restarted from the observed state with the \emph{true}
+parameters (\BKOrcObs): from $(x,\dot x)$ alone, one-step prediction is limited by the hidden contact state, which the
+transformer evidently infers from its history (\BKTF). Feature RLS does adapt (its coefficients correlate with $1/m$
+and $\mu$ at $r{=}0.58$ and $0.46$); its plateau coincides with the no-context MLP because that is the linear model class's limit. On the pendulum, where feature RLS has the right model class up to discretisation, the transformer
 (\BPTF) and RLS (\BPRLS) are on par at the noise scale (true-parameter simulation: \BPOrc). Nominal simulation (\BPNom) and the no-context MLP (\BPMLP) are $\approx\BPratio\times$ worse,
 so the gain comes from in-context adaptation.
 
