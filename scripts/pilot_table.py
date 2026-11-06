@@ -4,12 +4,12 @@ import re
 rows = [
     ("pilot_c_norm_3e-4.log", r"BPTT, $J/J_{\rm oracle}$, lr $3{\cdot}10^{-4}$"),
     ("pilot_c_lognorm_3e-4.log", r"BPTT, $\log(J/J_{\rm oracle})$, lr $3{\cdot}10^{-4}$"),
-    ("pilot_c_lognorm_1e-4_sq1_tb0.log", r"BPTT, $\log$, lr $10^{-4}$, squashed inputs"),
+    ("pilot_c_lognorm_1e-4_sq1_tb0.log", r"BPTT, $\log$, squashed inputs$^\dagger$"),
     ("pilot_c_lognorm_1e-4_sq1_tb8.log", r"same, 8-step truncated BPTT"),
-    ("pilot_bcft.log", r"DAgger warm start (3000) + BPTT fine-tune (1500)"),
+    ("pilot_bcft.log", r"DAgger warm start (3000) + fine-tune (1500)$^\dagger$"),
 ]
 pat = re.compile(r"step\s+(\d+) loss \S+ val\(mean,median,fail\) \(([\d.e+-]+), ([\d.e+-]+), ([\d.e+-]+)\)")
-lines = [r"\begin{table}[h]", r"\centering\small", r"\caption{Controller-training pilots (seed 99, 1024 held-out plants). Cost is $J/J_{\rm oracle}$; ``fail'' means $J/J_{\rm oracle}{>}10$.}\label{tab:pilots}",
+lines = [r"\begin{table}[h]", r"\centering\small", r"\caption{Controller-training pilots (seed 99, 1024 held-out plants). Cost is $J/J_{\rm oracle}$; ``fail'' means $J/J_{\rm oracle}{>}10$. $^\dagger$Intended lr $10^{-4}$, but a bug ran these pilots at $3{\cdot}10^{-4}$. The final runs use $10^{-4}$.}\label{tab:pilots}",
          r"\begin{tabular}{lrrrr}", r"\toprule", r"variant & step & median & mean & fail \\", r"\midrule"]
 for f, lab in rows:
     try:

@@ -88,15 +88,15 @@ if dev == "cuda":
 
     # held-out validation plants for monitoring only (normalised cost, never used for training)
     vgen = torch.Generator(device=dev).manual_seed(777)
-    vA, vB = C.sample_plants(1024, vgen, dev)
-    vx0, vw = C.sample_noise(1024, vgen, dev)
+    vA, vB = C.sample_plants(512, vgen, dev)
+    vx0, vw = C.sample_noise(512, vgen, dev)
     vJo = oracle_cost(vA, vB, vx0, vw)
 
     def validate():
         with torch.no_grad():
             J, _, _ = C.simulate(vA, vB, vx0, vw, C.tf_policy(model, bool(a.squash)))
             r = J / vJo
-        return float(r.mean()), float(r.median()), float((r > 10).float().mean())
+        return float(r.mean()), float(r.median()), float((r > 10).float().mean()), float(torch.log(r).mean())
 
     s = torch.cuda.Stream()
     s.wait_stream(torch.cuda.current_stream())
@@ -109,7 +109,11 @@ if dev == "cuda":
     graph = torch.cuda.CUDAGraph()
     with torch.cuda.graph(graph):
         static_loss = fwd_bwd()
+    import copy
     hist, t0 = [], time.time()
+    v0 = validate()  # step-0 model (= the warm start when --init is given) is a candidate too
+    best = (v0[3], -1, copy.deepcopy(model.state_dict()))
+    print(f"init val(mean,median,fail,logmean) {v0}", flush=True)
     for step in range(a.steps):
         A, B = C.sample_plants(NB_, gen, dev)
         x0, w = C.sample_noise(NB_, gen, dev)
@@ -118,14 +122,21 @@ if dev == "cuda":
             sJo.copy_(oracle_cost(A, B, x0, w))
         graph.replay()
         for gp in opt.param_groups:
-            gp["lr"] = lr_at(step, a.steps)
+            gp["lr"] = lr_at(step, a.steps, a.lr)  # (bug fixed 2026-11-06: base lr was silently 3e-4)
         torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
         opt.step()
         if step % 250 == 0 or step == a.steps - 1:
             lv = float(static_loss)
-            val = validate() if (step % 1000 == 0 or step == a.steps - 1) else None
+            val = validate() if (step % 500 == 0 or step == a.steps - 1) else None
+            if val is not None and val[3] < best[0]:
+                best = (val[3], step, copy.deepcopy(model.state_dict()))
             hist.append((step, lv, val))
             print(f"step {step:6d} loss {lv:.5f} val(mean,median,fail) {val} ({time.time() - t0:.0f}s)", flush=True)
+    # model selection on the held-out validation plants (seed 777, disjoint from the test plants)
+    torch.save({"cfg": cfg.__dict__, "state": model.state_dict(), "args": vars(a)}, f"{a.out}/seed{a.seed}{a.tag}_last.pt")
+    model.load_state_dict(best[2])
+    hist.append(("best", best[1], best[0]))
+    print(f"selected step {best[1]} (val log-mean {best[0]:.4f})", flush=True)
 else:
     hist = fit(model, loss_fn, a.steps, log_every=250)
 torch.save({"cfg": cfg.__dict__, "state": model.state_dict(), "args": vars(a)}, f"{a.out}/seed{a.seed}{a.tag}.pt")

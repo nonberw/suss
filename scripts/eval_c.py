@@ -82,6 +82,7 @@ for k, pol in ctrl.items():
     traj[k] = (X, U)
     res[k] = dict(norm=(J / Jo).cpu().numpy(), info8=C.info_gain(X, U).cpu().numpy())
 res["oracle"] = dict(J=Jo.cpu().numpy(), info8=C.info_gain(Xo, Uo).cpu().numpy())
+res["plants"] = dict(A=P[0].cpu().numpy(), B=P[1][..., 0].cpu().numpy())  # for failure diagnostics
 for s in a.seeds:
     Kc = torch.load(f"runs/c/fixed_seed{s}.pt")["K"].to(dev)
     J, X, U = run(lambda sl: C.fixed_policy(Kc), P)

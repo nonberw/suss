@@ -84,22 +84,32 @@ if "B_block_curves" in S:
 if os.path.exists("results/c/eval.pt"):
     R = torch.load("results/c/eval.pt", weights_only=False)
     fig, ax = plt.subplots(1, 3, figsize=(7.0, 2.2))
-    names = [("fixed_seed0", "fixed"), ("ce", "CE"), ("etc", "explore-then-CE"), ("ce_dither", "CE+dither"), ("tf_seed0", "transformer")]
-    data = [np.log10(np.clip(R[k]["norm"], 1e-3, 1e6)) for k, _ in names]
-    data[-1] = np.log10(np.clip(np.concatenate([R[f"tf_seed{s}"]["norm"] for s in range(3)]), 1e-3, 1e6))
-    data[0] = np.log10(np.clip(np.concatenate([R[f"fixed_seed{s}"]["norm"] for s in range(3)]), 1e-3, 1e6))
+    pooled = lambda pre: np.concatenate([R[f"{pre}_seed{s}"]["norm"] for s in range(3)])
+    names = [("fixed", pooled("fixed")), ("CE", R["ce"]["norm"]), ("expl.-then-CE", R["etc"]["norm"]),
+             ("CE+dither", R["ce_dither"]["norm"]), ("Thompson", R["ts"]["norm"]),
+             ("TF imitation", pooled("bc")), ("TF + cost FT", pooled("tf"))]
+    data = [np.log10(np.clip(v, 1e-3, 1e6)) for _, v in names]
     ax[0].boxplot(data, showfliers=False, whis=(5, 95))
-    ax[0].set_xticks(range(1, 6)); ax[0].set_xticklabels([n for _, n in names], rotation=30, fontsize=6)
+    ax[0].axhline(0, color="k", lw=0.5)
+    ax[0].set_xticks(range(1, len(names) + 1)); ax[0].set_xticklabels([n for n, _ in names], rotation=40, fontsize=5.5)
     ax[0].set_ylabel(r"$\log_{10}(J/J_{\rm oracle})$"); ax[0].set_title("(a) closed-loop cost", fontsize=8)
-    dev = np.mean([R[f"tf_seed{s}"]["dev_ce"].mean(0) for s in range(3)], 0)
-    uab = np.mean([R[f"tf_seed{s}"]["u_abs"].mean(0) for s in range(3)], 0)
-    ax[1].plot(dev, color=COL["tf"], label=r"$\|u_{TF}-u_{CE}(\mathrm{own\ history})\|^2$")
-    ax[1].plot(uab, color=COL["bayes"], ls="--", label=r"$|u_{TF}|$")
-    ax[1].set_yscale("log"); ax[1].set_xlabel("time step t"); ax[1].legend(frameon=False, fontsize=6)
-    ax[1].set_title("(b) excitation beyond certainty equivalence", fontsize=8)
-    info = [R["ce"]["info8"], R["ce_dither"]["info8"], R["etc"]["info8"], np.concatenate([R[f"tf_seed{s}"]["info8"] for s in range(3)]), R["oracle"]["info8"]]
+    diag = S["C_fail_diag"]["by_controller"]
+    names_b = [("ce_dither", "CE+dither"), ("ts", "Thompson"), ("etc", "expl.-then-CE"), ("bc", "TF imitation"), ("tf", "TF + cost FT")]
+
+    def fr(k, which):
+        if k in ("bc", "tf"):
+            return np.mean([diag[f"{k}_seed{s}"][which] for s in range(3)])
+        return diag[k][which]
+    xb = np.arange(len(names_b))
+    ax[1].bar(xb - 0.2, [100 * fr(k, "fail_stable") for k, _ in names_b], 0.4, color=COL["bayes"], label="open-loop stable plants")
+    ax[1].bar(xb + 0.2, [100 * fr(k, "fail_unstable") for k, _ in names_b], 0.4, color=COL["tf"], label="open-loop unstable plants")
+    ax[1].set_xticks(xb); ax[1].set_xticklabels([n for _, n in names_b], rotation=40, fontsize=5.5)
+    ax[1].set_ylabel(r"failure rate (%), $J/J_{\rm oracle}>10$"); ax[1].legend(frameon=False, fontsize=6)
+    ax[1].set_title("(b) where the failures are", fontsize=8)
+    pooled_i = lambda pre: np.concatenate([R[f"{pre}_seed{s}"]["info8"] for s in range(3)])
+    info = [R["ce"]["info8"], R["ce_dither"]["info8"], R["etc"]["info8"], R["ts"]["info8"], pooled_i("bc"), pooled_i("tf"), R["oracle"]["info8"]]
     ax[2].boxplot(info, showfliers=False, whis=(5, 95))
-    ax[2].set_xticks(range(1, 6)); ax[2].set_xticklabels(["CE", "CE+dither", "expl.-then-CE", "transformer", "oracle LQR"], rotation=30, fontsize=6)
+    ax[2].set_xticks(range(1, 8)); ax[2].set_xticklabels(["CE", "CE+dither", "expl.-then-CE", "Thompson", "TF imitation", "TF + cost FT", "oracle LQR"], rotation=40, fontsize=5.5)
     ax[2].set_ylabel(r"$\log\det(\Lambda_0+\sigma^{-2}S_8)$"); ax[2].set_title("(c) information after 8 steps", fontsize=8)
     fig.tight_layout(); fig.savefig("paper/figs/fig_c.pdf"); plt.close(fig)
 # ---- Figure 4: mechanism (exploratory): Jacobian = Bayes estimate; estimate lives in key-value memory

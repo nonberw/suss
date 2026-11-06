@@ -35,7 +35,7 @@ $\AkvThreeFour$ of the behaviour.
 physics-feature RLS by $\BKratio\times$, and on a pendulum it beats RLS even though RLS has the true model class. Physical parameters follow the same pattern:
 they are weakly readable from activations ($1/m$: $R^2{=}\BprobePinvm$), but strongly readable from the key--value memory ($\BfwPinvm$) and from the model's
 input sensitivity ($r{=}\BfuncP$).
-\item \textbf{In-context control (\S\ref{sec:expc}).} \PENDING{introC}
+\item \textbf{In-context control (\S\ref{sec:expc}).} A transformer controller trained by imitation and then on cost discovers excitation (\Hfived\ nats of information above exploration-free certainty equivalence, of which \CinfoFtBc\ come from cost training), and it matches dithered certainty equivalence and Thompson sampling in median cost. Its failure rate, however, is \CTFfail\% against \CCEDfail\%, concentrated on open-loop-unstable plants, and cost fine-tuning makes those failures more severe. The controller stores its estimate of the actuation matrix in the same key--value memory.
 \end{itemize}
 
 \section{Related work}

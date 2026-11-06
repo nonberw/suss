@@ -182,6 +182,7 @@ if os.path.exists("results/c/eval.pt"):
         summ[k] = dict(mean=float(v.mean()), median=float(np.median(v)), fail=float((v > 10).mean()),
                        info8=float(R[k]["info8"].mean()) if "info8" in R[k] else None)
     out["C_summary"] = summ
+    out["C_oracle_info8"] = float(R["oracle"]["info8"].mean())
     for k in [x for x in ["ce_dither", "etc", "ts"] if x in R]:
         pt, d = hier_boot([R[k]["norm"] - t for t in tfn], n_boot=NB)
         out[f"H5c_{k}_minus_tf"] = dict(point=float(pt), ci=list(ci(d)), desc="exploratory two-sided, mean")
@@ -195,6 +196,18 @@ if os.path.exists("results/c/eval.pt"):
         out["C_bc_minus_ft"] = dict(point=float(pt), ci=list(ci(d)), desc="imitation-only minus fine-tuned, mean normalised cost")
         pt, d = hier_boot([R[f"tf_seed{s}"]["info8"] - R[f"bc_seed{s}"]["info8"] for s in SEEDS], n_boot=NB)
         out["C_info8_ft_minus_bc"] = dict(point=float(pt), ci=list(ci(d)), desc="does cost fine-tuning add excitation beyond imitation?")
+    if "plants" in R:  # EXPLORATORY failure diagnostics: which plants does each controller fail on?
+        A_, B_ = R["plants"]["A"], R["plants"]["B"]
+        rho = np.abs(np.linalg.eigvals(A_)).max(-1)
+        ctrb = np.linalg.svd(np.stack([B_, np.einsum("bij,bj->bi", A_, B_)], -1), compute_uv=False)[:, -1]
+        diag = {}
+        for k in ["ce_dither", "ts", "etc"] + [f"tf_seed{s}" for s in SEEDS] + [f"bc_seed{s}" for s in SEEDS]:
+            if k not in R:
+                continue
+            f = R[k]["norm"] > 10
+            diag[k] = dict(fail=float(f.mean()), fail_unstable=float(f[rho > 1].mean()), fail_stable=float(f[rho <= 1].mean()),
+                           fail_low_ctrb=float(f[ctrb < np.quantile(ctrb, 0.1)].mean()), fail_high_ctrb=float(f[ctrb >= np.quantile(ctrb, 0.1)].mean()))
+        out["C_fail_diag"] = dict(frac_unstable=float((rho > 1).mean()), by_controller=diag)
     out["C_tuning"] = {k: (v if not isinstance(v, dict) else {str(kk): vv for kk, vv in v.items()}) for k, v in R["tuning"].items()}
     out["C_probe"] = {f"seed{s}": {f"{k[0]}@{k[1]}": round(v[0], 4) for k, v in R[f"tf_seed{s}"]["probe"].items()} for s in SEEDS}
     out["C_dev_ce"] = [R[f"tf_seed{s}"]["dev_ce"].mean(0).tolist() for s in SEEDS]
@@ -213,6 +226,9 @@ if os.path.exists("results/a/mech4.pt"):
 if os.path.exists("results/b/mech2.pt"):
     MB2 = torch.load("results/b/mech2.pt", weights_only=False)
     out["B_mech2"] = {"|".join(map(str, k)): v for k, v in MB2.items()}
+if os.path.exists("results/c/mech.pt"):
+    MC = torch.load("results/c/mech.pt", weights_only=False)
+    out["C_mech"] = {str(s): {k: ({str(kk): vv for kk, vv in v.items()} if isinstance(v, dict) else v) for k, v in r.items()} for s, r in MC.items()}
 if os.path.isdir("results/scale"):
     out["scale"] = {f[:-5]: {k: v for k, v in json.load(open(f"results/scale/{f}")).items() if k != "hist"}
                     for f in sorted(os.listdir("results/scale")) if f.endswith(".json")}

@@ -25,6 +25,7 @@ for s in 0 1 2; do
   python scripts/train_c.py --seed $s --steps 6000 --init runs/c/bc_seed$s.pt --loss lognorm --lr 1e-4 --tbptt 8  # stage 2
 done
 python scripts/eval_c.py
+python scripts/mech_c.py     # exploratory: controller gain Jacobian, where B is stored
 # ---- Scale study (exploratory)
 python scripts/scale_a.py --tag long60k --steps 60000
 for s in 0 1 2; do python scripts/scale_a.py --tag n4m2_s$s --n 4 --m 2 --seed $s; done

@@ -30,7 +30,9 @@ Every change made after the pre-registration commit (`d134c5a`), with its reason
     | raw cost | loss oscillated between 25 and 4700 |
     | J/J_oracle | median 85, 96% failures |
     | log(J/J_oracle), lr 3e-4 | median 2.4 at step 1000, then collapsed to median 11.7 and 52% failures |
-    | same with lr 1e-4 and input squashing | 98% failures |
+    | same with input squashing (intended lr 1e-4, actually 3e-4, see item 15) | 98% failures |
     | with truncated BPTT (8 steps) | median 4.3, 36% failures at step 1000 |
 
     The cause is exploding gradients through open-loop-unstable plants. The final controller therefore uses a DAgger warm start (`scripts/train_c2.py`), imitating the oracle LQR action from its own history, followed by BPTT fine-tuning on the cost (`train_c.py --init`). Both stages are evaluated, so the paper can say what cost-driven fine-tuning adds to imitation.
+15. **Learning-rate bug (found 2026-11-06 04:40).** In the CUDA-graph branch of `train_c.py`, the schedule called `lr_at(step, steps)` without the `--lr` argument, so every pilot labelled "lr 1e-4" and the first (aborted) fine-tuning attempt actually ran at peak lr 3e-4. The bug is fixed. The final fine-tuning runs use the intended 1e-4, and the pilot table marks the affected pilots.
+16. **Checkpoint selection for the controller.** The final controller is the fine-tuning checkpoint with the lowest validation log-cost on 512 held-out plants (seed 777, disjoint from the test plants), evaluated every 500 steps. The warm start itself (before any fine-tuning) is also a candidate, so fine-tuning cannot make the reported controller worse on validation. The last checkpoint is saved too (`seed*_last.pt`). In-training validation uses 512 plants instead of 1024 to save GPU time; it is used for monitoring and selection only.
