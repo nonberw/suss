@@ -41,31 +41,24 @@ input sensitivity ($r{=}\BfuncP$).
 \section{Related work}
 
 \paragraph{In-context learning of function classes.} Transformers trained on random regression tasks match least
-squares~\citep{garg2022what}. Behaviourally they interpolate between ridge and OLS, and probes recover intermediate
-quantities in static regression~\citep{akyurek2022learning}. They can implement GD~\citep{vonoswald2023transformers,ahn2023transformers,zhang2023trained},
-higher-order iterations~\citep{fu2023transformers} and algorithm selection~\citep{bai2023transformers}, and they
-approximate posterior predictives~\citep{muller2022transformers,raventos2023pretraining}. We move these questions to
-dynamical, closed-loop data, where the regressors depend on the past and on the policy. There the dual effect has no analogue in i.i.d.\ regression.
+squares~\citep{garg2022what}, interpolate between ridge and OLS with intermediate quantities decodable by probes in
+static regression~\citep{akyurek2022learning}, can implement GD~\citep{vonoswald2023transformers,ahn2023transformers,zhang2023trained},
+higher-order iterations~\citep{fu2023transformers} and algorithm selection~\citep{bai2023transformers}, and approximate
+posterior predictives~\citep{muller2022transformers,raventos2023pretraining}. We move these questions to closed-loop
+dynamical data, where the regressors depend on the past and on the policy, and where the dual effect has no i.i.d.\ analogue.
 
-\paragraph{In-context learning of dynamical systems.} Meta-trained transformers predict and filter unseen linear and
-nonlinear systems~\citep{forgione2023from,piga2023adaptation,busetto2023incontext,balim2023can,akram2026transformers}
-and can serve as contextual controllers for a system class~\citep{busetto2024one}. Constructions and approximation
-theory exist for Kalman filtering~\citep{goel2024can}, for least-squares learning of LDS with depth
-separation~\citep{cole2025incontext}, and for single linear-attention layers~\citep{vladarean2026learning}. All of these are
-either behavioural or representational. None of them intervenes on a trained model.
+\paragraph{In-context learning of dynamical systems.} Meta-trained transformers predict, filter and control unseen
+systems~\citep{forgione2023from,piga2023adaptation,busetto2023incontext,balim2023can,akram2026transformers,busetto2024one}.
+Constructions and approximation theory exist for Kalman filtering~\citep{goel2024can}, least-squares learning of
+LDS~\citep{cole2025incontext} and single attention layers~\citep{vladarean2026learning}. All of these are behavioural or
+representational; none intervenes on a trained model.
 
-\paragraph{Adaptation from history and in-context RL.} RMA~\citep{kumar2021rma} regresses a history encoding onto
-privileged physical parameters. Probing such latents gives mixed results~\citep{chamachot2026evaluating}, and decoding
-them can need a learned generative model~\citep{zhang2026interpreting}. Meta-RL agents can learn to
-explore~\citep{duan2016rl2,zintgraf2020varibad}; algorithm distillation imitates learning
-histories~\citep{laskin2022incontext}; and in-context RL algorithms are provably representable in tabular
+\paragraph{Adaptation from history, in-context RL, fast weights.} RMA~\citep{kumar2021rma} regresses a history encoding
+onto privileged physical parameters; probing such latents gives mixed results~\citep{chamachot2026evaluating,zhang2026interpreting}.
+Meta-RL agents can learn to explore~\citep{duan2016rl2,zintgraf2020varibad}, algorithm distillation imitates learning
+histories~\citep{laskin2022incontext}, and in-context RL algorithms are representable in tabular
 MDPs~\citep{liang2026transformers}. In adaptive LQR, certainty equivalence with dithering is
-rate-optimal~\citep{mania2019certainty,simchowitz2020naive}. We use these methods as baselines and ask whether a
-transformer controller, trained by imitation and then on cost, discovers the excitation they prescribe.
-
-\paragraph{Interpretability tools and fast weights.} We use linear probes~\citep{alain2016understanding} and activation
-patching~\citep{zhang2024towards,heimersheim2024how}. Our probes are always paired with interventions, and the probe
-targets are \emph{estimator} quantities, which are distinct from the ground truth. The view of attention as reading and writing
-\emph{fast weights}~\citep{ba2016using,schlag2021linear}, and its dual form as implicit gradient
-descent~\citep{dai2023why,vonoswald2023transformers}, motivates our key--value analysis. To our knowledge, it has not
-been used to localise a physical parameter estimate in a trained model.
+rate-optimal~\citep{mania2019certainty,simchowitz2020naive}; these methods are our baselines. We use linear
+probes~\citep{alain2016understanding} and activation patching~\citep{zhang2024towards,heimersheim2024how}, always
+paired with interventions, and the view of attention as reading and writing fast
+weights~\citep{ba2016using,schlag2021linear,dai2023why} motivates our key--value analysis.

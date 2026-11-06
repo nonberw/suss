@@ -16,3 +16,4 @@ results/b/*_mech.pt
 results/c/eval.pt
 paper/*.pdf
 !paper/main.pdf
+submission/

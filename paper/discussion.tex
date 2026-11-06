@@ -8,11 +8,11 @@ explains why two attention layers suffice to gather the required statistics. For
 controllers (and of RMA-style policies), the lesson is to probe the \emph{function} (Jacobians) and the
 \emph{memory} (keys and values), not only the activations.
 
-\paragraph{Why pre-registration mattered.} Without it, a residual probe with $R^2{=}\ARtheta$ and a significant (but
-negligible) gain over the truth (H2b) could easily have been written up as ``the model represents its estimate''.
-The pre-registered thresholds and the causal tests H3a/H3b rejected that story. The alternative was then found with
-exploratory tools. We label it as exploratory and test it causally (KV patching, Fig.~\ref{fig:mech}c). We also test
-it out-of-sample, on models trained after the hypothesis was formed: the bouncing-ball system and the scale study.
+\paragraph{Why pre-registration mattered.} Without it, a residual probe with $R^2{=}\ARtheta$ and a significant but
+negligible gain over the truth (H2b) could have been written up as ``the model represents its estimate''. The
+pre-registered thresholds and the causal tests H3a/H3b rejected that story; the alternative was found with exploratory
+tools, is labelled as such, is tested causally (Fig.~\ref{fig:mech}c), and is tested out-of-sample on models trained
+after the hypothesis was formed (the bouncing ball, the scale study).
 
 \paragraph{Limitations.} (i)~\emph{Scale.} The models have 0.2--3M parameters, the linear systems have at most 24
 unknowns, and the MuJoCo systems have one degree of freedom. Whether the key--value account holds for large

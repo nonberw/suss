@@ -1,0 +1,11 @@
+\begin{table}[t]
+\centering\small
+\caption{Scale study (exploratory, one seed unless stated). Ratio: excess risk relative to the Bayes (ridge) predictor, mean over $t{=}4..47$ and at $t{=}47$. $R^2(J)$: agreement of the query Jacobian with the ridge estimate, mean over $t\in\{4,8,16,32,47\}$.}\label{tab:scale}
+\begin{tabular}{llrrrr}
+\toprule
+model & change & params & ratio ($t\ge4$) & ratio ($t{=}47$) & $R^2(J)$ \\
+\midrule
+A (3 seeds) & reference, 20k steps & 0.8M & 1.59 & 2.04 & 0.92 \\
+\bottomrule
+\end{tabular}
+\end{table}

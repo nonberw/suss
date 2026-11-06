@@ -49,32 +49,24 @@ transfers over 90\% of the other episode's behaviour. Keys or values alone trans
 \vspace{-3mm}
 \end{figure}
 
-\paragraph{Exploratory: the estimate lives in the keys and values, and acts through the query Jacobian.} The
-following analyses were added after the pre-registered ones failed, and they are labelled as such. Remark~\ref{rem:fw}
-suggests where to look.
-\begin{itemize}
-\item \emph{The answer is linearly represented; the parameter is not.} A linear probe recovers the Bayes
-\emph{prediction} $\hat\theta_tz_t$ with $R^2{=}\AyhatLthree$ after block~3 and $\AyhatLfour$ after block~4. An MLP probe
-recovers $\hat\theta_t$ itself only up to $R^2{=}\AmlpTheta$.
-\item \emph{The Jacobian is the estimate.} The predictor is close to linear in its own query: counterfactual queries are explained with
-$R^2{=}\AcfLin$ by its Jacobian, and their effect has slope \AcfSlope\ against the Bayes map. Its Jacobian
-$J_t{=}\partial\hat y_t/\partial z_t$ matches $\hat\theta^{\rm Bayes}_t$ with $R^2{=}\AjacBayes$, more closely than it
-matches the truth ($\AjacTrue$) or OLS ($\AjacOLS$) (Fig.~\ref{fig:mech}a).
-\item \emph{It is stored in key--value memory.} The per-head fast weights $\widehat{\mathrm{Cov}}(v,k)$ of
-block~4 predict $\hat\theta_{47}$ with $R^2{=}\AfwR$ (block 3: \AfwRthree). The residual stream at the same position
-gives at most \AresidR\ (Fig.~\ref{fig:mech}b).
-\item \emph{The memory is causal.} Replacing only the context keys and values of blocks 3--4 by those of another episode,
-with the query's residual stream, its attention queries and all MLPs left as they were, transfers $\tau{=}\AkvThreeFour$ of that
-episode's behaviour (blocks 2--4: \AkvTwoFour). Keys alone give \AkOnly\ and values alone \AvOnly
-(Fig.~\ref{fig:mech}c). The carriers are 2--3 heads per block with near-uniform attention, as in Remark~\ref{rem:fw}.
-\item \emph{Probe directions are not the model's directions.} Even for the well-decoded prediction, steering along the
-probe direction has slope only \AsteerYhat, and swapping the probe subspace transfers only \AtauYhat. Linear decodability did not imply
-causal use anywhere in this study.
-\end{itemize}
-In short, the transformer does implement near-Bayes system identification. It does not do so by writing $\hat\theta$
-into an activation. The estimate is spread over the key--value memory of the context and is read out, applied to the query, by
-attention. This is why RMA-style ``latent parameter'' probes of the residual stream~\citep{kumar2021rma,chamachot2026evaluating}
-can fail even when adaptation works.
+\paragraph{Exploratory: the estimate lives in the keys and values and acts through the query Jacobian.}
+These analyses were added after the pre-registered ones failed; Remark~\ref{rem:fw} says where to look.
+\emph{The answer is linearly represented, the parameter is not:} a linear probe recovers the Bayes \emph{prediction}
+$\hat\theta_tz_t$ with $R^2{=}\AyhatLthree$ after block~3 and \AyhatLfour\ after block~4, while an MLP probe recovers
+$\hat\theta_t$ itself only to \AmlpTheta. \emph{The Jacobian is the estimate:} the predictor is near-linear in its query
+(counterfactual queries are explained with $R^2{=}\AcfLin$ by its Jacobian, slope \AcfSlope\ against the Bayes map), and
+$J_t{=}\partial\hat y_t/\partial z_t$ matches $\hat\theta^{\rm Bayes}_t$ with $R^2{=}\AjacBayes$, more closely than the
+truth (\AjacTrue) or OLS (\AjacOLS) (Fig.~\ref{fig:mech}a). \emph{It is stored in key--value memory:} the per-head fast
+weights $\widehat{\mathrm{Cov}}(v,k)$ of block~4 predict $\hat\theta_{47}$ with $R^2{=}\AfwR$ (block~3: \AfwRthree), while
+the residual stream at the same position gives at most \AresidR\ (Fig.~\ref{fig:mech}b). \emph{The memory is causal:}
+replacing only the context keys and values of blocks 3--4 by another episode's, with the query's residual stream, its
+attention queries and all MLPs untouched, transfers $\tau{=}\AkvThreeFour$ of that episode's behaviour (blocks 2--4:
+\AkvTwoFour; keys alone \AkOnly, values alone \AvOnly; Fig.~\ref{fig:mech}c), carried by 2--3 near-uniform heads per
+block, as in Remark~\ref{rem:fw}. \emph{Probe directions are not the model's directions:} even for the well-decoded
+prediction, steering along the probe has slope \AsteerYhat\ and subspace patching transfers \AtauYhat. In short, the
+transformer implements near-Bayes system identification without writing $\hat\theta$ into any activation: the estimate
+is spread over the key--value memory of the context and is applied to the query by attention. This is why RMA-style
+``latent parameter'' probes of activations~\citep{kumar2021rma,chamachot2026evaluating} can fail even when adaptation works.
 
 \section{Experiment B: nonlinear and contact physics in MuJoCo}\label{sec:expb}
 
@@ -106,8 +98,7 @@ key--value fast weights decode $1/m$ with $R^2{=}\BfwPinvm$ (residual: \BresPinv
 
 \input{resC}
 
-\section{Scale and training length}\label{sec:scale}
-\PENDING{resScale}
+\input{resScale}
 
 \section{Discussion and limitations}\label{sec:disc}
 \input{discussion}

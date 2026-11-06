@@ -10,7 +10,12 @@ M = {}
 
 def put(name, fn, fmt="{:.2f}"):
     try:
-        v = fn()
+        import warnings
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            v = fn()
+        if not isinstance(v, str) and (v != v):  # nan
+            raise ValueError("missing")
         M[name] = v if isinstance(v, str) else fmt.format(v)
     except Exception:
         M[name] = "??"
@@ -96,6 +101,8 @@ def bfw(name, tg, which):
     for s in range(3):
         best = max((bm[k][which] for k in bm if k.startswith(f"{name}|{s}|") and k.endswith(f"|{tg}")), default=np.nan)
         vals.append(best)
+    if any(np.isnan(v) for v in vals):
+        raise ValueError("missing")
     return "{:.2f}--{:.2f}".format(min(vals), max(vals))
 
 
@@ -141,6 +148,29 @@ for k, lab in (("ce_dither", "CED"), ("etc", "ETC"), ("ts", "TS")):
     put(f"Cvs{lab}med", lambda k=k: S[f"H5c_{k}_minus_tf_median"]["point"]); put(f"Cvs{lab}medci", ci(f"H5c_{k}_minus_tf_median"))
     put(f"Cwins{lab}", lambda k=k: S[f"H5c_{k}_tf_wins"] * 100, "{:.0f}")
     put(f"Cinfo{lab}", lambda k=k: S[f"C_info8_tf_minus_{k}"]["point"]); put(f"Cinfo{lab}ci", ci(f"C_info8_tf_minus_{k}"))
+mc = S.get("C_mech", {})
+put("CmechGainEnd", lambda: rng_seeds({s: {"v": mc[s]["gain_r2_oracle"][-1]} for s in mc}, "v"))
+put("CmechGainMid", lambda: rng_seeds({s: {"v": mc[s]["gain_r2_oracle"][2]} for s in mc}, "v"))
+put("CmechGainErrEnd", lambda: np.mean([mc[s]["gain_err_oracle"][-1] for s in mc]))
+put("CmechCEErrEnd", lambda: np.mean([mc[s]["ce_err_oracle"][-1] for s in mc]))
+put("CmechGainErrEarly", lambda: np.mean([mc[s]["gain_err_oracle"][0] for s in mc]), "{:.1f}")
+put("CmechCEErrEarly", lambda: np.mean([mc[s]["ce_err_oracle"][0] for s in mc]), "{:.1f}")
+put("CmechBfwEnd", lambda: rng_seeds({s: {"v": mc[s]["probe_B_fw"]["47"]} for s in mc}, "v"))
+put("CmechBfwEarly", lambda: rng_seeds({s: {"v": mc[s]["probe_B_fw"]["8"]} for s in mc}, "v"))
+put("CmechBresEnd", lambda: rng_seeds({s: {"v": mc[s]["probe_B_resid"]["47"]} for s in mc}, "v"))
+put("CmechBresEarly", lambda: rng_seeds({s: {"v": mc[s]["probe_B_resid"]["8"]} for s in mc}, "v"))
+# ---- scale study
+sc = S.get("scale", {})
+put("ScBaseRatio", lambda: S["H1c"]["point"])
+put("ScLongRatio", lambda: sc["long60k"]["ratio_mean_t4"]); put("ScLongRatioEnd", lambda: sc["long60k"]["ratio_t47"])
+put("ScDeepRatio", lambda: sc["deep8"]["ratio_mean_t4"]); put("ScWideRatio", lambda: sc["wide256"]["ratio_mean_t4"])
+put("ScSmallRatio", lambda: sc["small64"]["ratio_mean_t4"])
+put("ScFourRatio", lambda: "{:.2f}--{:.2f}".format(min(sc[f"n4m2_s{s}"]["ratio_mean_t4"] for s in range(3)), max(sc[f"n4m2_s{s}"]["ratio_mean_t4"] for s in range(3))))
+put("ScFourJac", lambda: "{:.2f}--{:.2f}".format(min(np.mean(list(sc[f"n4m2_s{s}"]["jac_r2"].values())) for s in range(3)), max(np.mean(list(sc[f"n4m2_s{s}"]["jac_r2"].values())) for s in range(3))))
+put("ScFourJacEnd", lambda: "{:.2f}--{:.2f}".format(min(sc[f"n4m2_s{s}"]["jac_r2"]["47"] for s in range(3)), max(sc[f"n4m2_s{s}"]["jac_r2"]["47"] for s in range(3))))
+put("ScLongJacEnd", lambda: sc["long60k"]["jac_r2"]["47"])
+put("ScFourTR", lambda: "{:.2f}--{:.2f}".format(min(sc[f"n4m2_s{s}"]["t_excess_ridge_47"] for s in range(3)), max(sc[f"n4m2_s{s}"]["t_excess_ridge_47"] for s in range(3))))
+put("ScFourNP", lambda: sc["n4m2_s0"]["npsigma2"])
 # ---- Holm
 for k, v in S.get("holm", {}).items():
     put("P" + k.replace("1", "one").replace("2", "two").replace("3", "three").replace("4", "four").replace("5", "five"),

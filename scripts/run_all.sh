@@ -37,4 +37,5 @@ python scripts/analyze.py
 python scripts/make_numbers.py
 python scripts/make_figures.py
 python scripts/pilot_table.py   # pilots (seed 99) logged in results/pilots/
-(cd paper && tectonic main.tex)
+(cd paper && tectonic -X compile --keep-intermediates main.tex)
+bash scripts/package.sh

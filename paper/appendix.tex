@@ -1,3 +1,22 @@
+\section{Omitted proofs}\label{app:proofs}
+
+\paragraph{Proof of Corollary~\ref{cor:law}.}
+Let $M_t=t(\sigma^2\Lambda_0+S_t)^{-1}$, so $M_t\to\Sigma_\theta^{-1}$ a.s.\ by (a). Then
+$|z_t^\top(M_t-\Sigma_\theta^{-1})z_t|\le\|z_t\|^2\|M_t-\Sigma_\theta^{-1}\|$, which tends to $0$ in probability because $\|z_t\|^2$ is tight by (c). The difference
+is uniformly integrable as a difference of uniformly integrable families, so its expectation vanishes. Hence
+$\mathbb{E}[z_t^\top M_tz_t\mid\theta]=\operatorname{tr}(\Sigma_\theta^{-1}\mathbb{E}[z_tz_t^\top\mid\theta])+o(1)\to p$ by (b).
+Multiply by $n\sigma^2$. The unconditional statement follows by dominated convergence.
+
+\paragraph{Proof of Proposition~\ref{prop:construct}.}
+\emph{Layer 1 (previous-token head).} Set $q_t=\Pi\pi_t=\pi_{t-1}$, with $\Pi$ the down-shift and $\pi_{-1}=0$; set $k_s=\pi_s$ and
+$v_s=z_s$. Linear attention outputs
+$\sum_{s\le t}v_s\,k_s^\top q_t=v_{t-1}$. The residual becomes $(z_t,1,\pi_t,z_{t-1})$, with $z_{-1}=0$.
+\emph{Layer 2 (moment heads).} Head $j\in\{1..p\}$ uses the constant query $q_t=1$, the key
+$k_s=(z_{s-1})_j$, and the value $v_s=(z_{s-1},x_s)$. It outputs $\sum_{s\le t}(z_{s-1},x_s)(z_{s-1})_j$, which is the
+$j$-th column of $[S_t;C_t^\top]$, because the pairs $(z_{s-1},x_s)$, $1\le s\le t$, are exactly the context pairs. Writing
+the $p$ head outputs to disjoint residual coordinates gives $S_t$ and $C_t$. The map $\phi$ is continuous on
+$\{\sigma^2\Lambda_0+S\succ0\}$, so the universal approximation theorem applies on compacta.
+
 \section{Deviations from the pre-registration}\label{app:dev}
 (1)~We measure excess risk against the noiseless mean $\theta z_t$ instead of as $\mathrm{MSE}-n\sigma^2$. The two have the same
 expectation and ours has lower variance. (2)~$\Lambda_0{=}I$ in the information measure, which the pre-registration did not fix.

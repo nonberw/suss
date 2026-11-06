@@ -37,12 +37,8 @@ does not depend on the prior, on $\theta$, or on the input distribution, because
 $\operatorname{tr}(\Sigma_\theta^{-1}\Sigma_\theta)=p$ whatever $\Sigma_\theta$ is. Conditions (a)--(b) are standard
 for stable plants driven by i.i.d.\ inputs (as in Experiment~A); we check the limit numerically rather than verify (c).
 \end{corollary}
-\begin{proof}
-Let $M_t=t(\sigma^2\Lambda_0+S_t)^{-1}$, so $M_t\to\Sigma_\theta^{-1}$ a.s.\ by (a). Then
-$|z_t^\top(M_t-\Sigma_\theta^{-1})z_t|\le\|z_t\|^2\|M_t-\Sigma_\theta^{-1}\|$, which tends to $0$ in probability because $\|z_t\|^2$ is tight by (c). The difference
-is uniformly integrable as a difference of uniformly integrable families, so its expectation vanishes. Hence
-$\mathbb{E}[z_t^\top M_tz_t\mid\theta]=\operatorname{tr}(\Sigma_\theta^{-1}\mathbb{E}[z_tz_t^\top\mid\theta])+o(1)\to p$ by (b).
-Multiply by $n\sigma^2$. The unconditional statement follows by dominated convergence.
+\begin{proof}[Proof sketch]
+$t(\sigma^2\Lambda_0+S_t)^{-1}\to\Sigma_\theta^{-1}$ a.s.; uniform integrability exchanges limit and expectation; and $\operatorname{tr}(\Sigma_\theta^{-1}\Sigma_\theta)=p$. Full proof in Appendix~\ref{app:proofs}.
 \end{proof}
 
 Theorem~\ref{thm:bayes} turns ``is the transformer Bayes-optimal?'' into a measurable gap. Corollary~\ref{cor:law}
@@ -81,15 +77,8 @@ the Bayes predictor of Theorem~\ref{thm:bayes} is a fixed continuous function $\
 residual alone. A token-wise MLP approximates it uniformly on any compact set, so in this construction all
 further depth is free for the ``solve'' $\phi$ rather than for gathering data.
 \end{proposition}
-\begin{proof}
-\emph{Layer 1 (previous-token head).} Set $q_t=\Pi\pi_t=\pi_{t-1}$, with $\Pi$ the down-shift and $\pi_{-1}=0$; set $k_s=\pi_s$ and
-$v_s=z_s$. Linear attention outputs
-$\sum_{s\le t}v_s\,k_s^\top q_t=v_{t-1}$. The residual becomes $(z_t,1,\pi_t,z_{t-1})$, with $z_{-1}=0$.
-\emph{Layer 2 (moment heads).} Head $j\in\{1..p\}$ uses the constant query $q_t=1$, the key
-$k_s=(z_{s-1})_j$, and the value $v_s=(z_{s-1},x_s)$. It outputs $\sum_{s\le t}(z_{s-1},x_s)(z_{s-1})_j$, which is the
-$j$-th column of $[S_t;C_t^\top]$, because the pairs $(z_{s-1},x_s)$, $1\le s\le t$, are exactly the context pairs. Writing
-the $p$ head outputs to disjoint residual coordinates gives $S_t$ and $C_t$. The map $\phi$ is continuous on
-$\{\sigma^2\Lambda_0+S\succ0\}$, so the universal approximation theorem applies on compacta.
+\begin{proof}[Proof sketch]
+A previous-token head pairs $z_{s-1}$ with $x_s$; then $p$ linear-attention heads with constant queries accumulate the columns of $[S_t;\,C_t^\top]$. Appendix~\ref{app:proofs} gives the weights.
 \end{proof}
 
 \begin{remark}[Where an estimate can live without appearing in any activation]\label{rem:fw}
