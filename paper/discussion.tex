@@ -2,7 +2,7 @@
 identifiers, but their \emph{form} of identification is not the one we pre-registered: there is no linearly readable,
 causally used parameter vector in the residual stream (an MLP probe recovers part of it, so the information is present
 nonlinearly). The sufficient statistics of the context sit in the key--value memory of the last two blocks, where they are
-read with $R^2{=}\AcFwMom$ against at most \AcCtxMom\ from the residual stream over all positions, and the model's
+read with $R^2{=}\AcFwMom$ against at most \AcResBestMom\ from the residual stream (query, all positions, mean-pooled or last context token), and the model's
 query Jacobian, rather than any activation, is what matches the Bayes estimate.
 For the interpretability of adaptive controllers, including RMA-style policies, the practical lesson is to probe the
 \emph{function} (Jacobians) and the \emph{memory} (keys and values), not only the activations.
@@ -16,7 +16,7 @@ tests H3a/H3b rejected that, and the key--value account that replaced it is labe
 \paragraph{Limitations.} (i)~\emph{Scale.} The models have 0.2--3M parameters, the linear systems have at most 24
 unknowns, and the MuJoCo systems have one degree of freedom. Whether the key--value account holds for large
 robot policies is open. (ii)~\emph{Post-hoc mechanism.} The key--value account was formulated after the
-pre-registered probes failed, on the same models. \PENDING{oos} (iii)~\emph{Seeds.} Three training seeds per model; the
+pre-registered probes failed, on the same models. The bouncing-ball system, trained after the account was formed, shows the same pattern (\S\ref{sec:expb}). (iii)~\emph{Seeds.} Three training seeds per model; the
 cluster bootstrap over three seeds under-estimates between-seed variance, so the confirmatory $p$-values are conditional on
 these seeds, and seed-level results are reported alongside. (iv)~\emph{Approximation floor.} The predictors stay a factor
 \Aratio\ above the Bayes risk averaged over contexts (H1c rejected). \PENDING{scaleclaim} (v)~\emph{Control recipe.}

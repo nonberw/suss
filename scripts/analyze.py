@@ -253,7 +253,13 @@ if os.path.exists("results/a/mech6.pt"):
     for fn in ["resid_mean", "resid_last_ctx"]:
         for tn in ["theta_bayes", "moments"]:
             agg[f"{fn}|{tn}"] = [max(M6[s_][(fn, l, tn)] for l in range(4)) for s_ in seeds6]
-    agg["remark_r2_blocks34"] = [float(np.mean(M6[s_][("remark_r2", 2)] + M6[s_][("remark_r2", 3)])) for s_ in seeds6]
+    def _uniform_mean(s_, blocks):
+        vals = [r2 for l in blocks for r2, e in zip(M6[s_][("remark_r2", l)], M6[s_][("entropy", l)]) if e >= 0.8]
+        return float(np.mean(vals)) if vals else float("nan")
+    agg["remark_r2_blocks34"] = [_uniform_mean(s_, (2, 3)) for s_ in seeds6]
+    agg["remark_r2_all_uniform"] = [_uniform_mean(s_, (0, 1, 2, 3)) for s_ in seeds6]
+    agg["n_sharp_blocks34"] = [int(sum(1 for l in (2, 3) for e in M6[s_][("entropy", l)] if e < 0.8)) for s_ in seeds6]
+    agg["remark_r2_sharp"] = [float(np.mean([r2 for l in (0, 1, 2, 3) for r2, e in zip(M6[s_][("remark_r2", l)], M6[s_][("entropy", l)]) if e < 0.8] or [float("nan")])) for s_ in seeds6]
     agg["remark_r2_by_block"] = [[float(np.mean(M6[s_][("remark_r2", l)])) for l in range(4)] for s_ in seeds6]
     agg["entropy_by_block"] = [[float(np.mean(M6[s_][("entropy", l)])) for l in range(4)] for s_ in seeds6]
     for kk in (2, 3):

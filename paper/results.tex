@@ -60,7 +60,8 @@ truth (\AjacTrue) or OLS (\AjacOLS) (Fig.~\ref{fig:mech}a). \emph{The sufficient
 weights $\widehat{\mathrm{Cov}}(v,k)$ of block~4 predict $\hat\theta_{47}$ with $R^2{=}\AfwR$ (block~3: \AfwRthree), the
 residual stream at the query position at most \AresidR\ (Fig.~\ref{fig:mech}b). This is not a matter of dimension
 (Table~\ref{tab:controls}): projected to 128 dimensions the fast weights still give $R^2{=}\AcFwRpTheta$ (PCA: \AcFwPcaTheta),
-while the residual stream over \emph{all} 48 positions, 6144 dimensions, gives \AcCtxTheta. The memory holds the
+while the residual stream gives at most \AcResBestTheta\ whichever way it is read (query position, all 48 positions
+concatenated, mean-pooled, or last context token; Table~\ref{tab:controls}). The memory holds the
 normalised sufficient statistics $(S_t,C_t)$ as directly as the estimate: by block~4 both are linearly readable from
 the fast weights ($R^2{=}\AcFwMom$ and \AcFwTheta; residual stream over all positions: \AcCtxMom\ and \AcCtxTheta), and
 in the earlier blocks the statistics lead (block~2: \AcFwMomBtwo\ against \AcFwThetaBtwo). The pre-registered
@@ -74,8 +75,8 @@ experiment adds is \emph{where}: blocks 3--4, and within them 2--3 near-uniform 
 better than that (\AcFwTheta): the key--value features of blocks 3--4 are shaped so that their covariance across the
 context is itself a linear image of the estimate, which is exactly what Remark~\ref{rem:fw} requires of a head that applies
 $\hat\theta$ to the query.
-The first-order picture of Remark~\ref{rem:fw} explains $R^2{=}\ARemarkR$ of the head outputs in blocks 3--4 (block~1:
-\ARemarkRone). Patching the keys and values of the two highest-transfer heads per block gives $\tau{=}\ATopTwo$, against
+The first-order picture of Remark~\ref{rem:fw} explains $R^2{=}\ARemarkR$ of the outputs of the near-uniform heads
+(entropy $\ge0.8$) in blocks 3--4, and fails, as it must, for the \ANsharp\ sharp heads there. Patching the keys and values of the two highest-transfer heads per block gives $\tau{=}\ATopTwo$, against
 \ARandTwo\ for two random heads. \emph{Probe directions are not the model's directions:} even for the well-decoded
 prediction, steering along the probe has slope \AsteerYhat\ and subspace patching transfers \AtauYhat. In short, the
 transformer implements near-Bayes system identification without a linearly readable $\hat\theta$ in the residual stream:
@@ -114,7 +115,15 @@ $\mu$ (H4c rejected). Steering along the $1/m$ probe moves the input sensitivity
 transfer. The model's own sensitivity $\partial\dot q_{t+1}/\partial u_t$, its functional estimate of $1/m$, correlates
 with the true $1/m$ at $r{=}\BfuncP$ on the pendulum; on the block it is $r{=}\BfuncK$, because the sensitivity is zero while stuck. The
 key--value fast weights decode $1/m$ with $R^2{=}\BfwPinvm$ (residual: \BresPinvm), and on the block they decode $\mu$ at \BfwKmu\ (residual
-\BresKmu). \PENDING{bouncer}
+\BresKmu). 
+
+\paragraph{Out-of-sample check: a bouncing ball.} This system was added after the key--value account had been formed:
+a ball with unknown mass, gravity and contact damping ratio $\zeta$, pushed by random vertical forces. The transformer
+reaches \BQTF\ against \BQNom\ for nominal-parameter simulation, \BQMLP\ for the no-context MLP and \BQRLS\ for a
+spring--damper feature RLS, which is worse than persistence (\BQPer): a linear contact model is the wrong class. The
+pattern of \S\ref{sec:expa} repeats. Residual-stream probes at $t{=}47$ read $\zeta$ at $R^2{=}\BprobeQzeta$ but $g$ and
+$1/m$ only at \BprobeQg\ and \BprobeQinvm; from the key--value memory, $1/m$ reads at \BfwQinvm\ and $\zeta$ at \BfwQzeta\
+(residual stream at the same depth: \BresQinvm, \BresQzeta); and steering along the $1/m$ probe is inert (\BsteerQ\% correct sign).
 
 \input{resC}
 

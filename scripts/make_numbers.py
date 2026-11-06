@@ -92,6 +92,7 @@ for name, P, tg in (("pendulum", "P", "g"), ("pendulum", "P", "inv_m"), ("pendul
         min(S[f"B_{name}_probe"][f"seed{s}"][tg][0] for s in range(3)), max(S[f"B_{name}_probe"][f"seed{s}"][tg][0] for s in range(3))))
 for name, P in (("pendulum", "P"), ("block", "K")):
     put(f"Bsteer{P}", lambda name=name: S[f"H4d_{name}"]["frac_correct"] * 100, "{:.0f}")
+put("BsteerQ", lambda: S["B_bouncer_steer"]["frac_correct"] * 100, "{:.0f}")
 for name, P in (("pendulum", "P"), ("block", "K"), ("bouncer", "Q")):
     put(f"Bfunc{P}", lambda name=name: "{:.2f}--{:.2f}".format(min(S[f"B_{name}_functional_invm"]["corr"]), max(S[f"B_{name}_functional_invm"]["corr"])))
 bm = S.get("B_mech2", {})
@@ -201,6 +202,11 @@ put("AcMeanTheta", lambda: rng_list(m6["resid_mean|theta_bayes"])); put("AcLastT
 put("AcMeanMom", lambda: rng_list(m6["resid_mean|moments"])); put("AcLastMom", lambda: rng_list(m6["resid_last_ctx|moments"]))
 put("AcCeilLin", lambda: m6["ceiling_linear"]); put("AcCeilMlp", lambda: m6["ceiling_mlp"])
 put("ARemarkR", lambda: rng_list(m6["remark_r2_blocks34"]))
+put("ANsharp", lambda: rng_list(m6["n_sharp_blocks34"], "{:d}"))
+put("ARemarkSharp", lambda: rng_list(m6["remark_r2_sharp"], "{:.0f}"))
+put("AcResBestTheta", lambda: rng_list([max(m5["resid_q|theta_bayes"]["by_block"][i][l] for l in range(4)) if False else max(
+    max(m5["resid_q|theta_bayes"]["by_block"][i]), max(m5["resid_ctx|theta_bayes"]["by_block"][i]), m6["resid_mean|theta_bayes"][i], m6["resid_last_ctx|theta_bayes"][i]) for i in range(3)]))
+put("AcResBestMom", lambda: rng_list([max(max(m5["resid_q|moments"]["by_block"][i]), max(m5["resid_ctx|moments"]["by_block"][i]), m6["resid_mean|moments"][i], m6["resid_last_ctx|moments"][i]) for i in range(3)]))
 put("ARemarkRone", lambda: rng_list([b[0] for b in m6["remark_r2_by_block"]]))
 put("ATopTwo", lambda: rng_list(m6["top2"])); put("ARandTwo", lambda: rng_list(m6["random2"]))
 put("ATopThree", lambda: rng_list(m6["top3"])); put("ARandThree", lambda: rng_list(m6["random3"]))

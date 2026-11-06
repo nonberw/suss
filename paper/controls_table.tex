@@ -11,6 +11,11 @@ random projection of the above to 128 & 128 & 0.01 & 0.08--0.09 & 0.01 \\
 key--value fast weights $\widehat{\mathrm{Cov}}(v,k)$ & 4224 & 0.90--0.91 & 0.92 & 0.89 \\
 random projection of fast weights to 128 & 128 & 0.84--0.86 & 0.75--0.76 & 0.83--0.84 \\
 top-128 PCs of fast weights & 128 & 0.87 & 0.80--0.81 & 0.86 \\
+residual stream, mean over 48 positions & 128 & 0.58--0.61 & 0.68--0.71 & -- \\
+residual stream, last context token & 128 & 0.18--0.25 & 0.29--0.31 & -- \\
+fast weights, shuffled labels (control) & 4224 & -0.01--0.01 & -- & -- \\
+\midrule
+true statistics $(S,C)_{47}\to\hat\theta_{47}$, linear / MLP (ceiling) & 12 & 0.46 / 0.87 & -- & -- \\
 \bottomrule
 \end{tabular}
 \end{table}
