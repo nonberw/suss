@@ -266,6 +266,34 @@ if os.path.exists("results/a/mech6.pt"):
         agg[f"top{kk}"] = [M6[s_][("top", kk)] for s_ in seeds6]
         agg[f"random{kk}"] = [M6[s_][("random", kk)] for s_ in seeds6]
     out["A_mech6"] = agg
+# ---- EXPLORATORY replication of A on 10 seeds (seed = unit of analysis)
+rep_seeds = [s_ for s_ in range(10) if os.path.exists(f"results/a/eval_seed{s_}.npz")]
+if len(rep_seeds) > 3:
+    ref = np.load("results/a/references_excess.npz")
+    ratios = [float(np.mean(np.load(f"results/a/eval_seed{s_}.npz")["tf_excess"].mean(0)[4:] / ref["bayes"].mean(0)[4:])) for s_ in rep_seeds]
+    kv, fwt, fwm, rqt, rct = {}, {}, {}, {}, {}
+    for f in ["results/a/mech4.pt", "results/a/mech4_rep.pt"]:
+        if os.path.exists(f):
+            for s_, r in torch.load(f, weights_only=False).items():
+                kv[s_] = r[("kv", 2, 3)]
+    for f in ["results/a/mech5.pt", "results/a/mech5_rep.pt"]:
+        if os.path.exists(f):
+            for s_, r in torch.load(f, weights_only=False).items():
+                fwt[s_] = max(r[("fw", l, "theta_bayes")] for l in range(4))
+                fwm[s_] = max(r[("fw", l, "moments")] for l in range(4))
+                rqt[s_] = max(r[("resid_q", l, "theta_bayes")] for l in range(4))
+                rct[s_] = max(r[("resid_ctx", l, "theta_bayes")] for l in range(4))
+
+    def seed_stats(v):
+        v = np.array(list(v.values()) if isinstance(v, dict) else v, float)
+        sem = v.std(ddof=1) / np.sqrt(len(v)) if len(v) > 1 else float("nan")
+        return dict(n=int(len(v)), mean=float(v.mean()), sd=float(v.std(ddof=1)) if len(v) > 1 else 0.0,
+                    ci=[float(v.mean() - 2.262 * sem), float(v.mean() + 2.262 * sem)] if len(v) == 10 else [float(v.mean() - 2 * sem), float(v.mean() + 2 * sem)],
+                    min=float(v.min()), max=float(v.max()))
+    out["A_rep"] = dict(seeds=rep_seeds, ratio=seed_stats(ratios), kv34=seed_stats(kv) if kv else None,
+                        fw_theta=seed_stats(fwt) if fwt else None, fw_moments=seed_stats(fwm) if fwm else None,
+                        resid_q_theta=seed_stats(rqt) if rqt else None, resid_ctx_theta=seed_stats(rct) if rct else None,
+                        frac_ratio_below_125=float(np.mean(np.array(ratios) < 1.25)))
 if os.path.exists("results/c/variants.pt"):
     V = torch.load("results/c/variants.pt", weights_only=False)
     rho = V["rho"]

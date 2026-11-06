@@ -31,7 +31,7 @@ T, SIG = 48, 0.1
 n, m = a.n, a.m
 p = n + m
 sdA = 0.4 if n == 2 else 0.8 / np.sqrt(n)
-sd = torch.tensor([sdA] * n + [0.5] * m, device=dev)
+sd = torch.tensor([float(sdA)] * n + [0.5] * m, device=dev, dtype=torch.float32)
 
 
 def sample_theta(k, gen):

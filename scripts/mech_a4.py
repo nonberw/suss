@@ -60,7 +60,7 @@ if __name__ == "__main__":
     tokB = tok[idxB]
     tokA2 = torch.cat([tok[idxA, :-1], tok[idxB, -1:]], 1)
     out = {}
-    for s in [0, 1, 2]:
+    for s in [int(x) for x in os.environ.get("SUSS_SEEDS", "0,1,2").split(",")]:
         ck = torch.load(f"runs/a/seed{s}.pt", map_location=dev)
         model = GPT(GPTConfig(**ck["cfg"])).to(dev).eval()
         model.load_state_dict(ck["state"])
@@ -87,4 +87,4 @@ if __name__ == "__main__":
         print("  single blocks", {k: round(v, 3) for k, v in r.items() if k[0] == "kv" and len(k) == 2},
               "k/v only", {k: round(v, 3) for k, v in r.items() if k[0] in ("k", "v")}, flush=True)
         print("  heads", np.round(np.array([[r[("head", l, hh)] for hh in range(H)] for l in range(nL)]), 2).tolist(), flush=True)
-    torch.save(out, "results/a/mech4.pt")
+    torch.save(out, os.environ.get("SUSS_OUT", "results/a/mech4.pt"))

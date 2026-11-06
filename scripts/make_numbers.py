@@ -210,6 +210,18 @@ put("AcResBestMom", lambda: rng_list([max(max(m5["resid_q|moments"]["by_block"][
 put("ARemarkRone", lambda: rng_list([b[0] for b in m6["remark_r2_by_block"]]))
 put("ATopTwo", lambda: rng_list(m6["top2"])); put("ARandTwo", lambda: rng_list(m6["random2"]))
 put("ATopThree", lambda: rng_list(m6["top3"])); put("ARandThree", lambda: rng_list(m6["random3"]))
+ar = S.get("A_rep", {})
+
+
+def repfmt(key, fmt="{:.2f}"):
+    d = ar[key]
+    return (fmt + r" $\pm$ " + fmt).format(d["mean"], d["sd"])
+
+
+put("RepN", lambda: ar["ratio"]["n"], "{:d}")
+put("RepRatio", lambda: repfmt("ratio")); put("RepKv", lambda: repfmt("kv34")); put("RepFwTheta", lambda: repfmt("fw_theta"))
+put("RepFwMom", lambda: repfmt("fw_moments")); put("RepResQ", lambda: repfmt("resid_q_theta")); put("RepResCtx", lambda: repfmt("resid_ctx_theta"))
+put("RepKvMin", lambda: ar["kv34"]["min"]); put("RepFwMin", lambda: ar["fw_theta"]["min"]); put("RepResMax", lambda: max(ar["resid_q_theta"]["max"], ar["resid_ctx_theta"]["max"]))
 cv = S.get("C_variants", {})
 for name, lab in (("imitation", "Imi"), ("log-cost", "Log"), ("raw-cost", "Raw"), ("cvar", "Cvar")):
     put(f"Cv{lab}Med", lambda name=name: cv[f"{name}|0"]["median"]); put(f"Cv{lab}Fail", lambda name=name: cv[f"{name}|0"]["fail"] * 100, "{:.1f}")
