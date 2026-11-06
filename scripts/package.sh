@@ -4,7 +4,9 @@
 #   submission/arxiv_source.zip LaTeX source + class + bib + bbl + figures (what arXiv wants)
 set -e
 cd "$(dirname "$0")/.."
-(cd paper && tectonic -X compile --keep-intermediates main.tex > /dev/null)
+# tectonic: use the one on PATH, else the known local install
+TECTONIC=$(command -v tectonic || echo "$HOME/tools/tectonic/tectonic.exe")
+(cd paper && "$TECTONIC" -X compile --keep-intermediates main.tex > /dev/null)
 mkdir -p submission
 rm -f submission/supplement.zip submission/arxiv_source.zip
 python - <<'EOF'

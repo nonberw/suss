@@ -2,6 +2,8 @@
 # Reproduce every number in the paper. Seeds are fixed inside each script. One GPU job at a time.
 set -e
 cd "$(dirname "$0")/.."
+# tectonic: use the one on PATH, else the known local install
+TECTONIC=$(command -v tectonic || echo "$HOME/tools/tectonic/tectonic.exe")
 mkdir -p runs results
 # ---- Experiment A (pre-registered) + exploratory mechanism
 for s in 0 1 2; do python scripts/train_a.py --seed $s; done
@@ -37,5 +39,5 @@ python scripts/analyze.py
 python scripts/make_numbers.py
 python scripts/make_figures.py
 python scripts/pilot_table.py   # pilots (seed 99) logged in results/pilots/
-(cd paper && tectonic -X compile --keep-intermediates main.tex)
+(cd paper && "$TECTONIC" -X compile --keep-intermediates main.tex)
 bash scripts/package.sh
