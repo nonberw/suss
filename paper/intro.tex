@@ -1,4 +1,4 @@
-\section{Introduction}
+\section{Introduction}\label{sec:intro}
 
 A robot picking up an unfamiliar object, or a legged robot stepping onto ice, must adapt to physics it does not
 know from a few seconds of interaction. A popular recipe trains a sequence model across randomised physics and lets it
@@ -10,32 +10,37 @@ For linear-Gaussian dynamics these questions have exact answers, so they can be 
 random linear systems are known to \emph{behave} like the Kalman filter or least
 squares~\citep{balim2023can,akram2026transformers}. They are also known to be \emph{able to represent} such
 estimators~\citep{goel2024can,cole2025incontext,vladarean2026learning}. What has not been measured is what is inside
-a trained in-context system-identifier, or what an in-context \emph{controller} does about the dual effect. The second
+a trained in-context system identifier, or what an in-context \emph{controller} does about the dual effect. The second
 question matters because, under exploration-free feedback, closed-loop data do not identify the plant~\citep{feldbaum1960dual,astrom1995adaptive,ljung1999system}.
 \citet{akram2026transformers} list the first question as future work.
 
-We study both questions in a pre-registered design. Hypotheses, metrics, seeds and tests were committed before the
-main experiments, and deviations are logged. The design combines exact optimal references, causal interventions and
-three settings of increasing difficulty: linear prediction, MuJoCo contact physics~\citep{todorov2012mujoco}, and adaptive control.
-Our contributions:
+We study both questions in a pre-registered design. Hypotheses, metrics, seeds and tests were committed to the
+repository before the main experiments, and every deviation is logged. We deliberately stay in the smallest settings
+in which the questions have exact answers: linear systems with unknown parameters, one-degree-of-freedom MuJoCo
+systems with contact~\citep{todorov2012mujoco}, and linear adaptive control. The aim is a clean mechanism, not a
+deployable controller. Our contributions:
 \begin{itemize}
-\item \textbf{Theory (\S\ref{sec:theory}).} An exact Bayes-risk identity for in-context prediction under any
-non-anticipating policy, with a parameter-free context-length law $t\,\mathcal{R}^\star_t\to np\sigma^2$. A
-closed-loop non-identifiability identity: the information gained along unexcited directions equals the excitation energy, and is
-exactly zero under pure feedback. A two-layer construction that gathers the exact sufficient statistics, and a
-first-order account of how a near-uniform attention head can apply a parameter estimate that is stored only in its
-key--value memory (Remark~\ref{rem:fw}).
 \item \textbf{What the trained predictor computes (\S\ref{sec:expa}).} It is Bayes-optimal while data are scarce, and
-then it settles at an approximation floor. Our pre-registered mechanism, a linearly readable and causally used parameter estimate in the
-residual stream, is \emph{rejected}: the probe reaches $R^2{=}\ARtheta$, and steering and subspace patching have no effect. Exploratory analyses show instead that the estimate lives
-in the \emph{key--value memory} of the last two blocks. It is readable from the fast weights ($R^2{=}\AfwR$), it equals the predictor's
-query Jacobian ($R^2{=}\AjacBayes$ against the Bayes estimate), and patching only context keys and values transfers
-$\AkvThreeFour$ of the behaviour.
+then it settles at an approximation floor. Our pre-registered mechanism, a linearly readable and causally used parameter
+estimate in the residual stream, is \emph{rejected}: the probe reaches $R^2{=}\ARtheta$, and steering and subspace patching
+have no effect. Exploratory analyses instead localise the context information in the \emph{key--value memory} of the last
+two blocks: replacing only those keys and values with another episode's transfers $\AkvThreeFour$ of its behaviour (first
+block alone: \AkvOne), and the predictor's query Jacobian, its functional estimate, matches the Bayes estimate
+($R^2{=}\AjacBayes$).
 \item \textbf{Contact physics (\S\ref{sec:expb}).} On a pushed block with Coulomb friction the transformer beats
-physics-feature RLS by $\BKratio\times$, and on a pendulum it beats RLS even though RLS has the true model class. Physical parameters follow the same pattern:
-they are weakly readable from activations ($1/m$: $R^2{=}\BprobePinvm$), but strongly readable from the key--value memory ($\BfwPinvm$) and from the model's
-input sensitivity ($r{=}\BfuncP$).
-\item \textbf{In-context control (\S\ref{sec:expc}).} A transformer controller trained by imitation and then on cost discovers excitation (\Hfived\ nats of information above exploration-free certainty equivalence, of which \CinfoFtBc\ come from cost training), and it matches dithered certainty equivalence and Thompson sampling in median cost. Its failure rate, however, is \CTFfail\% against \CCEDfail\%, concentrated on open-loop-unstable plants, and cost fine-tuning makes those failures more severe. The controller stores its estimate of the actuation matrix in the same key--value memory.
+linear-in-parameters physics-feature RLS by $\BKratio\times$, and on a pendulum it is on par with RLS, which there has the true
+model class. Physical parameters are weakly readable from activations ($1/m$ on the pendulum: $R^2{=}\BprobePinvm$) and
+more readable from the key--value memory ($\BfwPinvm$); on the block the gap is smaller ($\mu$: \BfwKmu\ vs.\ \BresKmu).
+\item \textbf{In-context control (\S\ref{sec:expc}).} A transformer controller trained by imitation and then on cost
+excites the plant without being asked to (\Hfived\ nats of information more than exploration-free certainty equivalence,
+about half of it learned from the cost), but less than dithered certainty equivalence (\CinfoCED\ nats). Its median cost
+is comparable to dither and Thompson sampling, while its failure rate is \CTFfail\% against \CCEDfail\%, concentrated on
+open-loop-unstable plants, and cost fine-tuning makes those failures more severe. It keeps its estimate of the actuation
+matrix in the same key--value memory.
+\item \textbf{Theoretical background (\S\ref{sec:theory}).} We restate, for in-context predictors under closed-loop data,
+the Bayes risk of prediction with unknown parameters, its $np\sigma^2/t$ law, and closed-loop non-identifiability in
+the form ``information along unexcited directions equals excitation energy''. These are standard results; they turn
+the questions above into measurable gaps.
 \end{itemize}
 
 \section{Related work}

@@ -115,6 +115,14 @@ if os.path.exists("results/b/block_eval.npz"):
         else:
             out["H4b_pendulum_rls_minus_tf"] = dict(point=float(pt), ci=list(ci(d)), desc="exploratory; negative = RLS better")
         out[f"B_{name}_mse"] = {k: float(E[k][:, sl].mean()) for k in E.files if "_err" in k}
+        if os.path.exists(f"results/b/{name}_sysid.npz"):
+            Sy = np.load(f"results/b/{name}_sysid.npz")
+            out[f"B_{name}_mse"]["sysid_err"] = float(Sy["sysid_err"][:, sl].mean())
+            out[f"B_{name}_mse"]["oracle_obs_err"] = float(Sy["oracle_obs_err"][:, sl].mean())
+            out[f"B_{name}_sysid_curve"] = Sy["sysid_err"].mean(0).tolist()
+            vals = [(Sy["sysid_err"][:, sl] - E[f"tf_err_seed{s}"][:, sl]).mean(1) for s in SEEDS]
+            pt, d = hier_boot(vals, n_boot=NB)
+            out[f"B_{name}_sysid_minus_tf"] = dict(point=float(pt), ci=list(ci(d)), desc="exploratory: structured sysID minus TF (positive = TF better)")
         out[f"B_{name}_vel"] = {k: float(E[k][:, sl].mean()) for k in E.files if "_vel" in k}
         out[f"B_{name}_curves"] = {k: E[k].mean(0).tolist() for k in E.files if "_err" in k}
     pp, dists = [], []

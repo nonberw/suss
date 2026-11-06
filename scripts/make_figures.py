@@ -15,7 +15,7 @@ COL = {"tf": "#c0392b", "bayes": "#2c3e50", "ridge": "#7f8c8d", "ols": "#2980b9"
 
 # ---- Figure 1: Experiment A, excess risk vs context length + probes by layer + patching by layer
 if "A_curves" in S:
-    fig, ax = plt.subplots(1, 3, figsize=(7.0, 2.0))
+    fig, ax = plt.subplots(1, 3, figsize=(7.0, 1.9))
     c = S["A_curves"]; t = np.arange(48)
     for k, lab in [("tf", "transformer"), ("bayes", "Bayes (exact)"), ("ols", "OLS"), ("gd1", "1-step GD")]:
         ax[0].plot(t[1:], np.array(c[k])[1:], label=lab, color=COL[k], lw=1.4 if k == "tf" else 1, ls="-" if k in ("tf", "bayes") else "--")
@@ -43,7 +43,7 @@ if "A_curves" in S:
 
 # ---- Figure 2: Experiment B
 if "B_block_curves" in S:
-    fig, ax = plt.subplots(1, 3, figsize=(7.0, 2.0))
+    fig, ax = plt.subplots(1, 3, figsize=(7.0, 1.9))
     for j, name in enumerate(["pendulum", "block"]):
         c = S[f"B_{name}_curves"]
         tf = np.mean([c[f"tf_err_seed{s}"] for s in range(3)], 0)
@@ -54,6 +54,8 @@ if "B_block_curves" in S:
         ax[j].plot(t, mlp, color=COL["gd1"], ls="-.", label="no-context MLP")
         ax[j].plot(t, c["nominal_err"], color=COL["ridge"], ls=":", label="nominal-param sim")
         ax[j].plot(t, c["oracle_err"], color=COL["bayes"], lw=0.8, label="true-param sim")
+        if f"B_{name}_sysid_curve" in S:
+            ax[j].plot(t, S[f"B_{name}_sysid_curve"], color=COL["theory"], ls="--", lw=0.9, label="structured sysID (exact sim)")
         ax[j].set_yscale("log"); ax[j].set_xlabel("context length t"); ax[j].set_ylabel("normalised MSE")
         ax[j].set_title(f"({'ab'[j]}) {name}", fontsize=8)
     ax[0].legend(frameon=False, fontsize=5.5)
@@ -83,7 +85,7 @@ if "B_block_curves" in S:
 # ---- Figure 3: Experiment C
 if os.path.exists("results/c/eval.pt"):
     R = torch.load("results/c/eval.pt", weights_only=False)
-    fig, ax = plt.subplots(1, 3, figsize=(7.0, 2.0))
+    fig, ax = plt.subplots(1, 3, figsize=(7.0, 1.9))
     pooled = lambda pre: np.concatenate([R[f"{pre}_seed{s}"]["norm"] for s in range(3)])
     names = [("fixed", pooled("fixed")), ("CE", R["ce"]["norm"]), ("expl.-then-CE", R["etc"]["norm"]),
              ("CE+dither", R["ce_dither"]["norm"]), ("Thompson", R["ts"]["norm"]),
@@ -114,7 +116,7 @@ if os.path.exists("results/c/eval.pt"):
     fig.tight_layout(); fig.savefig("paper/figs/fig_c.pdf"); plt.close(fig)
 # ---- Figure 4: mechanism (exploratory): Jacobian = Bayes estimate; estimate lives in key-value memory
 if "A_mech3" in S and "A_mech4" in S:
-    fig, ax = plt.subplots(1, 3, figsize=(7.0, 2.0))
+    fig, ax = plt.subplots(1, 3, figsize=(7.0, 1.9))
     M3 = S["A_mech3"]; t = np.arange(48)
     jb = np.array([M3[s]["jac_r2_bayes_by_t"] for s in M3])
     ax[0].plot(t[4:], jb.mean(0)[4:], color=COL["tf"], label=r"$R^2(J_t,\ \hat\theta^{\rm Bayes}_t)$ (left)")

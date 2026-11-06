@@ -18,7 +18,7 @@ ap.add_argument("--steps", type=int, default=6000)
 ap.add_argument("--fixed", action="store_true")
 ap.add_argument("--out", default="runs/c")
 ap.add_argument("--device", default="cuda")
-ap.add_argument("--loss", default="norm", choices=["raw", "norm", "lognorm"],
+ap.add_argument("--loss", default="norm", choices=["raw", "norm", "lognorm", "cvar"],
                 help="raw: mean J/H (pre-registered, unstable); norm: mean J/J_oracle (= evaluation metric); lognorm: mean log(J/J_oracle)")
 ap.add_argument("--lr", type=float, default=3e-4)
 ap.add_argument("--tbptt", type=int, default=0, help="if >0, stop state gradients every k steps (truncated BPTT)")
@@ -81,6 +81,8 @@ if dev == "cuda":
             loss = (J / C.H).mean()
         elif a.loss == "norm":
             loss = (J / sJo).mean()
+        elif a.loss == "cvar":  # CVaR_0.9: mean normalised cost of the worst 10% of plants in the batch
+            loss = torch.topk(J / sJo, max(1, NB_ // 10))[0].mean()
         else:
             loss = torch.log(J / sJo).mean()
         loss.backward()

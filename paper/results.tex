@@ -21,10 +21,10 @@ settles about $\Afloor\times10^{-3}$ above Bayes. Meanwhile $t\,\mathcal{R}^\sta
 Theorem~\ref{thm:bayes} gives \AtTheory\ and Corollary~\ref{cor:law} predicts $np\sigma^2{=}0.06$. The pre-registered
 tolerance H1c is \textbf{rejected}: the mean excess ratio is \Aratio\ \Aratioci, against a threshold of $1.25$. This is
 the dynamical analogue of the observation that trained transformers fall short of least-squares
-rates~\citep{hill2025transformers,cole2025incontext}. Section~\ref{sec:scale} tests whether longer training or
+rates~\citep{hill2025transformers,cole2025incontext}; \S\ref{sec:scale} tests whether longer training or
 larger models close the gap.
 
-\paragraph{The pre-registered mechanism is rejected: no estimate in the residual stream.} The best linear probe of
+\paragraph{The pre-registered mechanism is rejected: no linearly readable, causally used estimate in the residual stream.} The best linear probe of
 the residual stream for $\hat\theta_t$ reaches only $R^2{=}\ARtheta$ \ARthetaci\ (H2a, threshold $0.8$:
 rejected). It beats the probe for the true $\theta$ by just \AdR\ (H2b: significant but negligible). The normalised
 sufficient statistics are partly decodable ($R^2{\le}\Amom$) and peak at layers 1--2, before $\hat\theta$ peaks at
@@ -49,24 +49,26 @@ transfers over 90\% of the other episode's behaviour. Keys or values alone trans
 \vspace{-3mm}
 \end{figure}
 
-\paragraph{Exploratory: the estimate lives in the keys and values and acts through the query Jacobian.}
-These analyses were added after the pre-registered ones failed; Remark~\ref{rem:fw} says where to look.
-\emph{The answer is linearly represented, the parameter is not:} a linear probe recovers the Bayes \emph{prediction}
-$\hat\theta_tz_t$ with $R^2{=}\AyhatLthree$ after block~3 and \AyhatLfour\ after block~4, while an MLP probe recovers
-$\hat\theta_t$ itself only to \AmlpTheta. \emph{The Jacobian is the estimate:} the predictor is near-linear in its query
+\paragraph{Exploratory: the context information lives in the key--value memory and acts through the query Jacobian.}
+These analyses were added after the pre-registered ones failed; Remark~\ref{rem:fw} says where to look, and
+Appendix~\ref{app:controls} gives the dimension-matched controls.
+\emph{The answer is linearly represented before the parameter is:} a linear probe recovers the Bayes \emph{prediction}
+$\hat\theta_tz_t$ with $R^2{=}\AyhatLthree$ already after block~3 (after block~4 this is trivial, the unembedding being
+linear), while an MLP probe recovers $\hat\theta_t$ itself to \AmlpTheta: the parameter is present, nonlinearly. \emph{The functional estimate is the Jacobian:} the predictor is near-linear in its query
 (counterfactual queries are explained with $R^2{=}\AcfLin$ by its Jacobian, slope \AcfSlope\ against the Bayes map), and
 $J_t{=}\partial\hat y_t/\partial z_t$ matches $\hat\theta^{\rm Bayes}_t$ with $R^2{=}\AjacBayes$, more closely than the
-truth (\AjacTrue) or OLS (\AjacOLS) (Fig.~\ref{fig:mech}a). \emph{It is stored in key--value memory:} the per-head fast
-weights $\widehat{\mathrm{Cov}}(v,k)$ of block~4 predict $\hat\theta_{47}$ with $R^2{=}\AfwR$ (block~3: \AfwRthree), while
-the residual stream at the same position gives at most \AresidR\ (Fig.~\ref{fig:mech}b). \emph{The memory is causal:}
-replacing only the context keys and values of blocks 3--4 by another episode's, with the query's residual stream, its
-attention queries and all MLPs untouched, transfers $\tau{=}\AkvThreeFour$ of that episode's behaviour (blocks 2--4:
-\AkvTwoFour; keys alone \AkOnly, values alone \AvOnly; Fig.~\ref{fig:mech}c), carried by 2--3 near-uniform heads per
-block, as in Remark~\ref{rem:fw}. \emph{Probe directions are not the model's directions:} even for the well-decoded
+truth (\AjacTrue) or OLS (\AjacOLS) (Fig.~\ref{fig:mech}a). \emph{The context information is in the key--value memory of blocks 3--4:} the per-head fast
+weights $\widehat{\mathrm{Cov}}(v,k)$ of block~4 predict $\hat\theta_{47}$ with $R^2{=}\AfwR$ (block~3: \AfwRthree), the
+residual stream at the query position at most \AresidR\ (Fig.~\ref{fig:mech}b). \PENDING{controls} \emph{The memory is causal and localised:} replacing only the context keys and values of blocks 3--4 by another
+episode's, with the query's residual stream, its attention queries and all MLPs untouched, transfers $\tau{=}\AkvThreeFour$
+of that episode's behaviour; the same operation on block~1 alone transfers \AkvOne, keys alone \AkOnly, values alone
+\AvOnly\ (Fig.~\ref{fig:mech}c). That context information transfers through keys and values is expected; what the
+experiment adds is \emph{where}: blocks 3--4, and within them 2--3 near-uniform heads per block, as in Remark~\ref{rem:fw}. \emph{Probe directions are not the model's directions:} even for the well-decoded
 prediction, steering along the probe has slope \AsteerYhat\ and subspace patching transfers \AtauYhat. In short, the
-transformer implements near-Bayes system identification without writing $\hat\theta$ into any activation: the estimate
-is spread over the key--value memory of the context and is applied to the query by attention. This is why RMA-style
-``latent parameter'' probes of activations~\citep{kumar2021rma,chamachot2026evaluating} can fail even when adaptation works.
+transformer implements near-Bayes system identification without a linearly readable $\hat\theta$ in the residual stream:
+the context information is held in the key--value memory and applied to the query by attention. This is one reason why
+RMA-style ``latent parameter'' probes of activations~\citep{kumar2021rma,chamachot2026evaluating} can fail even when
+adaptation works.
 
 \section{Experiment B: nonlinear and contact physics in MuJoCo}\label{sec:expb}
 
@@ -83,8 +85,10 @@ parameter, from the key--value fast weights (best block) vs.\ from the residual 
 \paragraph{Prediction.} Averaged over $t{=}24..47$, the normalised error on the pushed block with Coulomb friction is
 \BKTF\ for the transformer and \BKRLS\ for physics-feature RLS (H4a: difference \HfourA\ \HfourAci, Holm $p\PHfoura$).
 For comparison, the no-context MLP gets \BKMLP, nominal-parameter simulation \BKNom, and simulation with the true parameters
-\BKOrc. On the pendulum, where feature RLS has the right model class up to discretisation, the transformer
-(\BPTF) still beats it (\BPRLS). Nominal simulation (\BPNom) and the no-context MLP (\BPMLP) are $\approx\BPratio\times$ worse,
+\BKOrc. Feature RLS is linear in its parameters and cannot represent stick--slip, so we add a structured identifier
+with the true model class: a grid search over $(m,\mu)$ with the exact simulator, choosing at each $t$ the parameters
+that best explain the context so far. It reaches \BKSys\ (\BKSysNote). On the pendulum, where feature RLS has the right model class up to discretisation, the transformer
+(\BPTF) and RLS (\BPRLS) are on par at the noise scale (true-parameter simulation: \BPOrc). Nominal simulation (\BPNom) and the no-context MLP (\BPMLP) are $\approx\BPratio\times$ worse,
 so the gain comes from in-context adaptation.
 
 \paragraph{Mechanism.} The pre-registered probes again fail for the parameters that enter the dynamics

@@ -20,6 +20,7 @@ from suss.probes import RidgeProbe, r2_from_parts, r2_parts
 from scripts.mech_a3 import fast_weights
 
 dev = os.environ.get("SUSS_DEV", "cuda")
+torch.set_num_threads(int(os.environ.get("SUSS_THREADS", "8")))  # be a good neighbour on a shared machine
 N_EP = int(os.environ.get("SUSS_NEP", 2048))
 PATTERN = os.environ.get("SUSS_CKPT", "runs/c/seed{s}.pt")  # e.g. runs/c/bc_seed{s}.pt for the warm-start ablation
 OUT = os.environ.get("SUSS_OUT", "results/c/mech.pt")

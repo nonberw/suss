@@ -1,4 +1,7 @@
-\section{Theory}\label{sec:theory}
+\section{Theoretical background}\label{sec:theory}
+The results of this section are standard (Bayesian ridge regression, closed-loop identifiability, and attention as
+fast weights), restated for in-context predictors under closed-loop data. We include short proofs for completeness and
+claim no novelty; their role is to turn the questions of \S\ref{sec:intro} into measurable gaps.
 
 \paragraph{Setting.} A plant $x_{s+1}=\theta z_s+w_s$ with regressor $z_s=(x_s,u_s)\in\mathbb{R}^p$, unknown
 $\theta=[A\;B]\in\mathbb{R}^{n\times p}$, and noise $w_s\sim\mathcal{N}(0,\sigma^2 I_n)$ i.i.d.\ and independent of
@@ -8,7 +11,7 @@ $\mathcal{D}_s=(x_0,u_0,\dots,x_s)$ and of independent randomness, so it does no
 $\mathcal{D}_s$. An \emph{in-context predictor} is any map $\hat y_t=f_t(\mathcal{D}_t,u_t)$, of which a causal transformer
 is one example. Write $S_t=\sum_{s<t} z_s z_s^\top$ and $C_t=\sum_{s<t} z_s x_{s+1}^\top$.
 
-\begin{theorem}[Exact Bayes risk of in-context prediction]\label{thm:bayes}
+\begin{theorem}[Bayes risk of in-context prediction; Bayesian ridge regression]\label{thm:bayes}
 Under the untruncated Gaussian prior, for every in-context predictor and every $t$,
 \begin{equation}
 \mathbb{E}\,\|\hat y_t-\theta z_t\|^2\;\ge\;\mathcal{R}^\star_t:=n\sigma^2\,\mathbb{E}\big[z_t^\top(\sigma^2\Lambda_0+S_t)^{-1}z_t\big],
@@ -17,15 +20,8 @@ Under the untruncated Gaussian prior, for every in-context predictor and every $
 with equality iff $\hat y_t=C_t^\top(\sigma^2\Lambda_0+S_t)^{-1}z_t$ almost surely. This is ridge regression, i.e.\ RLS
 initialised at the prior.
 \end{theorem}
-\begin{proof}
-The likelihood of $\mathcal{D}_t$ factorises into the policy factors $p(u_s\mid\mathcal{D}_s)$, which do not depend on
-$\theta$, and $\prod_{s<t}\mathcal{N}(x_{s+1};\theta z_s,\sigma^2 I)$. Hence the posterior of each row is Gaussian,
-$\theta_i\mid\mathcal{D}_t\sim\mathcal{N}(m_i,\Sigma_t)$, the rows are independent, and
-$\Sigma_t=(\Lambda_0+\sigma^{-2}S_t)^{-1}=\sigma^2(\sigma^2\Lambda_0+S_t)^{-1}$ and
-$[m_1,\dots,m_n]=\Sigma_t\,\sigma^{-2}C_t$. Since $u_t$ is conditionally independent of $\theta$ given $\mathcal{D}_t$, the posterior
-given $(\mathcal{D}_t,u_t)$ is the same. For any $(\mathcal{D}_t,u_t)$-measurable $\hat y_t$, the bias--variance identity gives
-$\mathbb{E}[\|\hat y_t-\theta z_t\|^2\mid\mathcal{D}_t,u_t]=\|\hat y_t-mz_t\|^2+\sum_i z_t^\top\Sigma_t z_t$.
-Taking expectations yields \eqref{eq:bayes}, with equality iff $\hat y_t=mz_t$.
+\begin{proof}[Proof sketch]
+The policy factors of the likelihood do not depend on $\theta$, so each row of $\theta$ has a Gaussian posterior with precision $\Lambda_0+\sigma^{-2}S_t$; the bias--variance identity then gives \eqref{eq:bayes}. Appendix~\ref{app:proofs}.
 \end{proof}
 
 \begin{corollary}[A parameter-free context-length law]\label{cor:law}
@@ -55,8 +51,9 @@ v_b^\top \Sigma_t^{-1} v_b \;=\; v_b^\top\Lambda_0 v_b+\sigma^{-2}\textstyle\sum
 In particular, without excitation ($\varepsilon\equiv0$), the posterior precision of every row along $v_b$
 stays at its prior value for every context length. By Cauchy--Schwarz, the posterior variance satisfies
 $v_b^\top\Sigma_tv_b\ge\|v_b\|^4/(v_b^\top\Lambda_0v_b)$ for every $t$. This bound does not depend on $t$, and it equals the
-prior variance when $\Lambda_0$ is isotropic. So the combination $\theta v_b=(B-AK^\top)b$ is never learned, and no
-in-context learner can predict along it better than a constant above the noise floor.
+prior variance when $\Lambda_0$ is isotropic. So the combination $\theta v_b=(B-AK^\top)b$ is never learned. On-policy
+queries are unaffected, since $v_b^\top z_t=0$ along the trajectory; what is lost is exactly the knowledge needed to
+act \emph{differently}, which is the dual effect.
 \end{proposition}
 \begin{proof}
 $v_b^\top z_s=-b^\top Kx_s+b^\top(Kx_s+\varepsilon_s)=b^\top\varepsilon_s$, so
@@ -64,10 +61,11 @@ $v_b^\top S_tv_b=\sum_{s<t}(b^\top\varepsilon_s)^2$. Substitute into $\Sigma_t^{
 variance bound follows from $(v^\top v)^2\le(v^\top\Sigma v)(v^\top\Sigma^{-1}v)$.
 \end{proof}
 
-The extreme case is $K=0$ with a prior mean of zero for $B$. A certainty-equivalent controller then outputs
-$u\equiv0$ forever and never learns anything about $B$; Experiment~C shows this failure exactly. A good adaptive
-controller must therefore \emph{spend} control effort on excitation. The information it gathers along the
-unexcited directions equals the energy of that excitation, which we measure as $\log\det(\Lambda_0+\sigma^{-2}S_8)$.
+The extreme case is $K=0$ with a prior mean of zero for $B$: a certainty-equivalent controller then outputs
+$u\equiv0$ forever and never learns anything about $B$, which Experiment~C shows exactly. A good adaptive controller
+must \emph{spend} control effort on excitation. We measure the information gathered as
+$\log\det(\Lambda_0+\sigma^{-2}S_8)$ with $\Lambda_0{=}I$; note that even $u\equiv0$ yields a non-zero value, from the
+state block of $S_8$, so the relevant comparison is between controllers, not against zero.
 
 \begin{proposition}[Two attention layers suffice to gather the sufficient statistics]\label{prop:construct}
 Let token $t$ be $e_t=(z_t,1,\pi_t)$, with $\pi_t\in\{0,1\}^T$ a one-hot position. There is a two-layer causal
@@ -95,12 +93,12 @@ weights''~\citep{vonoswald2023transformers}), which is spread over all context p
 a parameter estimate to the query, with the predictor's Jacobian $\partial\hat y_t/\partial z_t$ playing the role of
 $\hat\theta_t$, while $\hat\theta_t$ never appears as a vector in the residual stream. Two predictions follow. A residual
 probe for $\hat\theta$ can fail even when the model is near Bayes-optimal; a probe on $\widehat{\mathrm{Cov}}(v,k)$, and
-patching of keys and values alone, should succeed. Section~\ref{sec:expa} confirms both.
+patching of keys and values alone, should succeed. Section~\ref{sec:expa} tests both.
 \end{remark}
 
 Proposition~\ref{prop:construct} is in the spirit of earlier
-constructions~\citep{akyurek2022learning,bai2023transformers,vonoswald2023transformers}, and we do not claim it as a
-contribution in itself. Its role is to make a \emph{falsifiable} mechanistic prediction for trained models. If a
+constructions~\citep{akyurek2022learning,bai2023transformers,vonoswald2023transformers}. Its role is to make a
+\emph{falsifiable} mechanistic prediction for trained models. If a
 trained transformer works this way, a linear probe should decode the normalised statistics
 $(S_t,C_t)/(t{+}1)$ no later in depth than it decodes the posterior mean
 $\hat\theta_t$ (H2c). If it instead refines $\hat\theta$ iteratively in the style of GD~\citep{vonoswald2023transformers},

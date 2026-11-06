@@ -31,7 +31,8 @@ def mean_seeds(d, key):
 
 def rng_seeds(d, key, fmt="{:.2f}"):
     v = [d[s][key] for s in d]
-    return fmt.format(min(v)) + "--" + fmt.format(max(v))
+    lo, hi = fmt.format(min(v)), fmt.format(max(v))
+    return lo if lo == hi else lo + "--" + hi
 
 
 # ---- A, confirmatory
@@ -103,7 +104,8 @@ def bfw(name, tg, which):
         vals.append(best)
     if any(np.isnan(v) for v in vals):
         raise ValueError("missing")
-    return "{:.2f}--{:.2f}".format(min(vals), max(vals))
+    lo, hi = "{:.2f}".format(min(vals)), "{:.2f}".format(max(vals))
+    return lo if lo == hi else lo + "--" + hi
 
 
 for name, P, tg in (("pendulum", "P", "inv_m"), ("pendulum", "P", "g"), ("block", "K", "mu"), ("block", "K", "inv_m"), ("bouncer", "Q", "inv_m"), ("bouncer", "Q", "zeta")):
@@ -171,6 +173,11 @@ put("ScFourJacEnd", lambda: "{:.2f}--{:.2f}".format(min(sc[f"n4m2_s{s}"]["jac_r2
 put("ScLongJacEnd", lambda: sc["long60k"]["jac_r2"]["47"])
 put("ScFourTR", lambda: "{:.2f}--{:.2f}".format(min(sc[f"n4m2_s{s}"]["t_excess_ridge_47"] for s in range(3)), max(sc[f"n4m2_s{s}"]["t_excess_ridge_47"] for s in range(3))))
 put("ScFourNP", lambda: sc["n4m2_s0"]["npsigma2"])
+put("Hours", lambda: S["compute_gpu_hours"], "{:.0f}")
+put("BKSys", lambda: S["B_block_mse"]["sysid_err"], "{:.2g}")
+put("BKOrcObs", lambda: S["B_block_mse"]["oracle_obs_err"], "{:.2g}")
+put("BKSysNote", lambda: ("better than the transformer" if S["B_block_mse"]["sysid_err"] < np.mean([S["B_block_mse"][f"tf_err_seed{s}"] for s in range(3)]) else "worse than the transformer")
+    + "; with the true parameters and the same observation-only state it gets {:.2g}".format(S["B_block_mse"]["oracle_obs_err"]))
 # ---- Holm
 for k, v in S.get("holm", {}).items():
     put("P" + k.replace("1", "one").replace("2", "two").replace("3", "three").replace("4", "four").replace("5", "five"),

@@ -1,5 +1,15 @@
 \section{Omitted proofs}\label{app:proofs}
 
+\paragraph{Proof of Theorem~\ref{thm:bayes}.}
+The likelihood of $\mathcal{D}_t$ factorises into the policy factors $p(u_s\mid\mathcal{D}_s)$, which do not depend on
+$\theta$, and $\prod_{s<t}\mathcal{N}(x_{s+1};\theta z_s,\sigma^2 I)$. Hence the posterior of each row is Gaussian,
+$\theta_i\mid\mathcal{D}_t\sim\mathcal{N}(m_i,\Sigma_t)$, the rows are independent, and
+$\Sigma_t=(\Lambda_0+\sigma^{-2}S_t)^{-1}=\sigma^2(\sigma^2\Lambda_0+S_t)^{-1}$ and
+$[m_1,\dots,m_n]=\Sigma_t\,\sigma^{-2}C_t$. Since $u_t$ is conditionally independent of $\theta$ given $\mathcal{D}_t$, the posterior
+given $(\mathcal{D}_t,u_t)$ is the same. For any $(\mathcal{D}_t,u_t)$-measurable $\hat y_t$, the bias--variance identity gives
+$\mathbb{E}[\|\hat y_t-\theta z_t\|^2\mid\mathcal{D}_t,u_t]=\|\hat y_t-mz_t\|^2+\sum_i z_t^\top\Sigma_t z_t$.
+Taking expectations yields \eqref{eq:bayes}, with equality iff $\hat y_t=mz_t$.
+
 \paragraph{Proof of Corollary~\ref{cor:law}.}
 Let $M_t=t(\sigma^2\Lambda_0+S_t)^{-1}$, so $M_t\to\Sigma_\theta^{-1}$ a.s.\ by (a). Then
 $|z_t^\top(M_t-\Sigma_\theta^{-1})z_t|\le\|z_t\|^2\|M_t-\Sigma_\theta^{-1}\|$, which tends to $0$ in probability because $\|z_t\|^2$ is tight by (c). The difference
@@ -43,8 +53,9 @@ minimal-norm residual change that moves readout coordinate $k$ by $\delta$ while
 $\delta\,(D^+)_k$. \textbf{Patching transfer} is
 $\tau=\langle\hat y_{\rm patch}-\hat y_B,\hat y_{A'}-\hat y_B\rangle/\|\hat y_{A'}-\hat y_B\|^2$, where $A'$ is
 episode $A$'s context followed by episode $B$'s query token. \textbf{Compute.} Everything runs on a laptop RTX~3050\,Ti
-(4\,GB) with a 20-thread CPU, in about \PENDING{hours} hours end to end.
+(4\,GB) with a 20-thread CPU, in about \Hours\ GPU-hours end to end.
 
 \input{pilot_table}
 \input{scale_table}
-\PENDING{appextra}
+\section{Dimension-matched probe controls}\label{app:controls}
+\PENDING{controlstable}
