@@ -70,8 +70,10 @@ episode's, with the query's residual stream, its attention queries and all MLPs 
 of that episode's behaviour; the same operation on block~1 alone transfers \AkvOne, keys alone \AkOnly, values alone
 \AvOnly\ (Fig.~\ref{fig:mech}c). That context information transfers through keys and values is expected; what the
 experiment adds is \emph{where}: blocks 3--4, and within them 2--3 near-uniform heads per block, as in Remark~\ref{rem:fw}. Shuffled labels give $R^2{=}\AcShuffled$; the mean-pooled and last-context-token residuals give \AcMeanTheta\ and
-\AcLastTheta\ for $\hat\theta$; and the true statistics predict the estimate linearly with $R^2{=}\AcCeilLin$ (MLP: \AcCeilMlp), so
-linear readability of $\hat\theta$ from the memory is what linear readability of $(S,C)$ implies at this context length.
+\AcLastTheta\ for $\hat\theta$; and the true statistics predict the estimate \emph{linearly} only with $R^2{=}\AcCeilLin$ (an MLP: \AcCeilMlp). The memory does
+better than that (\AcFwTheta): the key--value features of blocks 3--4 are shaped so that their covariance across the
+context is itself a linear image of the estimate, which is exactly what Remark~\ref{rem:fw} requires of a head that applies
+$\hat\theta$ to the query.
 The first-order picture of Remark~\ref{rem:fw} explains $R^2{=}\ARemarkR$ of the head outputs in blocks 3--4 (block~1:
 \ARemarkRone). Patching the keys and values of the two highest-transfer heads per block gives $\tau{=}\ATopTwo$, against
 \ARandTwo\ for two random heads. \emph{Probe directions are not the model's directions:} even for the well-decoded
