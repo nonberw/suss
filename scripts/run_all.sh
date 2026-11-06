@@ -12,6 +12,7 @@ python scripts/mech_a.py      # pre-registered probes / steering / patching / he
 python scripts/mech_a2.py     # exploratory: answer vs parameter probes
 python scripts/mech_a3.py     # exploratory: query Jacobian, fast-weight probes
 python scripts/mech_a4.py     # exploratory: KV-only patching
+CUDA_VISIBLE_DEVICES= SUSS_DEV=cpu python scripts/mech_a5.py  # exploratory: dimension-matched probe controls (CPU)
 # ---- Experiment B
 python scripts/gen_b.py
 for sys in block pendulum bouncer; do for s in 0 1 2; do
@@ -20,6 +21,7 @@ for sys in block pendulum bouncer; do for s in 0 1 2; do
 done; done
 python scripts/eval_b.py
 python scripts/mech_b2.py
+python scripts/sysid_block.py  # structured sysID baseline (CPU)
 # ---- Experiment C
 for s in 0 1 2; do
   python scripts/train_c.py --seed $s --fixed --device cpu
@@ -27,7 +29,10 @@ for s in 0 1 2; do
   python scripts/train_c.py --seed $s --steps 6000 --init runs/c/bc_seed$s.pt --loss lognorm --lr 1e-4 --tbptt 8  # stage 2
 done
 python scripts/eval_c.py
-python scripts/mech_c.py     # exploratory: controller gain Jacobian, where B is stored
+CUDA_VISIBLE_DEVICES= SUSS_DEV=cpu python scripts/mech_c.py  # exploratory: controller gain Jacobian, where B is stored (CPU)
+python scripts/train_c.py --seed 0 --steps 3000 --init runs/c/bc_seed0.pt --loss raw --lr 1e-4 --tbptt 8 --tag _raw   # objective pilots
+python scripts/train_c.py --seed 0 --steps 3000 --init runs/c/bc_seed0.pt --loss cvar --lr 1e-4 --tbptt 8 --tag _cvar
+python scripts/eval_c_variants.py
 # ---- Scale study (exploratory)
 python scripts/scale_a.py --tag long60k --steps 60000
 for s in 0 1 2; do python scripts/scale_a.py --tag n4m2_s$s --n 4 --m 2 --seed $s; done
@@ -39,5 +44,8 @@ python scripts/analyze.py
 python scripts/make_numbers.py
 python scripts/make_figures.py
 python scripts/pilot_table.py   # pilots (seed 99) logged in results/pilots/
+python scripts/seed_table.py
+python scripts/scale_table.py
+python scripts/controls_table.py
 (cd paper && "$TECTONIC" -X compile --keep-intermediates main.tex)
 bash scripts/package.sh

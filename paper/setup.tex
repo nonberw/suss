@@ -1,32 +1,29 @@
 \section{Experimental design}\label{sec:setup}
 
-\paragraph{Pre-registration.} Before the main experiments we committed the hypotheses, metrics, seeds, thresholds and
-analysis plan (\texttt{PREREGISTRATION.md}, git commit \texttt{d134c5a}). Deviations are listed in
-\texttt{docs/DEVIATIONS.md} and in Appendix~\ref{app:dev}. All confirmatory claims use a hierarchical bootstrap
-(training seeds, then test episodes; $10^4$ resamples) with Holm--Bonferroni correction across the 13 confirmatory tests.
+\paragraph{Pre-registration and statistics.} Hypotheses, metrics, seeds, thresholds and tests were committed before
+the main experiments (\texttt{PREREGISTRATION.md}, commit \texttt{d134c5a}); deviations are in Appendix~\ref{app:dev}.
+Confirmatory claims use a hierarchical bootstrap (training seeds, then test episodes; $10^4$ resamples) with
+Holm--Bonferroni correction across the 13 confirmatory tests. Every model is a GPT-style causal decoder (pre-LN,
+$d{=}128$, 4 layers, 4 heads, MLP width 512, learned positions, about 0.8M parameters), trained from scratch with AdamW and
+three seeds on a 4\,GB laptop GPU. ``Residual stream $\ell$'' is the input to block $\ell{+}1$.
 
-\paragraph{Model.} Every experiment uses the same GPT-style causal decoder: pre-LN, $d{=}128$, 4 layers, 4 heads, MLP
-width 512, learned positions, about 0.8M parameters. Each model is trained from scratch with AdamW and three seeds, on
-a 4\,GB laptop GPU. ``Residual stream $\ell$'' means the input to block $\ell{+}1$ ($\ell{=}0$: embeddings).
+\paragraph{A: in-context prediction of linear systems.} $x\in\mathbb{R}^2$, $u\in\mathbb{R}$ ($p{=}3$), $\sigma{=}0.1$,
+prior $A_{ij}\sim\mathcal{N}(0,0.4^2)$, $B_i\sim\mathcal{N}(0,0.5^2)$ truncated to $\rho(A)<0.95$, inputs $u_t\sim\mathcal{N}(0,1)$,
+$T{=}48$; token $t$ is $(x_t,u_t)$, target $x_{t+1}$; fresh batches for 20k steps. References: the \emph{exact} Bayes
+predictor (truncated posterior mean by Monte Carlo), ridge/RLS, OLS, tuned one-step GD~\citep{vonoswald2023transformers},
+and zero. Excess risk is measured against the noiseless mean $\theta z_t$.
 
-\paragraph{A: in-context prediction of linear systems.} $x\in\mathbb{R}^2$, $u\in\mathbb{R}$ ($p{=}3$),
-$\sigma{=}0.1$. The prior is $A_{ij}\sim\mathcal{N}(0,0.4^2)$, $B_i\sim\mathcal{N}(0,0.5^2)$, truncated to $\rho(A)<0.95$,
-with $u_t\sim\mathcal{N}(0,1)$ and $T{=}48$. Token $t$ is $(x_t,u_t)$ and the target is $x_{t+1}$. Batches are freshly
-sampled for 20k steps. References: the \emph{exact} Bayes predictor (truncated posterior mean, Monte Carlo with 2048 samples),
-ridge/RLS, OLS, one-step GD with tuned step size~\citep{vonoswald2023transformers}, and zero. Excess risk is
-measured against the noiseless mean $\theta z_t$.
+\paragraph{B: MuJoCo physics.} \emph{Pendulum}: point mass on a 0.5\,m rod, $m\sim U[0.5,2]$, damping $c\sim U[0.02,0.3]$,
+$g\sim U[4,16]$, random torques; regression on $(u,\dot q,\sin q,1)$ contains the true model class. \emph{Pushed block}:
+box on a plane, Coulomb friction $\mu\sim U[0.1,1]$, $m\sim U[0.5,3]$, random forces; about half the steps are stuck, so
+stick--slip lies outside any linear-in-parameters model. \emph{Bouncing ball} (exploratory, added later): $m$, $g$ and
+the contact damping ratio unknown. Control step $0.05$\,s, unobserved process noise, 60k training episodes, $T{=}48$.
+Baselines: simulation with the true or nominal parameters, physics-feature RLS, a no-context MLP, and on the block a
+structured identifier with the exact simulator.
 
-\paragraph{B: MuJoCo physics.} \emph{Pendulum}: point mass on a 0.5\,m rod, with $m\sim U[0.5,2]$, joint damping
-$c\sim U[0.02,0.3]$, $g\sim U[4,16]$, random torques. Feature regression on $(u,\dot q,\sin q,1)$ contains the true
-model class. \emph{Pushed block}: a box on a plane with Coulomb contact friction $\mu\sim U[0.1,1]$, $m\sim U[0.5,3]$,
-and random forces $F\sim U[-15,15]$\,N. About half of the steps are stuck, so the stick--slip dynamics fall outside any
-linear-in-parameters model. Both systems use control step $0.05$\,s, unobserved process noise, 60k training episodes and $T{=}48$. Baselines: simulation with
-the true parameters, simulation with nominal parameters, physics-feature RLS, and a no-context MLP.
-
-\paragraph{C: in-context adaptive control.} $A=0.9I+\mathcal{N}(0,0.25^2)$ truncated to $\rho(A)<1.1$, so some plants are
-open-loop unstable. $B=r(\cos\phi,\sin\phi)$ with $\phi$ uniform, so the sign and direction of actuation are unknown.
-Cost $J=\sum_{t<48}\|x_t\|^2+0.1u_t^2+\|x_{48}\|^2$, $|u|\le5$. The transformer reads $(x_t,u_{t-1})$, outputs $u_t$, and
-is trained by back-propagating $J$ through the differentiable plant. It never sees $\theta$ and has no system-ID
-loss. Baselines, all tuned on separate plants: oracle finite-horizon LQR; the best constant gain over the prior
-(``fixed''); certainty equivalence (CE: ridge estimate, then LQR on the remaining horizon); CE with decaying dither $s_0/\sqrt{t+1}$~\citep{simchowitz2020naive};
-and explore-then-CE (system ID followed by control). Test plants and noise are shared across controllers.
+\paragraph{C: in-context adaptive control.} $A=0.9I+\mathcal{N}(0,0.25^2)$ truncated to $\rho(A)<1.1$ (\CfracUnst\% of
+plants are open-loop unstable), $B=r(\cos\phi,\sin\phi)$ with $\phi$ uniform (actuation direction and sign unknown),
+$J=\sum_{t<48}\|x_t\|^2+0.1u_t^2+\|x_{48}\|^2$, $|u|\le5$. The transformer reads $(x_t,u_{t-1})$ and outputs $u_t$; it
+never sees $\theta$ and has no identification loss. Baselines, tuned on separate plants: oracle finite-horizon LQR, the best
+constant gain, certainty equivalence (CE), CE with decaying dither~\citep{simchowitz2020naive}, explore-then-commit, and
+Thompson sampling. Test plants and noise are shared across controllers.

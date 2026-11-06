@@ -234,6 +234,27 @@ if os.path.exists("results/a/mech4.pt"):
 if os.path.exists("results/b/mech2.pt"):
     MB2 = torch.load("results/b/mech2.pt", weights_only=False)
     out["B_mech2"] = {"|".join(map(str, k)): v for k, v in MB2.items()}
+if os.path.exists("results/a/mech5.pt"):
+    M5 = torch.load("results/a/mech5.pt", weights_only=False)
+    agg = {}
+    for fn in ["resid_q", "resid_ctx", "ctx_rp128", "fw", "fw_rp128", "fw_pca128"]:
+        for tn in ["theta_bayes", "moments", "theta_true"]:
+            per_seed = [max(M5[s_][(fn, l, tn)] for l in range(4)) for s_ in M5]
+            agg[f"{fn}|{tn}"] = dict(mean=float(np.mean(per_seed)), min=float(min(per_seed)), max=float(max(per_seed)),
+                                     by_block=[[M5[s_][(fn, l, tn)] for l in range(4)] for s_ in M5])
+        agg[f"{fn}|dim"] = int(M5[0][("dim", fn, 0)])
+    out["A_mech5"] = agg
+if os.path.exists("results/c/variants.pt"):
+    V = torch.load("results/c/variants.pt", weights_only=False)
+    rho = V["rho"]
+    var = {}
+    for k, v in V.items():
+        if k == "rho":
+            continue
+        r = v["norm"]
+        var[f"{k[0]}|{k[1]}"] = dict(median=float(np.median(r)), mean=float(r.mean()), p90=float(np.percentile(r, 90)),
+                                   fail=float((r > 10).mean()), fail_unstable=float((r[rho > 1] > 10).mean()), info8=float(v["info8"].mean()))
+    out["C_variants"] = var
 if os.path.exists("results/c/mech.pt"):
     MC = torch.load("results/c/mech.pt", weights_only=False)
     out["C_mech"] = {str(s): {k: ({str(kk): vv for kk, vv in v.items()} if isinstance(v, dict) else v) for k, v in r.items()} for s, r in MC.items()}

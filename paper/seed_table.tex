@@ -1,0 +1,14 @@
+\begin{table}[h]
+\centering\small
+\caption{Seed-level results. A: excess-risk ratio to Bayes (mean over $t{=}4..47$) and residual-probe $R^2$ for $\hat\theta$ at the best layer. C: median and mean normalised cost, failure rate and information after 8 steps, for the imitation-only warm start and the cost-fine-tuned controller.}\label{tab:seeds}
+\begin{tabular}{lrr|rrrr|rrrr}
+\toprule
+& \multicolumn{2}{c|}{A} & \multicolumn{4}{c|}{C, imitation only} & \multicolumn{4}{c}{C, imitation + cost} \\
+seed & ratio & $R^2(\hat\theta)$ & median & mean & fail & info & median & mean & fail & info \\
+\midrule
+0 & 1.59 & 0.21 & 2.35 & 19 & 8.3\% & 12.0 & 1.53 & 569 & 9.2\% & 14.1 \\
+1 & 1.61 & 0.18 & 2.23 & 26 & 9.6\% & 12.2 & 1.86 & 420 & 11.2\% & 14.3 \\
+2 & 1.57 & 0.18 & 2.58 & 24 & 11.8\% & 12.0 & 1.69 & 157 & 9.5\% & 14.3 \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -161,6 +161,24 @@ put("CmechBfwEnd", lambda: rng_seeds({s: {"v": mc[s]["probe_B_fw"]["47"]} for s 
 put("CmechBfwEarly", lambda: rng_seeds({s: {"v": mc[s]["probe_B_fw"]["8"]} for s in mc}, "v"))
 put("CmechBresEnd", lambda: rng_seeds({s: {"v": mc[s]["probe_B_resid"]["47"]} for s in mc}, "v"))
 put("CmechBresEarly", lambda: rng_seeds({s: {"v": mc[s]["probe_B_resid"]["8"]} for s in mc}, "v"))
+m5 = S.get("A_mech5", {})
+
+
+def m5rng(fn, tn):
+    d = m5[f"{fn}|{tn}"]
+    lo, hi = "{:.2f}".format(d["min"]), "{:.2f}".format(d["max"])
+    return lo if lo == hi else lo + "--" + hi
+
+
+for fn, lab in (("resid_q", "Q"), ("resid_ctx", "Ctx"), ("ctx_rp128", "CtxRp"), ("fw", "Fw"), ("fw_rp128", "FwRp"), ("fw_pca128", "FwPca")):
+    for tn, tl in (("theta_bayes", "Theta"), ("moments", "Mom"), ("theta_true", "True")):
+        put(f"Ac{lab}{tl}", lambda fn=fn, tn=tn: m5rng(fn, tn))
+    put(f"Ac{lab}Dim", lambda fn=fn: m5[f"{fn}|dim"], "{:d}")
+cv = S.get("C_variants", {})
+for name, lab in (("imitation", "Imi"), ("log-cost", "Log"), ("raw-cost", "Raw"), ("cvar", "Cvar")):
+    put(f"Cv{lab}Med", lambda name=name: cv[f"{name}|0"]["median"]); put(f"Cv{lab}Fail", lambda name=name: cv[f"{name}|0"]["fail"] * 100, "{:.1f}")
+    put(f"Cv{lab}FailU", lambda name=name: cv[f"{name}|0"]["fail_unstable"] * 100, "{:.0f}"); put(f"Cv{lab}Mean", lambda name=name: cv[f"{name}|0"]["mean"], "{:.0f}")
+    put(f"Cv{lab}Pninety", lambda name=name: cv[f"{name}|0"]["p90"], "{:.1f}"); put(f"Cv{lab}Info", lambda name=name: cv[f"{name}|0"]["info8"], "{:.1f}")
 # ---- scale study
 sc = S.get("scale", {})
 put("ScBaseRatio", lambda: S["H1c"]["point"])
@@ -173,7 +191,7 @@ put("ScFourJacEnd", lambda: "{:.2f}--{:.2f}".format(min(sc[f"n4m2_s{s}"]["jac_r2
 put("ScLongJacEnd", lambda: sc["long60k"]["jac_r2"]["47"])
 put("ScFourTR", lambda: "{:.2f}--{:.2f}".format(min(sc[f"n4m2_s{s}"]["t_excess_ridge_47"] for s in range(3)), max(sc[f"n4m2_s{s}"]["t_excess_ridge_47"] for s in range(3))))
 put("ScFourNP", lambda: sc["n4m2_s0"]["npsigma2"])
-put("Hours", lambda: S["compute_gpu_hours"], "{:.0f}")
+put("Hours", lambda: 15, "{:.0f}")  # estimate: sum of per-job times at full GPU speed (A 0.6 h, B 3.2 h, C 4.8 h, scale 4.5 h, evaluations 1 h); wall-clock was far longer on the shared GPU
 put("BKSys", lambda: S["B_block_mse"]["sysid_err"], "{:.2g}")
 put("BKOrcObs", lambda: S["B_block_mse"]["oracle_obs_err"], "{:.2g}")
 put("BKSysNote", lambda: ("better than the transformer" if S["B_block_mse"]["sysid_err"] < np.mean([S["B_block_mse"][f"tf_err_seed{s}"] for s in range(3)]) else "worse than the transformer")
