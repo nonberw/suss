@@ -41,15 +41,14 @@ layer~2 still transfers $\ge\AtauCtxTwo$.
 \vspace{-6mm}
 \caption{\textbf{A, exploratory follow-up: where the estimate lives} (3 seeds). (a)~The predictor's Jacobian with
 respect to its query, $J_t{=}\partial\hat y_t/\partial z_t$, matches the Bayes estimate. Its error to the truth
-(dashed) tracks the Bayes estimate's error (dotted). (b)~$\hat\theta_{47}$ is linearly readable from the per-block
-key--value fast weights $\widehat{\mathrm{Cov}}(v,k)$ but not from the residual stream at the same position.
+(dashed) tracks the Bayes estimate's error (dotted). (b)~Probes at $t{=}47$ by block: the key--value fast weights read the sufficient statistics and the estimate; projected to 128 dimensions they still beat the residual stream over all 48 positions (Table~\ref{tab:controls}).
 (c)~Patching \emph{only} the context keys and values of blocks 3--4, leaving every activation of the query untouched,
 transfers over 90\% of the other episode's behaviour. Keys or values alone transfer about half.}
 \label{fig:mech}
 \vspace{-3mm}
 \end{figure}
 
-\paragraph{Exploratory: the context information lives in the key--value memory and acts through the query Jacobian.}
+\paragraph{Exploratory: the sufficient statistics live in the key--value memory and act through the query Jacobian.}
 These analyses were added after the pre-registered ones failed; Remark~\ref{rem:fw} says where to look, and
 Appendix~\ref{app:controls} gives the dimension-matched controls.
 \emph{The answer is linearly represented before the parameter is:} a linear probe recovers the Bayes \emph{prediction}
@@ -57,16 +56,23 @@ $\hat\theta_tz_t$ with $R^2{=}\AyhatLthree$ already after block~3 (after block~4
 linear), while an MLP probe recovers $\hat\theta_t$ itself to \AmlpTheta: the parameter is present, nonlinearly. \emph{The functional estimate is the Jacobian:} the predictor is near-linear in its query
 (counterfactual queries are explained with $R^2{=}\AcfLin$ by its Jacobian, slope \AcfSlope\ against the Bayes map), and
 $J_t{=}\partial\hat y_t/\partial z_t$ matches $\hat\theta^{\rm Bayes}_t$ with $R^2{=}\AjacBayes$, more closely than the
-truth (\AjacTrue) or OLS (\AjacOLS) (Fig.~\ref{fig:mech}a). \emph{The context information is in the key--value memory of blocks 3--4:} the per-head fast
+truth (\AjacTrue) or OLS (\AjacOLS) (Fig.~\ref{fig:mech}a). \emph{The sufficient statistics are in the key--value memory of blocks 3--4:} the per-head fast
 weights $\widehat{\mathrm{Cov}}(v,k)$ of block~4 predict $\hat\theta_{47}$ with $R^2{=}\AfwR$ (block~3: \AfwRthree), the
-residual stream at the query position at most \AresidR\ (Fig.~\ref{fig:mech}b). \PENDING{controls} \emph{The memory is causal and localised:} replacing only the context keys and values of blocks 3--4 by another
+residual stream at the query position at most \AresidR\ (Fig.~\ref{fig:mech}b). This is not a matter of dimension
+(Table~\ref{tab:controls}): projected to 128 dimensions the fast weights still give $R^2{=}\AcFwRpTheta$ (PCA: \AcFwPcaTheta),
+while the residual stream over \emph{all} 48 positions, 6144 dimensions, gives \AcCtxTheta. The memory holds the
+normalised sufficient statistics $(S_t,C_t)$ as directly as the estimate: by block~4 both are linearly readable from
+the fast weights ($R^2{=}\AcFwMom$ and \AcFwTheta; residual stream over all positions: \AcCtxMom\ and \AcCtxTheta), and
+in the earlier blocks the statistics lead (block~2: \AcFwMomBtwo\ against \AcFwThetaBtwo). The pre-registered
+``statistics first, solve later'' picture was therefore right about the order and wrong about the location: the
+statistics accumulate in the key--value memory, not in the residual stream. \emph{The memory is causal and localised:} replacing only the context keys and values of blocks 3--4 by another
 episode's, with the query's residual stream, its attention queries and all MLPs untouched, transfers $\tau{=}\AkvThreeFour$
 of that episode's behaviour; the same operation on block~1 alone transfers \AkvOne, keys alone \AkOnly, values alone
 \AvOnly\ (Fig.~\ref{fig:mech}c). That context information transfers through keys and values is expected; what the
 experiment adds is \emph{where}: blocks 3--4, and within them 2--3 near-uniform heads per block, as in Remark~\ref{rem:fw}. \emph{Probe directions are not the model's directions:} even for the well-decoded
 prediction, steering along the probe has slope \AsteerYhat\ and subspace patching transfers \AtauYhat. In short, the
 transformer implements near-Bayes system identification without a linearly readable $\hat\theta$ in the residual stream:
-the context information is held in the key--value memory and applied to the query by attention. This is one reason why
+the sufficient statistics are held in the key--value memory and applied to the query by attention. This is one reason why
 RMA-style ``latent parameter'' probes of activations~\citep{kumar2021rma,chamachot2026evaluating} can fail even when
 adaptation works.
 
@@ -76,7 +82,7 @@ adaptation works.
 \centering\includegraphics[width=\linewidth]{figs/fig_b.pdf}
 \vspace{-6mm}
 \caption{\textbf{B} (3 seeds). (a, b)~Normalised one-step error vs.\ context length. On the pendulum the transformer
-beats physics-feature RLS, even though RLS has the true model class up to discretisation. On the stick--slip block it beats RLS by $\BKratio\times$. (c)~Probe $R^2$ at $t{=}47$ for each physical
+is on par with physics-feature RLS, which there has the true model class up to discretisation. On the stick--slip block it beats RLS by $\BKratio\times$. (c)~Probe $R^2$ at $t{=}47$ for each physical
 parameter, from the key--value fast weights (best block) vs.\ from the residual stream (P: pendulum, K: block, B: bouncing ball).}
 \label{fig:b}
 \vspace{-3mm}

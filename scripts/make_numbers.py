@@ -174,6 +174,14 @@ for fn, lab in (("resid_q", "Q"), ("resid_ctx", "Ctx"), ("ctx_rp128", "CtxRp"), 
     for tn, tl in (("theta_bayes", "Theta"), ("moments", "Mom"), ("theta_true", "True")):
         put(f"Ac{lab}{tl}", lambda fn=fn, tn=tn: m5rng(fn, tn))
     put(f"Ac{lab}Dim", lambda fn=fn: m5[f"{fn}|dim"], "{:d}")
+def m5blk(fn, tn, blk):
+    v = [bb[blk] for bb in m5[f"{fn}|{tn}"]["by_block"]]
+    lo, hi = "{:.2f}".format(min(v)), "{:.2f}".format(max(v))
+    return lo if lo == hi else lo + "--" + hi
+
+
+put("AcFwMomBtwo", lambda: m5blk("fw", "moments", 1)); put("AcFwThetaBtwo", lambda: m5blk("fw", "theta_bayes", 1))
+put("AcFwMomBone", lambda: m5blk("fw", "moments", 0)); put("AcFwThetaBone", lambda: m5blk("fw", "theta_bayes", 0))
 cv = S.get("C_variants", {})
 for name, lab in (("imitation", "Imi"), ("log-cost", "Log"), ("raw-cost", "Raw"), ("cvar", "Cvar")):
     put(f"Cv{lab}Med", lambda name=name: cv[f"{name}|0"]["median"]); put(f"Cv{lab}Fail", lambda name=name: cv[f"{name}|0"]["fail"] * 100, "{:.1f}")

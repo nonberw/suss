@@ -5,6 +5,12 @@
 \toprule
 features & dim & $\hat\theta_{47}$ & $(S,C)_{47}$ & $\theta$ \\
 \midrule
+residual stream, query position & 128 & 0.18--0.25 & 0.28--0.29 & 0.18--0.25 \\
+residual stream, all 48 positions & 6144 & 0.33--0.37 & 0.50--0.53 & 0.32--0.36 \\
+random projection of the above to 128 & 128 & 0.01 & 0.08--0.09 & 0.01 \\
+key--value fast weights $\widehat{\mathrm{Cov}}(v,k)$ & 4224 & 0.90--0.91 & 0.92 & 0.89 \\
+random projection of fast weights to 128 & 128 & 0.84--0.86 & 0.75--0.76 & 0.83--0.84 \\
+top-128 PCs of fast weights & 128 & 0.87 & 0.80--0.81 & 0.86 \\
 \bottomrule
 \end{tabular}
 \end{table}

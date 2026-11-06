@@ -41,6 +41,12 @@ unchanged (\CBCfail\% to \CTFfail\%), and makes the failures far more severe: th
 for typical-case gains. A raw cost would weight those cases, but it did not train (Table~\ref{tab:pilots}). The safe
 in-context controller on unstable plants remains an open problem.
 
-\paragraph{Exploratory: the controller identifies the plant in its key--value memory.} On its own closed-loop
-trajectories, a residual-stream probe recovers the actuation matrix $B$ with $R^2{=}\CprobeB$ (pooled over $t\ge4$), and
-flipping the probed estimate flips the action in only \Cflip\% of cases, as in \S\ref{sec:expa}. \PENDING{mechC}
+\paragraph{Exploratory: what the controller identifies, and where.} On its own closed-loop trajectories, the
+controller's feedback Jacobian $-\partial u_t/\partial x_t$, its functional gain, approaches the oracle LQR gain as the
+context grows ($R^2{=}\CmechGainEnd$ at $t{=}47$), but it extracts less from its data than a classical estimator would:
+the certainty-equivalent gain computed from the \emph{same} history is \CmechCEErrEnd\ from the oracle gain in squared
+error, against \CmechGainErrEnd\ for the transformer. The actuation matrix $B$ is readable from the key--value fast
+weights with $R^2{=}\CmechBfwEarly$ already at $t{=}8$ (\CmechBfwEnd\ at $t{=}47$), against \CmechBresEarly\ (\CmechBresEnd)
+from the residual stream at the query position, with the dimension caveat of Appendix~\ref{app:controls}. As in
+\S\ref{sec:expa}, the residual-probe directions are inert: flipping the probed estimate flips the action in \Cflip\% of
+cases.
