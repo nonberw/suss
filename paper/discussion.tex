@@ -1,8 +1,7 @@
 \paragraph{What the transformer computes.} In all three settings the trained models are competent in-context system
-identifiers: they match the exact Bayes predictor at short contexts, beat linear-in-parameters regression on contact
-dynamics, and adapt within a few steps. Their \emph{form} of identification is not the one we pre-registered. There is
-no linearly readable, causally used parameter vector in the residual stream (an MLP probe does recover part of it, so the
-information is present nonlinearly). The sufficient statistics of the context sit in the key--value memory of the last two blocks, where they are
+identifiers, but their \emph{form} of identification is not the one we pre-registered: there is no linearly readable,
+causally used parameter vector in the residual stream (an MLP probe recovers part of it, so the information is present
+nonlinearly). The sufficient statistics of the context sit in the key--value memory of the last two blocks, where they are
 read with $R^2{=}\AcFwMom$ against at most \AcCtxMom\ from the residual stream over all positions, and the model's
 query Jacobian, rather than any activation, is what matches the Bayes estimate.
 For the interpretability of adaptive controllers, including RMA-style policies, the practical lesson is to probe the

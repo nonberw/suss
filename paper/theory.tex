@@ -20,8 +20,8 @@ Under the untruncated Gaussian prior, for every in-context predictor and every $
 with equality iff $\hat y_t=C_t^\top(\sigma^2\Lambda_0+S_t)^{-1}z_t$ almost surely. This is ridge regression, i.e.\ RLS
 initialised at the prior.
 \end{theorem}
-\begin{proof}[Proof sketch]
-The policy factors of the likelihood do not depend on $\theta$, so each row of $\theta$ has a Gaussian posterior with precision $\Lambda_0+\sigma^{-2}S_t$; the bias--variance identity then gives \eqref{eq:bayes}. Appendix~\ref{app:proofs}.
+\begin{proof}
+Appendix~\ref{app:proofs} (Gaussian posterior with precision $\Lambda_0+\sigma^{-2}S_t$, then bias--variance).
 \end{proof}
 
 \begin{corollary}[A parameter-free context-length law]\label{cor:law}
@@ -33,8 +33,8 @@ does not depend on the prior, on $\theta$, or on the input distribution, because
 $\operatorname{tr}(\Sigma_\theta^{-1}\Sigma_\theta)=p$ whatever $\Sigma_\theta$ is. Conditions (a)--(b) are standard
 for stable plants driven by i.i.d.\ inputs (as in Experiment~A); we check the limit numerically rather than verify (c).
 \end{corollary}
-\begin{proof}[Proof sketch]
-$t(\sigma^2\Lambda_0+S_t)^{-1}\to\Sigma_\theta^{-1}$ a.s.; uniform integrability exchanges limit and expectation; and $\operatorname{tr}(\Sigma_\theta^{-1}\Sigma_\theta)=p$. Full proof in Appendix~\ref{app:proofs}.
+\begin{proof}
+Appendix~\ref{app:proofs}.
 \end{proof}
 
 Theorem~\ref{thm:bayes} turns ``is the transformer Bayes-optimal?'' into a measurable gap. Corollary~\ref{cor:law}
@@ -75,8 +75,8 @@ the Bayes predictor of Theorem~\ref{thm:bayes} is a fixed continuous function $\
 residual alone. A token-wise MLP approximates it uniformly on any compact set, so in this construction all
 further depth is free for the ``solve'' $\phi$ rather than for gathering data.
 \end{proposition}
-\begin{proof}[Proof sketch]
-A previous-token head pairs $z_{s-1}$ with $x_s$; then $p$ linear-attention heads with constant queries accumulate the columns of $[S_t;\,C_t^\top]$. Appendix~\ref{app:proofs} gives the weights.
+\begin{proof}
+Appendix~\ref{app:proofs}: a previous-token head, then $p$ constant-query linear-attention heads.
 \end{proof}
 
 \begin{remark}[Where an estimate can live without appearing in any activation]\label{rem:fw}

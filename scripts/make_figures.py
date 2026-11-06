@@ -15,7 +15,7 @@ COL = {"tf": "#c0392b", "bayes": "#2c3e50", "ridge": "#7f8c8d", "ols": "#2980b9"
 
 # ---- Figure 1: Experiment A, excess risk vs context length + probes by layer + patching by layer
 if "A_curves" in S:
-    fig, ax = plt.subplots(1, 3, figsize=(7.0, 1.9))
+    fig, ax = plt.subplots(1, 3, figsize=(7.0, 1.8))
     c = S["A_curves"]; t = np.arange(48)
     for k, lab in [("tf", "transformer"), ("bayes", "Bayes (exact)"), ("ols", "OLS"), ("gd1", "1-step GD")]:
         ax[0].plot(t[1:], np.array(c[k])[1:], label=lab, color=COL[k], lw=1.4 if k == "tf" else 1, ls="-" if k in ("tf", "bayes") else "--")
@@ -43,7 +43,7 @@ if "A_curves" in S:
 
 # ---- Figure 2: Experiment B
 if "B_block_curves" in S:
-    fig, ax = plt.subplots(1, 3, figsize=(7.0, 1.9))
+    fig, ax = plt.subplots(1, 3, figsize=(7.0, 1.8))
     for j, name in enumerate(["pendulum", "block"]):
         c = S[f"B_{name}_curves"]
         tf = np.mean([c[f"tf_err_seed{s}"] for s in range(3)], 0)
@@ -85,7 +85,7 @@ if "B_block_curves" in S:
 # ---- Figure 3: Experiment C
 if os.path.exists("results/c/eval.pt"):
     R = torch.load("results/c/eval.pt", weights_only=False)
-    fig, ax = plt.subplots(1, 3, figsize=(7.0, 1.9))
+    fig, ax = plt.subplots(1, 3, figsize=(7.0, 1.8))
     pooled = lambda pre: np.concatenate([R[f"{pre}_seed{s}"]["norm"] for s in range(3)])
     names = [("fixed", pooled("fixed")), ("CE", R["ce"]["norm"]), ("expl.-then-CE", R["etc"]["norm"]),
              ("CE+dither", R["ce_dither"]["norm"]), ("Thompson", R["ts"]["norm"]),
@@ -116,7 +116,7 @@ if os.path.exists("results/c/eval.pt"):
     fig.tight_layout(); fig.savefig("paper/figs/fig_c.pdf"); plt.close(fig)
 # ---- Figure 4: mechanism (exploratory): Jacobian = Bayes estimate; estimate lives in key-value memory
 if "A_mech3" in S and "A_mech4" in S:
-    fig, ax = plt.subplots(1, 3, figsize=(7.0, 1.9))
+    fig, ax = plt.subplots(1, 3, figsize=(7.0, 1.8))
     M3 = S["A_mech3"]; t = np.arange(48)
     jb = np.array([M3[s]["jac_r2_bayes_by_t"] for s in M3])
     ax[0].plot(t[4:], jb.mean(0)[4:], color=COL["tf"], label=r"$R^2(J_t,\ \hat\theta^{\rm Bayes}_t)$ (left)")
@@ -134,17 +134,16 @@ if "A_mech3" in S and "A_mech4" in S:
     xs = np.arange(1, 5)
     if M5:
         bb = lambda fn, tn: np.array(M5[f"{fn}|{tn}"]["by_block"]).mean(0)
-        ax[1].plot(xs, bb("fw", "moments"), marker="o", ms=3, color=COL["tf"], label=r"K,V fast weights (4224-d) $\to(S,C)$")
-        ax[1].plot(xs, bb("fw", "theta_bayes"), marker="o", ms=3, color=COL["tf"], ls="--", label=r"K,V fast weights $\to\hat\theta$")
-        ax[1].plot(xs, bb("fw_rp128", "theta_bayes"), marker="^", ms=3, color=COL["theory"], ls="--", label=r"same, random 128-d projection $\to\hat\theta$")
-        ax[1].plot(xs, bb("resid_ctx", "theta_bayes"), marker="s", ms=3, color=COL["ridge"], ls="--", label=r"residual, all 48 positions (6144-d) $\to\hat\theta$")
-        ax[1].plot(xs, bb("resid_q", "theta_bayes"), marker="s", ms=3, color=COL["ols"], ls="--", label=r"residual, query position (128-d) $\to\hat\theta$")
+        ax[1].plot(xs, bb("fw", "theta_bayes"), marker="o", ms=3, color=COL["tf"], ls="--", label=r"K,V fast weights (4224-d) $\to \hat\theta$")
+        ax[1].plot(xs, bb("fw_rp128", "theta_bayes"), marker="^", ms=3, color=COL["theory"], ls="--", label=r"K,V fw, random 128-d proj. $\to \hat\theta$")
+        ax[1].plot(xs, bb("resid_ctx", "theta_bayes"), marker="s", ms=3, color=COL["ridge"], ls="--", label=r"residual, all 48 pos. (6144-d) $\to \hat\theta$")
+        ax[1].plot(xs, bb("resid_q", "theta_bayes"), marker="s", ms=3, color=COL["ols"], ls="--", label=r"residual, query pos. (128-d) $\to \hat\theta$")
     else:
         fw = np.array([M3[s]["fw_r2"] for s in M3]); rr = np.array([M3[s]["resid_r2"] for s in M3])
         ax[1].plot(xs, fw.mean(0), marker="o", ms=3, color=COL["tf"], label="key-value fast weights")
         ax[1].plot(xs, rr.mean(0), marker="s", ms=3, color=COL["ridge"], label="residual stream (query)")
-    ax[1].set_ylim(-0.05, 1); ax[1].set_xlabel("block"); ax[1].set_ylabel(r"held-out probe $R^2$ at $t{=}47$")
-    ax[1].legend(frameon=False, fontsize=4.8); ax[1].set_title("(b) dimension-matched probes", fontsize=8)
+    ax[1].set_ylim(-0.05, 1.9); ax[1].set_yticks([0, 0.5, 1.0]); ax[1].set_xlabel("block"); ax[1].set_ylabel(r"held-out probe $R^2$ at $t{=}47$")
+    ax[1].legend(frameon=False, fontsize=5, loc="upper left"); ax[1].set_title("(b) dimension-matched probes", fontsize=8)
     M4 = S["A_mech4"]
     keys = [("kv-0", "1"), ("kv-1", "2"), ("kv-2", "3"), ("kv-3", "4"), ("kv-2-3", "3+4"), ("kv-1-2-3", "2-4"), ("k-2-3", "K 3+4"), ("v-2-3", "V 3+4")]
     vals = np.array([[M4[s][k] for k, _ in keys] for s in M4])

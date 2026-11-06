@@ -35,11 +35,9 @@ the pre-registered mean (H5b: \Hfiveb\ \Hfivebci, $p\PHfiveb$), and it is far wo
 (vs.\ dither: \CvsCED\ \CvsCEDci).
 
 \paragraph{What cost fine-tuning buys, and what it costs.} Relative to the warm start, fine-tuning on
-$\log(J/J_{\rm oracle})$ improves the median (\CBCmed\ to \CTFmed) and the excitation (above), leaves the failure rate
-unchanged (\CBCfail\% to \CTFfail\%), and makes the failures far more severe: the mean rises from \CBCmean\ to \CTFmean\
-(difference \CbcMinusFt\ \CbcMinusFtci). The log objective compresses the tail, so the optimiser trades rare catastrophes
-for typical-case gains. A raw cost would weight those cases, but it did not train (Table~\ref{tab:pilots}). The safe
-in-context controller on unstable plants remains an open problem.
+$\log(J/J_{\rm oracle})$ improves the median (\CBCmed\ to \CTFmed) and the excitation, leaves the failure rate
+unchanged (\CBCfail\% to \CTFfail\%) and makes the failures more severe (mean \CBCmean\ to \CTFmean, difference
+\CbcMinusFt\ \CbcMinusFtci): the log objective compresses the tail. \PENDING{cvarC}
 
 \paragraph{Exploratory: what the controller identifies, and where.} On its own closed-loop trajectories, the
 controller's feedback Jacobian $-\partial u_t/\partial x_t$, its functional gain, approaches the oracle LQR gain as the

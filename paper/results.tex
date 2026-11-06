@@ -41,7 +41,7 @@ layer~2 still transfers $\ge\AtauCtxTwo$.
 \vspace{-6mm}
 \caption{\textbf{A, exploratory follow-up: where the estimate lives} (3 seeds). (a)~The predictor's Jacobian with
 respect to its query, $J_t{=}\partial\hat y_t/\partial z_t$, matches the Bayes estimate. Its error to the truth
-(dashed) tracks the Bayes estimate's error (dotted). (b)~Probes at $t{=}47$ by block: the key--value fast weights read the sufficient statistics and the estimate; projected to 128 dimensions they still beat the residual stream over all 48 positions (Table~\ref{tab:controls}).
+(dashed) tracks the Bayes estimate's error (dotted). (b)~Probes for $\hat\theta_{47}$ by block: projected to 128 dimensions, the key--value fast weights still beat the residual stream over all 48 positions (Table~\ref{tab:controls} adds the sufficient statistics).
 (c)~Patching \emph{only} the context keys and values of blocks 3--4, leaving every activation of the query untouched,
 transfers over 90\% of the other episode's behaviour. Keys or values alone transfer about half.}
 \label{fig:mech}
