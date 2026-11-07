@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SUSS: what a transformer learns when it adapts to unknown physics in-context</title>
+<meta name="description" content="A pre-registered mechanistic study of small transformers that adapt in-context to unknown dynamics: Bayes-optimal while data are scarce, the pre-registered residual-stream mechanism rejected, the sufficient statistics found in the attention key-value memory.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="What a Transformer Learns When It Adapts to Unknown Physics In-Context">
+<meta property="og:description" content="Probing, patching and controlling: a pre-registered study. The sufficient statistics live in the attention key-value memory, not in the residual stream.">
+<meta property="og:url" content="https://nonberw.github.io/suss/">
+<meta property="og:image" content="https://nonberw.github.io/suss/figs/social_preview.png">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="640">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1f2328; --muted: #59636e; --line: #d1d9e0; --soft: #f6f8fa;
+    --accent: #0969da; --ok: #1a7f37; --bad: #cf222e; --code: #f6f8fa;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d1117; --fg: #e6edf3; --muted: #9198a1; --line: #3d444d; --soft: #151b23;
+      --accent: #4493f8; --ok: #3fb950; --bad: #f85149; --code: #151b23;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  }
+  main { max-width: 880px; margin: 0 auto; padding: 48px 16px 64px; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  header { text-align: center; margin-bottom: 32px; }
+  .kicker { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
+  h1 { font-size: clamp(26px, 4.2vw, 38px); line-height: 1.2; margin: 0 0 16px; letter-spacing: -.01em; text-wrap: balance; }
+  .author { font-size: 18px; margin: 0; }
+  .affil { color: var(--muted); margin: 2px 0 20px; }
+  .links { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+  .links a {
+    display: inline-block; padding: 7px 16px; border: 1px solid var(--line); border-radius: 999px;
+    color: var(--fg); background: var(--soft); font-size: 14px; font-weight: 600;
+  }
+  .links a:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
+  h2 { font-size: 22px; margin: 48px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  figure { margin: 24px 0; }
+  figure img { display: block; width: 100%; height: auto; background: #fff; border-radius: 8px; border: 1px solid var(--line); }
+  figcaption { color: var(--muted); font-size: 14px; margin-top: 8px; }
+  .tldr { margin: 0; padding-left: 20px; }
+  .tldr li { margin-bottom: 10px; }
+  .abstract { text-align: justify; hyphens: auto; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; }
+  td.num { white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .yes { color: var(--ok); font-weight: 600; white-space: nowrap; }
+  .no { color: var(--bad); font-weight: 600; white-space: nowrap; }
+  pre {
+    position: relative; background: var(--code); border: 1px solid var(--line); border-radius: 8px;
+    padding: 14px 16px; overflow-x: auto; font-size: 13px; line-height: 1.5;
+  }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+  .copy {
+    position: absolute; top: 8px; right: 8px; font: 600 12px/1 inherit; font-family: inherit;
+    padding: 6px 10px; border-radius: 6px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); cursor: pointer;
+  }
+  .copy:hover { border-color: var(--accent); color: var(--accent); }
+  .note { color: var(--muted); font-size: 14px; }
+  footer { margin-top: 56px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; text-align: center; }
+</style>
+</head>
+<body>
+<main>
+<header>
+  <p class="kicker">Preprint 2026 &middot; pre-registered &middot; code, models and every number public</p>
+  <h1>What a Transformer Learns When It Adapts to Unknown Physics In-Context: Probing, Patching and Controlling</h1>
+  <p class="author">Anuar Zhambakin</p>
+  <p class="affil">Independent researcher</p>
+  <nav class="links" aria-label="Project links">
+    <a href="https://github.com/nonberw/suss/blob/main/paper/main.pdf">Paper (PDF)</a>
+    <a href="https://github.com/nonberw/suss">Code</a>
+    <a href="https://colab.research.google.com/github/nonberw/suss/blob/main/notebooks/quickstart.ipynb">Quickstart (Colab)</a>
+    <a href="https://github.com/nonberw/suss/releases/tag/v0.1.3">Trained models</a>
+    <a href="https://github.com/nonberw/suss/blob/prereg-d134c5a/PREREGISTRATION.md">Pre-registration</a>
+    <a href="https://doi.org/10.5281/zenodo.24031898">DOI</a>
+  </nav>
+</header>
+
+<figure>
+  <img src="figs/hero.png" width="1600" height="560" alt="Three panels. Left: a linear probe reads the Bayes estimate from the attention key-value memory with R squared 0.85 to 0.9, from the residual stream at most about 0.6. Middle: swapping only the context keys and values of blocks 3 and 4 transfers about 0.92 of another episode's behaviour, block 1 about 0.12. Right: the in-context controller has a competitive median cost but fails on 10 percent of plants.">
+  <figcaption>Left: where the Bayes estimate is linearly readable (128-d residual-stream readouts in grey, the attention key-value memory in blue). Middle: replacing only the context keys and values of a block with another episode's; blocks 3 and 4 together carry almost all of the behaviour. Right: the in-context controller against classical adaptive controllers.</figcaption>
+</figure>
+
+<h2>In one paragraph</h2>
+<p>A small transformer gets 48 steps of a system it has never seen: unknown mass, unknown friction, unknown sign of the input. It has to predict the next state, or control the system, with no gradient steps. We pre-registered what we expected to find inside and then tested it with exact optimal references and causal interventions. The model is Bayes-optimal while data are scarce. The mechanism we bet on, a parameter estimate written into the residual stream, is not there. What is there: the sufficient statistics of the context, stored in the attention key-value memory of the last two blocks, where swapping them moves the model's behaviour almost completely.</p>
+
+<h2>Findings</h2>
+<ul class="tldr">
+  <li><strong>Bayes-optimal until it isn't.</strong> Within 1.23&times; of the exact Bayes predictor up to t&nbsp;=&nbsp;4, then an approximation floor at 1.59&times; the Bayes excess risk (pre-registered tolerance 1.25&times;: rejected). Longer training or more depth brings it to about 1.22&times;, never to 1.</li>
+  <li><strong>The pre-registered mechanism is wrong.</strong> Best residual-stream probe R&sup2;&nbsp;=&nbsp;0.19 against a threshold of 0.8; steering along it does nothing; swapping its subspace transfers 0.0001 of the behaviour.</li>
+  <li><strong>The statistics live in the key-value memory</strong> (exploratory). Fast weights Cov(v,&nbsp;k) of blocks 3&ndash;4 read the sufficient statistics with R&sup2;&nbsp;=&nbsp;0.92 (0.75&ndash;0.76 after projection to the residual stream's 128 dimensions) against 0.68&ndash;0.71 for the best residual-stream readout. Swapping only those keys and values transfers 91&ndash;94% of another episode's behaviour; block 1 alone, 7&ndash;16%. Replicated on 10 seeds (0.93&nbsp;&plusmn;&nbsp;0.01).</li>
+  <li><strong>Physics.</strong> On a block pushed with Coulomb friction the transformer beats physics-feature regression by 3.2&times; and structured system identification with the exact MuJoCo simulator (0.0058 vs 0.011), because the contact state is hidden from (x,&nbsp;&#7819;) and recoverable from history.</li>
+  <li><strong>Control.</strong> The in-context controller explores without being told to (4.2 nats more information than certainty equivalence by t&nbsp;=&nbsp;8) and is competitive in median cost (1.69&times; oracle vs 1.57&times; for dithered certainty equivalence), but fails on 10% of plants against 1.4%, almost all open-loop unstable.</li>
+</ul>
+
+<h2>Abstract</h2>
+<p class="abstract">Sequence models that adapt to unknown dynamics from their own history are common in robot learning, but what they compute is unclear. We study small transformers trained from scratch, in a pre-registered design with exact optimal references and causal interventions, on linear systems with unknown parameters, one-degree-of-freedom MuJoCo systems with contact, and linear adaptive control. The predictors are Bayes-optimal while data are scarce, then settle at an approximation floor (1.59&times; the Bayes excess risk). Our pre-registered mechanism, a linearly readable and causally used parameter estimate in the residual stream, is rejected (probe R&sup2;&nbsp;=&nbsp;0.19; steering and patching have no effect). Exploratory analyses locate the sufficient statistics of the context in the attention key&ndash;value memory of the last two blocks: they are read from it with R&sup2;&nbsp;=&nbsp;0.92, against 0.68&ndash;0.71 for the best residual-stream readout, and replacing only those keys and values with another episode's transfers 0.91&ndash;0.94 of its behaviour. MuJoCo physical parameters show the same pattern, with system-dependent margins. A controller trained by imitation and then on closed-loop cost excites the plant without an identification objective, though less than dithered certainty equivalence, and is competitive in median cost but fails on 10.0% of plants, almost all open-loop unstable, against 1.4% for dithered certainty equivalence. Code, pre-registration and every number are public.</p>
+
+<h2>The pre-registered scoreboard</h2>
+<p>Thirteen tests, committed before the main experiments and Holm-corrected. Seven held up and six did not, including the headline mechanism. All of them stay in the paper.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Test</th><th>Result</th><th>Verdict</th></tr></thead>
+  <tbody>
+    <tr><td>H1a, H1b: closer to Bayes than to OLS / one-step gradient descent</td><td class="num">by 0.27 / 0.55</td><td class="yes">supported</td></tr>
+    <tr><td>H1c: excess risk within 1.25&times; of Bayes</td><td class="num">1.59&times; [1.56, 1.62]</td><td class="no">rejected</td></tr>
+    <tr><td>H2a: residual-stream probe for the estimate, R&sup2; &gt; 0.8</td><td class="num">0.19 [0.17, 0.21]</td><td class="no">rejected</td></tr>
+    <tr><td>H2b: the probe reads the Bayes estimate better than the true parameters</td><td class="num">+0.005</td><td class="yes">supported</td></tr>
+    <tr><td>H2c: sufficient statistics readable at an earlier block than the estimate</td><td class="num">3 of 3 seeds</td><td class="yes">supported</td></tr>
+    <tr><td>H3a, H3b: steering along the probe / swapping its subspace changes the prediction</td><td class="num">0.00 / 0.0001</td><td class="no">rejected</td></tr>
+    <tr><td>H4a: pushed block, transformer beats physics-feature RLS</td><td class="num">0.0058 vs 0.019</td><td class="yes">supported</td></tr>
+    <tr><td>H4c, H4d: physical parameters linearly readable and steerable on both systems</td><td class="num">no / no</td><td class="no">rejected</td></tr>
+    <tr><td>H5a: controller beats the best constant gain (mean cost)</td><td class="num">by 584 [147, 1179]</td><td class="yes">supported</td></tr>
+    <tr><td>H5b: controller beats certainty equivalence (mean cost)</td><td class="num">112 [&minus;149, 343]</td><td class="no">not supported</td></tr>
+    <tr><td>H5d: controller gathers more information than certainty equivalence by t&nbsp;=&nbsp;8</td><td class="num">+4.2 nats [4.06, 4.31]</td><td class="yes">supported</td></tr>
+  </tbody>
+</table>
+</div>
+<p class="note">Every change after the pre-registration, including two bugs found in our own code and the analyses added after an external review, is listed in <a href="https://github.com/nonberw/suss/blob/main/docs/DEVIATIONS.md">DEVIATIONS.md</a>.</p>
+
+<h2>Prediction on linear systems</h2>
+<figure>
+  <img src="figs/fig_a.png" alt="Excess risk against context length for the transformer and the exact Bayes predictor, held-out residual-stream probes by block, and activation patching by layer." loading="lazy">
+  <figcaption>(a) Excess risk vs context length: the transformer tracks the exact Bayes predictor while data are scarce, then flattens at an approximation floor; the Bayes curve follows the parameter-free n&thinsp;p&thinsp;&sigma;&sup2;/t law. (b) Held-out linear probes of the residual stream: the estimate is barely decodable, the posterior uncertainty is. (c) Activation patching: the query token carries the other episode's behaviour only from layer 3 on; the probe subspace carries nothing.</figcaption>
+</figure>
+
+<h2>Where the estimate lives</h2>
+<figure>
+  <img src="figs/fig_mech.png" alt="The query Jacobian matches the Bayes estimate; probes by block show the key-value fast weights above the residual stream even at 128 dimensions; patching only context keys and values of blocks 3 and 4 transfers over 90 percent of behaviour." loading="lazy">
+  <figcaption>(a) The predictor's Jacobian with respect to its query matches the Bayes estimate. (b) Probes for the estimate by block: projected to 128 dimensions, the key-value fast weights still beat the residual stream over all 48 positions. (c) Patching only the context keys and values of blocks 3&ndash;4, with every activation at the query untouched, transfers over 90% of the other episode's behaviour; keys or values alone transfer about half.</figcaption>
+</figure>
+
+<h2>Physics in MuJoCo</h2>
+<figure>
+  <img src="figs/fig_b.png" alt="One-step error against context length on the pendulum and the pushed block, and probe R squared for physical parameters from the key-value fast weights and the residual stream." loading="lazy">
+  <figcaption>(a, b) One-step error vs context length. On the pendulum the transformer is on par with physics-feature RLS, which there has the true model class; on the stick&ndash;slip block it beats it by 3.2&times;. (c) Physical parameters read from the key-value fast weights vs from the residual stream (P: pendulum, K: block, B: bouncing ball).</figcaption>
+</figure>
+
+<h2>In-context control</h2>
+<figure>
+  <img src="figs/fig_c.png" alt="Normalised control cost for each controller, failure rates on open-loop stable and unstable plants, and information gathered in the first 8 steps." loading="lazy">
+  <figcaption>(a) Normalised cost J/J<sub>oracle</sub> on 4096 paired test plants. Certainty equivalence without excitation never moves the input, so it learns nothing about B. (b) Failure rate on open-loop stable vs unstable plants. (c) Information gathered in the first 8 steps.</figcaption>
+</figure>
+
+<h2>Try it</h2>
+<p>The <a href="https://colab.research.google.com/github/nonberw/suss/blob/main/notebooks/quickstart.ipynb">quickstart notebook</a> reruns the three headline checks on fresh episodes in a few minutes on a CPU. All 51 trained checkpoints are on the <a href="https://github.com/nonberw/suss/releases/tag/v0.1.3">release</a>; one command reproduces the whole paper:</p>
+<pre><code>git clone https://github.com/nonberw/suss.git &amp;&amp; cd suss
+pip install -r requirements.txt
+bash scripts/run_all.sh   # about a day on a 4 GB laptop GPU</code></pre>
+
+<h2>Cite</h2>
+<pre id="bib"><button class="copy" type="button" data-target="bibtext">Copy</button><code id="bibtext">@misc{zhambakin2026suss,
+  author       = {Zhambakin, Anuar},
+  title        = {What a Transformer Learns When It Adapts to Unknown Physics In-Context:
+                  Probing, Patching and Controlling},
+  year         = {2026},
+  howpublished = {Preprint},
+  doi          = {10.5281/zenodo.24031898},
+  url          = {https://github.com/nonberw/suss}
+}</code></pre>
+
+<footer>
+  MIT licensed. Single-author work with substantial AI assistance, disclosed in the paper. Not peer reviewed.<br>
+  <a href="https://github.com/nonberw/suss">github.com/nonberw/suss</a>
+</footer>
+</main>
+<script>
+  document.querySelectorAll(".copy").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var text = document.getElementById(btn.dataset.target).textContent;
+      var done = function () { btn.textContent = "Copied"; setTimeout(function () { btn.textContent = "Copy"; }, 1500); };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () {});
+      } else {
+        var ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta);
+        ta.select(); try { document.execCommand("copy"); done(); } catch (e) {} document.body.removeChild(ta);
+      }
+    });
+  });
+</script>
+</body>
+</html>

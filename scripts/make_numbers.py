@@ -222,11 +222,6 @@ put("RepN", lambda: ar["ratio"]["n"], "{:d}")
 put("RepRatio", lambda: repfmt("ratio")); put("RepKv", lambda: repfmt("kv34")); put("RepFwTheta", lambda: repfmt("fw_theta"))
 put("RepFwMom", lambda: repfmt("fw_moments")); put("RepResQ", lambda: repfmt("resid_q_theta")); put("RepResCtx", lambda: repfmt("resid_ctx_theta"))
 put("RepKvMin", lambda: ar["kv34"]["min"]); put("RepFwMin", lambda: ar["fw_theta"]["min"]); put("RepResMax", lambda: max(ar["resid_q_theta"]["max"], ar["resid_ctx_theta"]["max"]))
-cv = S.get("C_variants", {})
-for name, lab in (("imitation", "Imi"), ("log-cost", "Log"), ("raw-cost", "Raw"), ("cvar", "Cvar")):
-    put(f"Cv{lab}Med", lambda name=name: cv[f"{name}|0"]["median"]); put(f"Cv{lab}Fail", lambda name=name: cv[f"{name}|0"]["fail"] * 100, "{:.1f}")
-    put(f"Cv{lab}FailU", lambda name=name: cv[f"{name}|0"]["fail_unstable"] * 100, "{:.0f}"); put(f"Cv{lab}Mean", lambda name=name: cv[f"{name}|0"]["mean"], "{:.0f}")
-    put(f"Cv{lab}Pninety", lambda name=name: cv[f"{name}|0"]["p90"], "{:.1f}"); put(f"Cv{lab}Info", lambda name=name: cv[f"{name}|0"]["info8"], "{:.1f}")
 # ---- scale study
 sc = S.get("scale", {})
 put("ScBaseRatio", lambda: S["H1c"]["point"])
