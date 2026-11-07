@@ -9,5 +9,7 @@ and \ScDeepJacEnd\ for the deep one. \emph{On a larger system} ($n{=}4$, $m{=}2$
 Bayes (excess ratio \ScFourRatio) yet its Jacobian still matches the ridge estimate ($R^2{=}\ScFourJacEnd$ at $t{=}47$);
 the Bayes risk follows the finite-sample form of Corollary~\ref{cor:law}, $t\,\mathcal{R}^\star_{47}{=}\ScFourTR$ against
 $np\sigma^2\,t/(t{-}p{-}1){=}\ScFourFinite$. \emph{Seeds.} Seven further training seeds of the main model, trained after the key--value account was formed,
-replicate both the behaviour (mean excess ratio \RepRatio, mean $\pm$ s.d.\ over \RepN\ seeds) and the localisation
-(KV-only patching of blocks 3--4 transfers \RepKv; minimum over seeds \RepKvMin).
+replicate the behaviour (mean excess ratio \RepRatio, mean $\pm$ s.d.\ over \RepN\ seeds), the localisation
+(KV-only patching of blocks 3--4 transfers \RepKv; minimum over seeds \RepKvMin), and the readability gap: the fast
+weights read $\hat\theta_{47}$ with \RepFwTheta\ (minimum \RepFwMin), the residual stream with \RepResQ\ at the query and
+\RepResCtx\ over all positions; the residual readout varies more across seeds and reaches \RepResMax\ in the best one.
