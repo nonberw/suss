@@ -246,6 +246,8 @@ put("BKSysNote", lambda: ("better than the transformer" if S["B_block_mse"]["sys
     + "; with the true parameters and the same observation-only state it gets {:.2g}".format(S["B_block_mse"]["oracle_obs_err"]))
 put("AratioEnd", lambda: S["A_curves"]["tf"][47] / S["A_curves"]["bayes"][47])
 put("ScDeepJacEnd", lambda: sc["deep8"]["jac_r2"]["47"])
+put("ScSmallJacEnd", lambda: sc["small64"]["jac_r2"]["47"])
+put("ScMinBigJacEnd", lambda: min(sc[k]["jac_r2"]["47"] for k in ("long60k", "deep8", "wide256")))
 put("ScWideJacEnd", lambda: sc["wide256"]["jac_r2"]["47"])
 put("ScFourFinite", lambda: sc["n4m2_s0"]["npsigma2"] * 47 / (47 - (sc["n4m2_s0"]["args"]["n"] + sc["n4m2_s0"]["args"]["m"]) - 1), "{:.3f}")
 put("ScFourTR", lambda: "{:.3f}".format(np.mean([sc[f"n4m2_s{s}"]["t_excess_ridge_47"] for s in range(3) if f"n4m2_s{s}" in sc])))
