@@ -7,7 +7,7 @@
 [![Paper](https://img.shields.io/badge/paper-PDF-b31b1b.svg)](paper/main.pdf)
 [![Project page](https://img.shields.io/badge/project-page-1f6feb.svg)](https://nonberw.github.io/suss/)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24031898.svg)](https://doi.org/10.5281/zenodo.24031898)
-[![tests](https://github.com/nonberw/suss/actions/workflows/tests.yml/badge.svg)](https://github.com/nonberw/suss/actions/workflows/tests.yml)
+[![tests](https://github.com/nonberw/suss/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/nonberw/suss/actions/workflows/tests.yml)
 [![Pre-registered](https://img.shields.io/badge/pre--registered-prereg--d134c5a-2ea44f.svg)](https://github.com/nonberw/suss/blob/prereg-d134c5a/PREREGISTRATION.md)
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nonberw/suss/blob/main/notebooks/quickstart.ipynb)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
