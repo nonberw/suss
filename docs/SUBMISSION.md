@@ -21,7 +21,11 @@ Format rules (from the author-information page and the official template):
 6. Submit **before Nov 13, 2026**. The time zone is not stated on the site, so treat it as "end of Nov 12 AoE" to be safe.
 7. Optional, recommended after submission: arXiv. You need an arXiv account and an endorsement for `cs.LG` / `eess.SY` (first-time submitters often need one). Upload `submission/arxiv_source.zip` (LaTeX source + figures + .bbl). L4DC is single-blind, so an arXiv preprint is fine.
 
-## Pre-registration timestamp (recommended, 10 minutes)
+## Pre-registration timestamp
+
+**Done (2026-11-07):** the repository is connected to Zenodo; release v0.1.2 is archived at https://doi.org/10.5281/zenodo.24031899 (concept DOI for all versions: 10.5281/zenodo.24031898). Every new GitHub release is archived automatically.
+
+### How it was set up
 
 The pre-registration lives in the git history (tag `prereg-d134c5a`). The repo already contains `.zenodo.json` and `CITATION.cff`. To get a DOI: log in at https://zenodo.org with GitHub, open https://zenodo.org/account/settings/github/, switch `nonberw/suss` ON, then publish a new GitHub release (Zenodo only archives releases made after it is switched on). Note: the DOI time-stamps the archived snapshot (November 2026, after the experiments); it does not by itself prove that the pre-registration predates the experiments, which only the git commit date records.
 

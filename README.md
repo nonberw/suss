@@ -1,5 +1,7 @@
 # SUSS
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24031898.svg)](https://doi.org/10.5281/zenodo.24031898)
+
 **What does a transformer compute when it has to suss out unknown physics from a few seconds of history?**
 
 You hand a small transformer 48 steps of a system it has never seen. Unknown mass, unknown friction, unknown which way the motor even pushes. It has to predict what happens next, or keep the thing from flying off into the void, with no gradient steps, purely in-context. The vibe is "it's giving system identification". This repo opens the model up and checks whether the vibe is real, and where exactly it lives.
@@ -60,7 +62,7 @@ docs/            LITERATURE.md (novelty check, every reference verified), DEVIAT
 
 ## Cite
 
-Anuar Zhambakin. *What a Transformer Learns When It Adapts to Unknown Physics In-Context: Probing, Patching and Controlling.* Preprint, 2026. https://github.com/nonberw/suss (see `CITATION.cff`).
+Anuar Zhambakin. *What a Transformer Learns When It Adapts to Unknown Physics In-Context: Probing, Patching and Controlling.* Preprint, 2026. Code and data: https://github.com/nonberw/suss, archived at https://doi.org/10.5281/zenodo.24031898 (see `CITATION.cff`).
 
 ## Status
 

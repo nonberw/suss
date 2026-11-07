@@ -4,6 +4,14 @@ title: "What a Transformer Learns When It Adapts to Unknown Physics In-Context: 
 authors:
   - family-names: Zhambakin
     given-names: Anuar
+doi: "10.5281/zenodo.24031898"
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.24031898"
+    description: "Concept DOI (all versions) on Zenodo"
+  - type: doi
+    value: "10.5281/zenodo.24031899"
+    description: "Version 0.1.2 on Zenodo"
 repository-code: "https://github.com/nonberw/suss"
 url: "https://github.com/nonberw/suss"
 license: MIT
