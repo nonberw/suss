@@ -17,3 +17,4 @@ results/c/eval.pt
 paper/*.pdf
 !paper/main.pdf
 submission/
+submission/arxiv_check/

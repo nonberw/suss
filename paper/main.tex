@@ -1,9 +1,17 @@
 \documentclass{l4dc2027}
 % camera-ready: \documentclass[final]{l4dc2027}
-\usepackage{fontspec}
-\setmainfont{texgyretermes}[Extension=.otf, UprightFont=*-regular, BoldFont=*-bold, ItalicFont=*-italic, BoldItalicFont=*-bolditalic]
+\usepackage{iftex}
+\ifXeTeX  % local builds use Tectonic (XeTeX); arXiv and Overleaf use pdfLaTeX, where the template's times package works
+  \usepackage{fontspec}
+  \setmainfont{texgyretermes}[Extension=.otf, UprightFont=*-regular, BoldFont=*-bold, ItalicFont=*-italic, BoldItalicFont=*-bolditalic]
+\else
+  \usepackage{times}
+\fi
 \usepackage{booktabs}
 \usepackage{multirow}
+\ifdefined\arxivpreprint  % set by scripts/package.sh for the arXiv source only
+  \jmlrproceedings{}{Preprint}\jmlrvolume{}\jmlrpages{}\jmlryear{2026}
+\fi
 \input{numbers}
 \newcommand{\PENDING}[1]{\textbf{[#1 pending]}}
 
