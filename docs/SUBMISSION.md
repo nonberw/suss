@@ -23,7 +23,7 @@ Format rules (from the author-information page and the official template):
 
 ## Pre-registration timestamp
 
-**Done (2026-11-07):** the repository is connected to Zenodo; release v0.1.2 is archived at https://doi.org/10.5281/zenodo.24031899 (concept DOI for all versions: 10.5281/zenodo.24031898). Every new GitHub release is archived automatically.
+**Done (2026-11-07):** the repository is connected to Zenodo; release v0.1.2 is archived at https://doi.org/10.5281/zenodo.24031899 (concept DOI for all versions: 10.5281/zenodo.24031898). Every new GitHub release is archived automatically. Release v0.1.3 (all 51 trained checkpoints, quickstart notebook, project page) is archived at https://doi.org/10.5281/zenodo.24032754.
 
 ### How it was set up
 
