@@ -1,0 +1,421 @@
+{
+ "cfg": {
+  "d_in": 3,
+  "d_out": 2,
+  "T": 48,
+  "d_model": 128,
+  "n_layer": 4,
+  "n_head": 4,
+  "d_mlp": 512
+ },
+ "dtype": "float32",
+ "tensors": [
+  {
+   "name": "pos",
+   "shape": [
+    1,
+    48,
+    128
+   ],
+   "offset": 0
+  },
+  {
+   "name": "embed.weight",
+   "shape": [
+    128,
+    3
+   ],
+   "offset": 6144
+  },
+  {
+   "name": "embed.bias",
+   "shape": [
+    128
+   ],
+   "offset": 6528
+  },
+  {
+   "name": "blocks.0.ln1.weight",
+   "shape": [
+    128
+   ],
+   "offset": 6656
+  },
+  {
+   "name": "blocks.0.ln1.bias",
+   "shape": [
+    128
+   ],
+   "offset": 6784
+  },
+  {
+   "name": "blocks.0.qkv.weight",
+   "shape": [
+    384,
+    128
+   ],
+   "offset": 6912
+  },
+  {
+   "name": "blocks.0.qkv.bias",
+   "shape": [
+    384
+   ],
+   "offset": 56064
+  },
+  {
+   "name": "blocks.0.proj.weight",
+   "shape": [
+    128,
+    128
+   ],
+   "offset": 56448
+  },
+  {
+   "name": "blocks.0.proj.bias",
+   "shape": [
+    128
+   ],
+   "offset": 72832
+  },
+  {
+   "name": "blocks.0.ln2.weight",
+   "shape": [
+    128
+   ],
+   "offset": 72960
+  },
+  {
+   "name": "blocks.0.ln2.bias",
+   "shape": [
+    128
+   ],
+   "offset": 73088
+  },
+  {
+   "name": "blocks.0.mlp.0.weight",
+   "shape": [
+    512,
+    128
+   ],
+   "offset": 73216
+  },
+  {
+   "name": "blocks.0.mlp.0.bias",
+   "shape": [
+    512
+   ],
+   "offset": 138752
+  },
+  {
+   "name": "blocks.0.mlp.2.weight",
+   "shape": [
+    128,
+    512
+   ],
+   "offset": 139264
+  },
+  {
+   "name": "blocks.0.mlp.2.bias",
+   "shape": [
+    128
+   ],
+   "offset": 204800
+  },
+  {
+   "name": "blocks.1.ln1.weight",
+   "shape": [
+    128
+   ],
+   "offset": 204928
+  },
+  {
+   "name": "blocks.1.ln1.bias",
+   "shape": [
+    128
+   ],
+   "offset": 205056
+  },
+  {
+   "name": "blocks.1.qkv.weight",
+   "shape": [
+    384,
+    128
+   ],
+   "offset": 205184
+  },
+  {
+   "name": "blocks.1.qkv.bias",
+   "shape": [
+    384
+   ],
+   "offset": 254336
+  },
+  {
+   "name": "blocks.1.proj.weight",
+   "shape": [
+    128,
+    128
+   ],
+   "offset": 254720
+  },
+  {
+   "name": "blocks.1.proj.bias",
+   "shape": [
+    128
+   ],
+   "offset": 271104
+  },
+  {
+   "name": "blocks.1.ln2.weight",
+   "shape": [
+    128
+   ],
+   "offset": 271232
+  },
+  {
+   "name": "blocks.1.ln2.bias",
+   "shape": [
+    128
+   ],
+   "offset": 271360
+  },
+  {
+   "name": "blocks.1.mlp.0.weight",
+   "shape": [
+    512,
+    128
+   ],
+   "offset": 271488
+  },
+  {
+   "name": "blocks.1.mlp.0.bias",
+   "shape": [
+    512
+   ],
+   "offset": 337024
+  },
+  {
+   "name": "blocks.1.mlp.2.weight",
+   "shape": [
+    128,
+    512
+   ],
+   "offset": 337536
+  },
+  {
+   "name": "blocks.1.mlp.2.bias",
+   "shape": [
+    128
+   ],
+   "offset": 403072
+  },
+  {
+   "name": "blocks.2.ln1.weight",
+   "shape": [
+    128
+   ],
+   "offset": 403200
+  },
+  {
+   "name": "blocks.2.ln1.bias",
+   "shape": [
+    128
+   ],
+   "offset": 403328
+  },
+  {
+   "name": "blocks.2.qkv.weight",
+   "shape": [
+    384,
+    128
+   ],
+   "offset": 403456
+  },
+  {
+   "name": "blocks.2.qkv.bias",
+   "shape": [
+    384
+   ],
+   "offset": 452608
+  },
+  {
+   "name": "blocks.2.proj.weight",
+   "shape": [
+    128,
+    128
+   ],
+   "offset": 452992
+  },
+  {
+   "name": "blocks.2.proj.bias",
+   "shape": [
+    128
+   ],
+   "offset": 469376
+  },
+  {
+   "name": "blocks.2.ln2.weight",
+   "shape": [
+    128
+   ],
+   "offset": 469504
+  },
+  {
+   "name": "blocks.2.ln2.bias",
+   "shape": [
+    128
+   ],
+   "offset": 469632
+  },
+  {
+   "name": "blocks.2.mlp.0.weight",
+   "shape": [
+    512,
+    128
+   ],
+   "offset": 469760
+  },
+  {
+   "name": "blocks.2.mlp.0.bias",
+   "shape": [
+    512
+   ],
+   "offset": 535296
+  },
+  {
+   "name": "blocks.2.mlp.2.weight",
+   "shape": [
+    128,
+    512
+   ],
+   "offset": 535808
+  },
+  {
+   "name": "blocks.2.mlp.2.bias",
+   "shape": [
+    128
+   ],
+   "offset": 601344
+  },
+  {
+   "name": "blocks.3.ln1.weight",
+   "shape": [
+    128
+   ],
+   "offset": 601472
+  },
+  {
+   "name": "blocks.3.ln1.bias",
+   "shape": [
+    128
+   ],
+   "offset": 601600
+  },
+  {
+   "name": "blocks.3.qkv.weight",
+   "shape": [
+    384,
+    128
+   ],
+   "offset": 601728
+  },
+  {
+   "name": "blocks.3.qkv.bias",
+   "shape": [
+    384
+   ],
+   "offset": 650880
+  },
+  {
+   "name": "blocks.3.proj.weight",
+   "shape": [
+    128,
+    128
+   ],
+   "offset": 651264
+  },
+  {
+   "name": "blocks.3.proj.bias",
+   "shape": [
+    128
+   ],
+   "offset": 667648
+  },
+  {
+   "name": "blocks.3.ln2.weight",
+   "shape": [
+    128
+   ],
+   "offset": 667776
+  },
+  {
+   "name": "blocks.3.ln2.bias",
+   "shape": [
+    128
+   ],
+   "offset": 667904
+  },
+  {
+   "name": "blocks.3.mlp.0.weight",
+   "shape": [
+    512,
+    128
+   ],
+   "offset": 668032
+  },
+  {
+   "name": "blocks.3.mlp.0.bias",
+   "shape": [
+    512
+   ],
+   "offset": 733568
+  },
+  {
+   "name": "blocks.3.mlp.2.weight",
+   "shape": [
+    128,
+    512
+   ],
+   "offset": 734080
+  },
+  {
+   "name": "blocks.3.mlp.2.bias",
+   "shape": [
+    128
+   ],
+   "offset": 799616
+  },
+  {
+   "name": "ln_f.weight",
+   "shape": [
+    128
+   ],
+   "offset": 799744
+  },
+  {
+   "name": "ln_f.bias",
+   "shape": [
+    128
+   ],
+   "offset": 799872
+  },
+  {
+   "name": "head.weight",
+   "shape": [
+    2,
+    128
+   ],
+   "offset": 800000
+  },
+  {
+   "name": "head.bias",
+   "shape": [
+    2
+   ],
+   "offset": 800256
+  }
+ ],
+ "source": "runs/a/seed0.pt (experiment A, seed 0)",
+ "n_params": 800258
+}

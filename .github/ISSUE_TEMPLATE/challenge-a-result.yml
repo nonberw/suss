@@ -1,0 +1,33 @@
+name: Challenge a result
+description: Think a number, a claim or an analysis does not hold? This is the "you're wrong because" form.
+title: "[challenge] "
+labels: ["challenge"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for poking at it. Rejected hypotheses stay in the paper, and a good challenge will too.
+  - type: input
+    id: claim
+    attributes:
+      label: Which claim?
+      description: Quote it and say where it is (paper section, table, README).
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why you think it does not hold
+      description: A confound, a missing control, a bug, a stronger baseline, a statistics problem...
+    validations:
+      required: true
+  - type: textarea
+    id: test
+    attributes:
+      label: What would settle it
+      description: An experiment, a control or a re-analysis. Commands or code welcome.
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence so far
+      description: Your numbers, logs or plots, if you have any.

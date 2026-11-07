@@ -64,3 +64,4 @@ python scripts/check_macros.py
 bash scripts/package.sh
 python scripts/pack_models.py
 python scripts/build_notebook.py              # re-executes notebooks/quickstart.ipynb (CPU, a few minutes)
+python scripts/export_demo.py                 # weights and reference curves for the in-browser demo (docs/demo/)

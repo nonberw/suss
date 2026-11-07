@@ -1,0 +1,9 @@
+# Exact versions the paper's numbers were produced with: Windows 11, Python 3.12.10, PyTorch built for CUDA 12.6
+# (an RTX 3050 Ti laptop GPU). requirements.txt has the looser ranges that also work.
+# CPU only: pip install torch==2.14.1 --index-url https://download.pytorch.org/whl/cpu
+numpy==2.3.1
+scipy==1.18.0
+torch==2.14.1
+mujoco==3.17.0
+matplotlib==3.10.3
+pytest==9.1.1

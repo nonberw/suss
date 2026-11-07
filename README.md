@@ -6,6 +6,7 @@
 
 [![Paper](https://img.shields.io/badge/paper-PDF-b31b1b.svg)](paper/main.pdf)
 [![Project page](https://img.shields.io/badge/project-page-1f6feb.svg)](https://nonberw.github.io/suss/)
+[![Live demo](https://img.shields.io/badge/live-demo-8250df.svg)](https://nonberw.github.io/suss/demo/)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24031898.svg)](https://doi.org/10.5281/zenodo.24031898)
 [![tests](https://github.com/nonberw/suss/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/nonberw/suss/actions/workflows/tests.yml)
 [![Pre-registered](https://img.shields.io/badge/pre--registered-prereg--d134c5a-2ea44f.svg)](https://github.com/nonberw/suss/blob/prereg-d134c5a/PREREGISTRATION.md)
@@ -18,7 +19,7 @@ You hand a small transformer 48 steps of a system it has never seen. Unknown mas
 
 A pre-registered, mechanistic study, trained from scratch on a laptop GPU (RTX 3050 Ti, 4 GB). Hypotheses were committed before any main experiment ran (tag `prereg-d134c5a`). Everything that changed afterwards, including two bugs we found in our own code and an external review we acted on, is in [`docs/DEVIATIONS.md`](docs/DEVIATIONS.md).
 
-**[Paper (PDF)](paper/main.pdf)** | **[Project page](https://nonberw.github.io/suss/)** | **[Quickstart notebook](notebooks/quickstart.ipynb)** | **[Trained models](https://github.com/nonberw/suss/releases/tag/v0.1.3)** | **[Pre-registration](PREREGISTRATION.md)** | **[Deviations](docs/DEVIATIONS.md)**
+**[Paper (PDF)](paper/main.pdf)** | **[Live demo](https://nonberw.github.io/suss/demo/)** | **[Project page](https://nonberw.github.io/suss/)** | **[Quickstart notebook](notebooks/quickstart.ipynb)** | **[Trained models](https://github.com/nonberw/suss/releases/tag/v0.1.3)** | **[Pre-registration](PREREGISTRATION.md)** | **[Deviations](docs/DEVIATIONS.md)**
 
 ## TL;DR
 
@@ -82,6 +83,10 @@ Plus: a scale study (longer, deeper, wider, a 4-state/2-input system), and the t
 
 **C, control.** (a) Normalised cost J / J_oracle on 4096 paired test plants. Certainty equivalence without excitation never moves u, so it learns nothing about B. (b) Failure rate on open-loop stable vs unstable plants. (c) Information gathered in the first 8 steps.
 
+## Live demo
+
+[**nonberw.github.io/suss/demo**](https://nonberw.github.io/suss/demo/): the main model runs in your browser (plain JavaScript, no server). Pick an unknown system and watch the transformer's predictions and its own parameter estimate converge next to the exact Bayes estimator. `tests/test_demo.py` checks the JavaScript model against PyTorch.
+
 ## Quickstart (CPU, a few minutes)
 
 The [quickstart notebook](notebooks/quickstart.ipynb) downloads one trained model (3 MB) from the release, makes fresh episodes and reruns the three headline checks: excess risk against Bayes, the residual vs key-value probe gap, and KV-only patching. It takes about 100 s on a laptop CPU; on Colab, click the badge at the top. Locally:
@@ -136,7 +141,8 @@ tests/           estimators, theory identities, hooks, KV patching, LQR, MuJoCo,
 results/         summary.json, SUMMARY.md, pilot logs (large raw outputs are regenerated, not committed)
 paper/           the paper: main.tex -> main.pdf, numbers.tex (generated), figs/
 docs/            LITERATURE.md (novelty check, every reference verified), DEVIATIONS.md, SUBMISSION.md,
-                 MODELS.md, and the project page (index.html, figs/)
+                 MODELS.md, the project page (index.html, figs/) and the live demo (demo/)
+hf/              model card for the Hugging Face Hub (upload with scripts/upload_hf.py)
 ```
 
 ## Cite

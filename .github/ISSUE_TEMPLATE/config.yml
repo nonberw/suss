@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Read the paper first
+    url: https://github.com/nonberw/suss/blob/main/paper/main.pdf
+    about: Most "why did you..." questions are answered in the paper or in docs/DEVIATIONS.md.

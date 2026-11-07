@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SUSS live demo: a transformer sussing out an unknown system</title>
+<meta name="description" content="The 0.8M-parameter transformer from the SUSS paper running in your browser: it adapts in-context to a linear system it has never seen, next to the exact Bayes-optimal estimator.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Watch a transformer suss out a system it has never seen">
+<meta property="og:description" content="Live in your browser: in-context system identification, next to the exact Bayes estimator.">
+<meta property="og:url" content="https://nonberw.github.io/suss/demo/">
+<meta property="og:image" content="https://nonberw.github.io/suss/figs/social_preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1f2328; --muted: #59636e; --line: #d1d9e0; --soft: #f6f8fa; --grid: #eaeef2;
+    --accent: #0969da; --tf: #cf2e4a; --bayes: #1f6feb; --truth: #1f2328; --pos: 207, 46, 74; --neg: 31, 111, 235;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d1117; --fg: #e6edf3; --muted: #9198a1; --line: #3d444d; --soft: #151b23; --grid: #21262d;
+      --accent: #4493f8; --tf: #ff7b8f; --bayes: #58a6ff; --truth: #e6edf3; --pos: 255, 123, 143; --neg: 88, 166, 255;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif; }
+  main { max-width: 1000px; margin: 0 auto; padding: 36px 16px 56px; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .kicker { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
+  h1 { font-size: clamp(24px, 4vw, 34px); line-height: 1.2; margin: 0 0 12px; text-wrap: balance; }
+  .lede { margin: 0 0 20px; max-width: 760px; }
+  .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin: 0 0 18px;
+    padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--soft); }
+  button { font: 600 14px/1 inherit; font-family: inherit; padding: 9px 14px; border-radius: 8px; cursor: pointer;
+    border: 1px solid var(--line); background: var(--bg); color: var(--fg); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button:disabled { opacity: .5; cursor: default; }
+  .slider { display: flex; align-items: center; gap: 8px; flex: 1 1 220px; min-width: 200px; }
+  .slider input { flex: 1; accent-color: var(--accent); }
+  output { font-variant-numeric: tabular-nums; min-width: 4.5em; font-weight: 600; }
+  #status { color: var(--muted); font-size: 14px; }
+  .grid { display: grid; grid-template-columns: 1.35fr 1fr; gap: 14px; }
+  .card { border: 1px solid var(--line); border-radius: 10px; padding: 14px 14px 10px; min-width: 0; }
+  .card h2 { font-size: 15px; margin: 0 0 6px; }
+  .card .sub { color: var(--muted); font-size: 13px; margin: 0 0 6px; }
+  .span2 { grid-column: 1 / -1; }
+  svg.chart { display: block; width: 100%; height: auto; overflow: visible; }
+  .chart text { fill: var(--muted); font-size: 11px; font-family: inherit; }
+  .chart .gridline { stroke: var(--grid); stroke-width: 1; }
+  .chart .axis { stroke: var(--line); stroke-width: 1; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--muted); margin: 6px 0 2px; }
+  .legend span::before { content: ""; display: inline-block; width: 14px; height: 3px; border-radius: 2px;
+    vertical-align: middle; margin-right: 6px; background: currentColor; }
+  .k-tf { color: var(--tf); } .k-bayes { color: var(--bayes); } .k-truth { color: var(--truth); }
+  .k-avg::before { opacity: .35; height: 6px !important; }
+  .mats { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  .mat h3 { font-size: 13px; margin: 0 0 4px; font-weight: 600; }
+  .mat h3 small { color: var(--muted); font-weight: 400; }
+  table.m { border-collapse: separate; border-spacing: 3px; font-variant-numeric: tabular-nums; font-size: 14px; }
+  table.m td { width: 64px; height: 30px; text-align: center; border-radius: 6px; border: 1px solid var(--line); }
+  table.m th { color: var(--muted); font-weight: 500; font-size: 12px; padding: 0 4px; }
+  .note { color: var(--muted); font-size: 13px; margin: 8px 0 0; }
+  .explain { margin-top: 26px; max-width: 780px; }
+  .explain h2 { font-size: 18px; margin: 0 0 8px; }
+  footer { margin-top: 36px; padding-top: 14px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
+  @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } table.m td { width: 56px; } }
+  @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+</head>
+<body>
+<main>
+<p class="kicker"><a href="../">SUSS</a> &middot; live demo &middot; runs entirely in your browser</p>
+<h1>Watch a transformer suss out a system it has never seen</h1>
+<p class="lede">Each episode draws a new two-state linear system x<sub>t+1</sub>&nbsp;=&nbsp;A&thinsp;x<sub>t</sub>&nbsp;+&nbsp;B&thinsp;u<sub>t</sub>&nbsp;+&nbsp;noise with random A and B. The 0.8M-parameter model from the paper sees only the history so far: no gradient steps, no hints. Next to it runs the Bayes-optimal estimator, computed exactly. Both predict the next state before it happens.</p>
+
+<div class="controls" role="group" aria-label="Demo controls">
+  <button id="new" class="primary" disabled>New unknown system</button>
+  <button id="play" disabled>Pause</button>
+  <div class="slider"><label for="t">Context</label><input id="t" type="range" min="0" max="47" value="0" disabled><output id="tval" for="t">t = 0</output></div>
+  <span id="status" aria-live="polite">Loading the model (3.2 MB)&hellip;</span>
+</div>
+
+<div class="grid">
+  <section class="card span2">
+    <h2>Next-state predictions</h2>
+    <p class="sub">Dots: the state that actually happened. Each prediction for step t+1 is made at step t, before that state is seen.</p>
+    <svg id="traj" class="chart" viewBox="0 0 900 270" role="img" aria-label="True states and predicted next states over time"></svg>
+    <div class="legend"><span class="k-truth">true state</span><span class="k-tf">transformer</span><span class="k-bayes">Bayes-optimal</span></div>
+  </section>
+  <section class="card">
+    <h2>What it thinks the system is</h2>
+    <p class="sub">The hidden parameters [A&nbsp;B], the Bayes estimate from the context so far, and the transformer's own estimate: the matrix it applies to the newest input, &part;&#375;/&part;z.</p>
+    <div class="mats" id="mats"></div>
+  </section>
+  <section class="card">
+    <h2>Errors</h2>
+    <p class="sub">Top: prediction error against the noise-free next state. Bottom: distance of each estimate from the true [A&nbsp;B]. Faint bands: average over 4096 episodes.</p>
+    <svg id="err" class="chart" viewBox="0 0 440 175" role="img" aria-label="Prediction error against context length"></svg>
+    <svg id="perr" class="chart" viewBox="0 0 440 175" role="img" aria-label="Parameter error against context length"></svg>
+    <div class="legend"><span class="k-tf">transformer</span><span class="k-bayes">Bayes-optimal</span><span class="k-bayes k-avg">average</span></div>
+  </section>
+</div>
+
+<section class="explain">
+  <h2>What you are looking at</h2>
+  <p>The transformer was trained on many random systems, then frozen. It can only adapt through its context window, the way a language model picks up a pattern from a prompt. While data are scarce it is as good as the exact Bayes-optimal estimator; with more context it levels off slightly above it, 1.59&times; the Bayes excess risk on average.</p>
+  <p>The middle panel is the paper's functional test: the derivative of the prediction with respect to the newest input is the parameter estimate the network is effectively using, and it tracks the Bayes estimate. The paper then shows where the evidence for that estimate is stored: in the attention keys and values of the last two blocks, not in the residual stream. Swapping only those keys and values with another episode's moves 91&ndash;94% of the behaviour.</p>
+  <p><a href="../">Project page</a> &middot; <a href="https://github.com/nonberw/suss/blob/main/paper/main.pdf">Paper (PDF)</a> &middot; <a href="https://github.com/nonberw/suss">Code</a> &middot; <a href="https://github.com/nonberw/suss/blob/main/docs/demo/model.js">This model in 150 lines of JavaScript</a></p>
+</section>
+<footer>The network runs on your device in plain JavaScript (no server, no library). Seed <span id="seedv">&ndash;</span>: <a id="perma" href="#">link to this system</a>.</footer>
+</main>
+<script src="model.js"></script>
+<script>
+(function () {
+  "use strict";
+  var T = 48, N = 2, P = 3, SIGMA = 0.1, SD = [0.4, 0.4, 0.5], RHO = 0.95, STEP_MS = 420;
+  var LAM = SD.map(function (s) { return (SIGMA / s) * (SIGMA / s); });
+  var $ = function (id) { return document.getElementById(id); };
+  var model = null, ref = null, ep = null, cur = 0, playing = false, timer = null;
+  var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // ---------- random numbers (seeded, so a system can be shared by link)
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function gauss(rng) {
+    var u = 0, v = 0;
+    while (u === 0) u = rng();
+    v = rng();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  }
+  function spectralRadius(a, b, c, d) {
+    var tr = a + d, det = a * d - b * c, disc = tr * tr - 4 * det;
+    if (disc >= 0) { var sq = Math.sqrt(disc); return Math.max(Math.abs(tr + sq), Math.abs(tr - sq)) / 2; }
+    return Math.sqrt(Math.max(det, 0));
+  }
+
+  // ---------- one episode: system, rollout, exact Bayes (ridge) estimates, model predictions
+  function makeEpisode(seed) {
+    var rng = mulberry32(seed), th;
+    do {
+      th = [[0, 0, 0], [0, 0, 0]];
+      for (var i = 0; i < N; i++) for (var j = 0; j < P; j++) th[i][j] = gauss(rng) * SD[j];
+    } while (spectralRadius(th[0][0], th[0][1], th[1][0], th[1][1]) >= RHO);
+    var x = [gauss(rng), gauss(rng)], tokens = new Float64Array(T * P), states = [x.slice()], means = [];
+    for (var t = 0; t < T; t++) {
+      var u = gauss(rng), z = [x[0], x[1], u];
+      tokens.set(z, t * P);
+      var m = [0, 1].map(function (i) { return th[i][0] * z[0] + th[i][1] * z[1] + th[i][2] * z[2]; });
+      means.push(m);
+      x = [m[0] + SIGMA * gauss(rng), m[1] + SIGMA * gauss(rng)];
+      states.push(x.slice());
+    }
+    // exact posterior mean under the Gaussian prior (ridge / recursive least squares), using pairs s < t
+    var S = [[0, 0, 0], [0, 0, 0], [0, 0, 0]], C = [[0, 0], [0, 0], [0, 0]], bayes = [], bayesPred = [];
+    for (t = 0; t < T; t++) {
+      var A = S.map(function (row, i) { return row.map(function (v, j) { return v + (i === j ? LAM[i] : 0); }); });
+      var est = solve3(A, C);
+      bayes.push(est);
+      var zt = tokens.subarray(t * P, t * P + P);
+      bayesPred.push([0, 1].map(function (i) { return est[i][0] * zt[0] + est[i][1] * zt[1] + est[i][2] * zt[2]; }));
+      for (i = 0; i < P; i++) {
+        for (j = 0; j < P; j++) S[i][j] += zt[i] * zt[j];
+        for (j = 0; j < N; j++) C[i][j] += zt[i] * states[t + 1][j];
+      }
+    }
+    var fw = SussModel.forwardAll(model, tokens, T);
+    return { seed: seed, theta: th, tokens: tokens, states: states, means: means, bayes: bayes, bayesPred: bayesPred,
+             tfPred: fw.preds, cache: fw.cache, jac: new Array(T) };
+  }
+  function solve3(A, C) {  // returns (A^-1 C)^T as a 2 x 3 matrix
+    var M = A.map(function (r, i) { return r.concat(C[i]); }), n = 3, i, j, k;
+    for (i = 0; i < n; i++) {
+      var piv = i;
+      for (k = i + 1; k < n; k++) if (Math.abs(M[k][i]) > Math.abs(M[piv][i])) piv = k;
+      var tmp = M[i]; M[i] = M[piv]; M[piv] = tmp;
+      for (k = 0; k < n; k++) {
+        if (k === i) continue;
+        var f = M[k][i] / M[i][i];
+        for (j = i; j < n + 2; j++) M[k][j] -= f * M[i][j];
+      }
+    }
+    var X = [0, 1, 2].map(function (r) { return [M[r][3] / M[r][r], M[r][4] / M[r][r]]; });
+    return [[X[0][0], X[1][0], X[2][0]], [X[0][1], X[1][1], X[2][1]]];
+  }
+  function jac(t) {
+    if (!ep.jac[t]) ep.jac[t] = SussModel.jacobianAt(model, ep.cache, ep.tokens, t).map(function (r) { return Array.from(r); });
+    return ep.jac[t];
+  }
+  function sq(a, b) { var s = 0; for (var i = 0; i < a.length; i++) s += (a[i] - b[i]) * (a[i] - b[i]); return s; }
+  function frob(A, B) { var s = 0; for (var i = 0; i < N; i++) for (var j = 0; j < P; j++) s += (A[i][j] - B[i][j]) * (A[i][j] - B[i][j]); return Math.sqrt(s); }
+
+  // ---------- drawing helpers (plain SVG)
+  function fmt(v) { return (Math.abs(v) < 0.005 ? 0 : v).toFixed(2); }
+  function line(pts, cls, extra) {
+    if (!pts.length) return "";
+    return '<polyline fill="none" points="' + pts.map(function (p) { return p[0].toFixed(1) + "," + p[1].toFixed(1); }).join(" ") + '" ' + (extra || "") + ' style="stroke:var(' + cls + ')"/>';
+  }
+  function drawTraj() {
+    var svg = $("traj"), W = 900, H = 270, L = 40, R = 12, gap = 18, ph = (H - 28 - gap) / 2, out = "";
+    var xs = function (t) { return L + (W - L - R) * t / T; };
+    for (var d = 0; d < N; d++) {
+      var top = 6 + d * (ph + gap), vals = ep.states.map(function (s) { return s[d]; });
+      var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals), pad = 0.15 * (hi - lo + 0.2);
+      lo -= pad; hi += pad;
+      var ys = function (v) { return top + ph * (1 - (v - lo) / (hi - lo)); };
+      out += '<line class="axis" x1="' + L + '" x2="' + (W - R) + '" y1="' + (top + ph) + '" y2="' + (top + ph) + '"/>';
+      if (lo < 0 && hi > 0) out += '<line class="gridline" x1="' + L + '" x2="' + (W - R) + '" y1="' + ys(0) + '" y2="' + ys(0) + '"/>';
+      out += '<text x="' + (L - 8) + '" y="' + (top + ph / 2 + 4) + '" text-anchor="end">x' + (d === 0 ? "₁" : "₂") + "</text>";
+      var seen = ep.states.slice(0, cur + 1).map(function (s, t) { return [xs(t), ys(s[d])]; });
+      out += line(seen, "--truth", 'stroke-width="1.2" opacity="0.35"');
+      seen.forEach(function (p) { out += '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="3" style="fill:var(--truth)"/>'; });
+      var tfp = [], bp = [];
+      for (var t = 0; t <= cur; t++) { tfp.push([xs(t + 1), ys(ep.tfPred[t][d])]); bp.push([xs(t + 1), ys(ep.bayesPred[t][d])]); }
+      out += line(bp, "--bayes", 'stroke-width="2" stroke-dasharray="5 4"');
+      out += line(tfp, "--tf", 'stroke-width="2"');
+      var last = tfp[tfp.length - 1];
+      out += '<circle cx="' + last[0].toFixed(1) + '" cy="' + last[1].toFixed(1) + '" r="5" fill="none" stroke-width="2" style="stroke:var(--tf)"/>';
+    }
+    for (var k = 0; k <= T; k += 8) out += '<text x="' + xs(k) + '" y="' + (H - 4) + '" text-anchor="middle">' + k + "</text>";
+    out += '<text x="' + (W - R) + '" y="' + (H - 4) + '" text-anchor="end">step</text>';
+    svg.innerHTML = out;
+  }
+  function logChart(id, series, avg, yLo, yHi, label) {
+    var W = 440, H = 175, L = 44, R = 8, top = 8, bottom = 22, out = "";
+    var xs = function (t) { return L + (W - L - R) * t / (T - 1); };
+    var ly = function (v) { var a = Math.log10(Math.max(v, yLo)); return top + (H - top - bottom) * (1 - (a - Math.log10(yLo)) / (Math.log10(yHi) - Math.log10(yLo))); };
+    for (var e = Math.ceil(Math.log10(yLo)); e <= Math.floor(Math.log10(yHi)); e++) {
+      var y = ly(Math.pow(10, e));
+      out += '<line class="gridline" x1="' + L + '" x2="' + (W - R) + '" y1="' + y + '" y2="' + y + '"/><text x="' + (L - 6) + '" y="' + (y + 4) + '" text-anchor="end">1e' + e + "</text>";
+    }
+    out += '<line class="axis" x1="' + L + '" x2="' + (W - R) + '" y1="' + (H - bottom) + '" y2="' + (H - bottom) + '"/>';
+    avg.forEach(function (a) { out += line(a.v.map(function (v, t) { return [xs(t), ly(v)]; }), a.c, 'stroke-width="7" stroke-linecap="round" opacity="0.18"'); });
+    series.forEach(function (s) { out += line(s.v.map(function (v, t) { return [xs(t), ly(v)]; }), s.c, 'stroke-width="2"' + (s.dash ? ' stroke-dasharray="5 4"' : "")); });
+    for (var k = 0; k < T; k += 8) out += '<text x="' + xs(k) + '" y="' + (H - 6) + '" text-anchor="middle">' + k + "</text>";
+    out += '<text x="' + (W - R) + '" y="' + (top + 10) + '" text-anchor="end">' + label + "</text>";
+    $(id).innerHTML = out;
+  }
+  function drawErrors() {
+    var eTf = [], eB = [], pTf = [], pB = [];
+    for (var t = 0; t <= cur; t++) {
+      eTf.push(sq(ep.tfPred[t], ep.means[t])); eB.push(sq(ep.bayesPred[t], ep.means[t]));
+      pTf.push(frob(jac(t), ep.theta)); pB.push(frob(ep.bayes[t], ep.theta));
+    }
+    logChart("err", [{ v: eB, c: "--bayes", dash: true }, { v: eTf, c: "--tf" }],
+             [{ v: ref.excess_bayes, c: "--bayes" }], 1e-5, 3, "prediction error");
+    logChart("perr", [{ v: pB, c: "--bayes", dash: true }, { v: pTf, c: "--tf" }],
+             [{ v: ref.param_err_bayes, c: "--bayes" }], 0.01, 2, "parameter error");
+  }
+  function cellStyle(v) {
+    var a = Math.min(Math.abs(v) / 1.1, 1) * 0.55;
+    return "background: rgba(var(" + (v >= 0 ? "--pos" : "--neg") + ")," + a.toFixed(2) + ")";
+  }
+  function matHTML(title, sub, M) {
+    var h = '<div class="mat"><h3>' + title + " <small>" + sub + '</small></h3><table class="m"><tr><th></th><th>a₁</th><th>a₂</th><th>b</th></tr>';
+    for (var i = 0; i < N; i++) {
+      h += "<tr><th>x" + (i === 0 ? "₁" : "₂") + "</th>";
+      for (var j = 0; j < P; j++) h += '<td style="' + cellStyle(M[i][j]) + '">' + fmt(M[i][j]) + "</td>";
+      h += "</tr>";
+    }
+    return h + "</table></div>";
+  }
+  function drawMats() {
+    $("mats").innerHTML = matHTML("Hidden truth", "[A B]", ep.theta) +
+      matHTML("Bayes-optimal estimate", "from " + cur + " transitions", ep.bayes[cur]) +
+      matHTML("Transformer", "∂ŷ/∂z at step " + cur, jac(cur));
+  }
+  function render() {
+    $("t").value = cur;
+    $("tval").textContent = "t = " + cur;
+    drawTraj(); drawMats(); drawErrors();
+  }
+
+  // ---------- playback
+  function stop() { playing = false; clearTimeout(timer); $("play").textContent = cur >= T - 1 ? "Replay" : "Play"; }
+  function tick() {
+    if (!playing) return;
+    if (cur >= T - 1) { stop(); return; }
+    cur += 1; render();
+    timer = setTimeout(tick, STEP_MS);
+  }
+  function play() {
+    if (cur >= T - 1) { cur = 0; render(); }
+    playing = true; $("play").textContent = "Pause";
+    timer = setTimeout(tick, STEP_MS);
+  }
+  function newSystem(seed) {
+    stop();
+    ep = makeEpisode(seed);
+    cur = 0;
+    $("seedv").textContent = seed;
+    $("perma").href = "#seed=" + seed;
+    render();
+    if (reduced) { cur = T - 1; render(); stop(); } else play();
+  }
+  function seedFromHash() {
+    var m = /seed=(\d+)/.exec(location.hash);
+    return m ? parseInt(m[1], 10) % 1000000 : null;
+  }
+
+  $("new").addEventListener("click", function () { var s = Math.floor(Math.random() * 1000000); history.replaceState(null, "", "#seed=" + s); newSystem(s); });
+  $("play").addEventListener("click", function () { if (playing) stop(); else play(); });
+  $("t").addEventListener("input", function (e) { stop(); cur = parseInt(e.target.value, 10); render(); });
+
+  Promise.all([
+    fetch("weights.json").then(function (r) { return r.json(); }),
+    fetch("weights.bin").then(function (r) { if (!r.ok) throw new Error("weights " + r.status); return r.arrayBuffer(); }),
+    fetch("reference.json").then(function (r) { return r.json(); })
+  ]).then(function (res) {
+    model = SussModel.buildModel(res[0], res[1]);
+    ref = res[2];
+    ["new", "play", "t"].forEach(function (id) { $(id).disabled = false; });
+    $("status").textContent = "Model loaded: " + res[0].n_params.toLocaleString("en-US") + " parameters, running on your device.";
+    newSystem(seedFromHash() || Math.floor(Math.random() * 1000000));
+  }).catch(function (err) {
+    $("status").textContent = "Could not load the model (" + err.message + "). Try reloading the page.";
+  });
+})();
+</script>
+</body>
+</html>

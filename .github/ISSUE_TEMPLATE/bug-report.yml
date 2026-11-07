@@ -1,0 +1,28 @@
+name: Bug report
+description: Something in the code, the notebook or the demo does not run or gives a different number.
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: input
+    id: command
+    attributes:
+      label: What you ran
+      description: The command, notebook cell or page.
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what you expected
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error or output
+      render: text
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      description: OS, Python, PyTorch and MuJoCo versions, GPU or CPU.
