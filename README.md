@@ -10,7 +10,7 @@ A pre-registered, mechanistic study, trained from scratch on a laptop GPU (RTX 3
 
 Numbers are from `results/summary.json`: 3 pre-registered training seeds per model (10 for the replication of experiment A), 4096 test episodes, hierarchical bootstrap, Holm correction over the 13 pre-registered tests. Anything added after the pre-registration is labelled exploratory, here and in the paper.
 
-**1. Bayes-optimal until it isn't.** On linear systems with unknown (A, B), the transformer tracks the *exact* Bayes predictor while data are scarce (within 1.23x up to t = 4), then flattens at an approximation floor: 1.59x the Bayes excess risk averaged over contexts (pre-registered tolerance was 1.25x, so that hypothesis is rejected). Exploratory: training 3x longer or doubling depth brings it to ~1.22x. Still not 1.
+**1. Bayes-optimal until it isn't.** On linear systems with unknown (A, B), the transformer tracks the *exact* Bayes predictor while data are scarce (within 1.23x up to t = 4), then flattens at an approximation floor: 1.59x the Bayes excess risk averaged over contexts (pre-registered tolerance was 1.25x, so that hypothesis is rejected). Exploratory scale study: training 3x longer or doubling depth brings it to ~1.22x, 4x width to 1.30x, and a 0.1M-parameter model sits at 5.3x. Still not 1.
 
 **2. The pre-registered mechanism is wrong, and we say so.** We bet the model writes its parameter estimate into the residual stream. It doesn't, at least not linearly or causally: the best linear probe gets R^2 = 0.19 (threshold 0.8), steering along the probe does nothing, and swapping the probe subspace between episodes transfers 0.0001 of the behaviour. Linear decodability told us nothing about causal use.
 
@@ -60,7 +60,7 @@ docs/            LITERATURE.md (novelty check, every reference verified), DEVIAT
 
 ## Status
 
-Preprint. Not peer reviewed. Single author, with heavy AI assistance (disclosed in the paper). Issues and "you're wrong because" welcome.
+Preprint (v0.1.x). Not peer reviewed. Target venue: L4DC 2027; see `docs/SUBMISSION.md`. Single author, with heavy AI assistance (disclosed in the paper). Issues and "you're wrong because" welcome.
 
 ## License
 
