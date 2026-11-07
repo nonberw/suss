@@ -20,7 +20,8 @@ for tag, change in rows[1:]:
     if not os.path.exists(f):
         continue
     r = json.load(open(f))
-    lines.append(f"{tag} & {change} & {r['params'] / 1e6:.1f}M & {r['ratio_mean_t4']:.2f} & {r['ratio_t47']:.2f} & {np.mean(list(r['jac_r2'].values())):.2f} \\\\")
+    tag_tex = tag.replace("_", "\\_")
+    lines.append(f"{tag_tex} & {change} & {r['params'] / 1e6:.1f}M & {r['ratio_mean_t4']:.2f} & {r['ratio_t47']:.2f} & {np.mean(list(r['jac_r2'].values())):.2f} \\\\")
 lines += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
 open("paper/scale_table.tex", "w").write("\n".join(lines) + "\n")
 print("\n".join(lines))

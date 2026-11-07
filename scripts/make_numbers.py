@@ -244,6 +244,13 @@ put("BKSys", lambda: S["B_block_mse"]["sysid_err"], "{:.2g}")
 put("BKOrcObs", lambda: S["B_block_mse"]["oracle_obs_err"], "{:.2g}")
 put("BKSysNote", lambda: ("better than the transformer" if S["B_block_mse"]["sysid_err"] < np.mean([S["B_block_mse"][f"tf_err_seed{s}"] for s in range(3)]) else "worse than the transformer")
     + "; with the true parameters and the same observation-only state it gets {:.2g}".format(S["B_block_mse"]["oracle_obs_err"]))
+put("AratioEnd", lambda: S["A_curves"]["tf"][47] / S["A_curves"]["bayes"][47])
+put("ScDeepJacEnd", lambda: sc["deep8"]["jac_r2"]["47"])
+put("ScWideJacEnd", lambda: sc["wide256"]["jac_r2"]["47"])
+put("ScFourFinite", lambda: sc["n4m2_s0"]["npsigma2"] * 47 / (47 - (sc["n4m2_s0"]["args"]["n"] + sc["n4m2_s0"]["args"]["m"]) - 1), "{:.3f}")
+put("ScFourTR", lambda: "{:.3f}".format(np.mean([sc[f"n4m2_s{s}"]["t_excess_ridge_47"] for s in range(3) if f"n4m2_s{s}" in sc])))
+put("ScFourRatio", lambda: rng_list([sc[f"n4m2_s{s}"]["ratio_mean_t4"] for s in range(3) if f"n4m2_s{s}" in sc], "{:.1f}"))
+put("ScFourJacEnd", lambda: rng_list([sc[f"n4m2_s{s}"]["jac_r2"]["47"] for s in range(3) if f"n4m2_s{s}" in sc]))
 # ---- Holm
 for k, v in S.get("holm", {}).items():
     put("P" + k.replace("1", "one").replace("2", "two").replace("3", "three").replace("4", "four").replace("5", "five"),

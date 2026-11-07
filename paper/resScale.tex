@@ -1,3 +1,13 @@
-\section{Scale and training length}\label{sec:scale}
-Table~\ref{tab:scale} (appendix) asks whether the approximation floor of \S\ref{sec:expa} is an artefact of a small model or short
-training, and whether the Jacobian account survives a larger system. \PENDING{scaleprose}
+\section{Scale, training length and seeds}\label{sec:scale}
+Table~\ref{tab:scale} (appendix; one seed per row, exploratory) asks whether the approximation floor of
+\S\ref{sec:expa} is an artefact of a small model or short training, and whether the Jacobian account survives a
+larger system. \emph{The floor is partly an optimisation and capacity limit.} Tripling the training steps lowers the
+mean excess ratio to Bayes from \Aratio\ to \ScLongRatio\ (at $t{=}47$ from \AratioEnd\ to \ScLongRatioEnd), and
+doubling the depth gives \ScDeepRatio; neither reaches the Bayes risk. \emph{The functional account is not specific to the small
+model:} the query Jacobian matches the ridge estimate with $R^2{=}\ScLongJacEnd$ at $t{=}47$ for the long-trained model
+and \ScDeepJacEnd\ for the deep one. \emph{On a larger system} ($n{=}4$, $m{=}2$, 24 unknowns) the transformer is far from
+Bayes (excess ratio \ScFourRatio) yet its Jacobian still matches the ridge estimate ($R^2{=}\ScFourJacEnd$ at $t{=}47$);
+the Bayes risk follows the finite-sample form of Corollary~\ref{cor:law}, $t\,\mathcal{R}^\star_{47}{=}\ScFourTR$ against
+$np\sigma^2\,t/(t{-}p{-}1){=}\ScFourFinite$. \emph{Seeds.} Seven further training seeds of the main model, trained after the key--value account was formed,
+replicate both the behaviour (mean excess ratio \RepRatio, mean $\pm$ s.d.\ over \RepN\ seeds) and the localisation
+(KV-only patching of blocks 3--4 transfers \RepKv; minimum over seeds \RepKvMin).

@@ -19,7 +19,7 @@ robot policies is open. (ii)~\emph{Post-hoc mechanism.} The key--value account w
 pre-registered probes failed, on the same models. The bouncing-ball system, trained after the account was formed, reproduces the inert residual probes but supports the key--value localisation only for one of three parameters (\S\ref{sec:expb}). (iii)~\emph{Seeds.} Three training seeds per model; the
 cluster bootstrap over three seeds under-estimates between-seed variance, so the confirmatory $p$-values are conditional on
 these seeds, and seed-level results are reported alongside. (iv)~\emph{Approximation floor.} The predictors stay a factor
-\Aratio\ above the Bayes risk averaged over contexts (H1c rejected). \PENDING{scaleclaim} (v)~\emph{Control recipe.}
+\Aratio\ above the Bayes risk averaged over contexts (H1c rejected). Tripling the training steps or doubling the depth brings it to about \ScLongRatio, not to 1 (one seed each). (v)~\emph{Control recipe.}
 Pure closed-loop BPTT, as pre-registered, did not train on open-loop-unstable plants; the controller results are for a
 DAgger warm start followed by cost fine-tuning on a log objective; fine-tuning on the raw cost or on its CVaR diverged. (vi)~\emph{Baselines in MuJoCo.} Feature RLS is
 linear in its parameters and cannot represent stick--slip; the structured identifier of \S\ref{sec:expb} is the
