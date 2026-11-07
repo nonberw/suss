@@ -1,3 +1,24 @@
+\section{A construction that gathers the sufficient statistics}\label{app:construct}
+\begin{proposition}[Two attention layers suffice to gather the sufficient statistics]\label{prop:construct}
+Let token $t$ be $e_t=(z_t,1,\pi_t)$, with $\pi_t\in\{0,1\}^T$ a one-hot position. There is a two-layer causal
+\emph{linear}-attention network (one head in layer~1, $p$ heads in layer~2, no MLPs) whose residual stream at every
+position $t$ contains $S_t$ and $C_t$ \emph{exactly}, together with $z_t$ and $t$. Consequently,
+the Bayes predictor of Theorem~\ref{thm:bayes} is a fixed continuous function $\phi(S_t,C_t,z_t)$ of the token-$t$
+residual alone. A token-wise MLP approximates it uniformly on any compact set, so in this construction all
+further depth is free for the ``solve'' $\phi$ rather than for gathering data.
+\end{proposition}
+\begin{proof}
+Appendix~\ref{app:proofs}: a previous-token head, then $p$ constant-query linear-attention heads.
+\end{proof}
+
+Proposition~\ref{prop:construct} is in the spirit of earlier
+constructions~\citep{akyurek2022learning,bai2023transformers,vonoswald2023transformers}. Its role is to make a
+\emph{falsifiable} mechanistic prediction for trained models. If a
+trained transformer works this way, a linear probe should decode the normalised statistics
+$(S_t,C_t)/(t{+}1)$ no later in depth than it decodes the posterior mean
+$\hat\theta_t$ (H2c). If it instead refines $\hat\theta$ iteratively in the style of GD~\citep{vonoswald2023transformers},
+$\hat\theta$ should become decodable gradually, with no early peak for the statistics.
+
 \section{Omitted proofs}\label{app:proofs}
 
 \paragraph{Proof of Theorem~\ref{thm:bayes}.}
@@ -60,3 +81,14 @@ episode $A$'s context followed by episode $B$'s query token. \textbf{Compute.} E
 \input{scale_table}
 \section{Dimension-matched probe controls}\label{app:controls}
 \input{controls_table}
+
+\section{Experiment B: curves and parameter readability}\label{app:figb}
+\begin{figure}[h]
+\centering\includegraphics[width=\linewidth]{figs/fig_b.pdf}
+\vspace{-6mm}
+\caption{\textbf{B} (3 seeds). (a, b)~Normalised one-step error vs.\ context length. On the pendulum the transformer
+is on par with physics-feature RLS, which there has the true model class up to discretisation. On the stick--slip block it beats RLS by $\BKratio\times$. (c)~Probe $R^2$ at $t{=}47$ for each physical
+parameter, from the key--value fast weights (best block) vs.\ from the residual stream (P: pendulum, K: block, B: bouncing ball).}
+\label{fig:b}
+\vspace{-3mm}
+\end{figure}

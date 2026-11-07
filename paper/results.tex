@@ -86,17 +86,9 @@ adaptation works.
 
 \section{Experiment B: nonlinear and contact physics in MuJoCo}\label{sec:expb}
 
-\begin{figure}[t]
-\centering\includegraphics[width=\linewidth]{figs/fig_b.pdf}
-\vspace{-6mm}
-\caption{\textbf{B} (3 seeds). (a, b)~Normalised one-step error vs.\ context length. On the pendulum the transformer
-is on par with physics-feature RLS, which there has the true model class up to discretisation. On the stick--slip block it beats RLS by $\BKratio\times$. (c)~Probe $R^2$ at $t{=}47$ for each physical
-parameter, from the key--value fast weights (best block) vs.\ from the residual stream (P: pendulum, K: block, B: bouncing ball).}
-\label{fig:b}
-\vspace{-3mm}
-\end{figure}
 
-\paragraph{Prediction.} Averaged over $t{=}24..47$, the normalised error on the pushed block with Coulomb friction is
+
+\paragraph{Prediction.} Averaged over $t{=}24..47$ (curves in Fig.~\ref{fig:b}, appendix), the normalised error on the pushed block with Coulomb friction is
 \BKTF\ for the transformer and \BKRLS\ for physics-feature RLS (H4a: difference \HfourA\ \HfourAci, Holm $p\PHfoura$).
 For comparison, the no-context MLP gets \BKMLP, nominal-parameter simulation \BKNom, and simulation with the true parameters
 \BKOrc. Feature RLS is linear in its parameters and cannot represent stick--slip, so we add a structured identifier

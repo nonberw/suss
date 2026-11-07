@@ -67,18 +67,6 @@ must \emph{spend} control effort on excitation. We measure the information gathe
 $\log\det(\Lambda_0+\sigma^{-2}S_8)$ with $\Lambda_0{=}I$; note that even $u\equiv0$ yields a non-zero value, from the
 state block of $S_8$, so the relevant comparison is between controllers, not against zero.
 
-\begin{proposition}[Two attention layers suffice to gather the sufficient statistics]\label{prop:construct}
-Let token $t$ be $e_t=(z_t,1,\pi_t)$, with $\pi_t\in\{0,1\}^T$ a one-hot position. There is a two-layer causal
-\emph{linear}-attention network (one head in layer~1, $p$ heads in layer~2, no MLPs) whose residual stream at every
-position $t$ contains $S_t$ and $C_t$ \emph{exactly}, together with $z_t$ and $t$. Consequently,
-the Bayes predictor of Theorem~\ref{thm:bayes} is a fixed continuous function $\phi(S_t,C_t,z_t)$ of the token-$t$
-residual alone. A token-wise MLP approximates it uniformly on any compact set, so in this construction all
-further depth is free for the ``solve'' $\phi$ rather than for gathering data.
-\end{proposition}
-\begin{proof}
-Appendix~\ref{app:proofs}: a previous-token head, then $p$ constant-query linear-attention heads.
-\end{proof}
-
 \begin{remark}[Where an estimate can live without appearing in any activation]\label{rem:fw}
 Consider a softmax head with keys $k_s$, values $v_s$ and query $q$, and suppose its scores are small,
 $|q^\top k_s|/\sqrt{d_h}\ll1$. This is the near-uniform regime, with normalised attention entropy close to 1. Expanding
@@ -88,18 +76,11 @@ the softmax to first order,
 \qquad \widehat{\mathrm{Cov}}(v,k)=\tfrac1{t+1}\textstyle\sum_{s\le t}(v_s-\bar v)k_s^\top .
 \label{eq:fw}
 \end{equation}
-The head is therefore an affine map of the query, and its matrix is the key--value covariance (``fast
-weights''~\citep{vonoswald2023transformers}), which is spread over all context positions. A transformer can thus apply
-a parameter estimate to the query, with the predictor's Jacobian $\partial\hat y_t/\partial z_t$ playing the role of
-$\hat\theta_t$, while $\hat\theta_t$ never appears as a vector in the residual stream. Two predictions follow. A residual
-probe for $\hat\theta$ can fail even when the model is near Bayes-optimal; a probe on $\widehat{\mathrm{Cov}}(v,k)$, and
-patching of keys and values alone, should succeed. Section~\ref{sec:expa} tests both.
+The head is an affine map of the query whose matrix is the key--value covariance (``fast
+weights''~\citep{vonoswald2023transformers}), spread over all context positions. So an estimate can be applied to the
+query, showing up in the Jacobian $\partial\hat y_t/\partial z_t$, without ever being a vector in the residual stream: a
+residual probe for $\hat\theta$ can fail while a probe on $\widehat{\mathrm{Cov}}(v,k)$ and patching of keys and values
+succeed. Section~\ref{sec:expa} tests both.
 \end{remark}
 
-Proposition~\ref{prop:construct} is in the spirit of earlier
-constructions~\citep{akyurek2022learning,bai2023transformers,vonoswald2023transformers}. Its role is to make a
-\emph{falsifiable} mechanistic prediction for trained models. If a
-trained transformer works this way, a linear probe should decode the normalised statistics
-$(S_t,C_t)/(t{+}1)$ no later in depth than it decodes the posterior mean
-$\hat\theta_t$ (H2c). If it instead refines $\hat\theta$ iteratively in the style of GD~\citep{vonoswald2023transformers},
-$\hat\theta$ should become decodable gradually, with no early peak for the statistics.
+Appendix~\ref{app:construct} gives a two-layer linear-attention construction that places the exact statistics $(S_t,C_t)$ in the residual stream; it motivated the pre-registered ``statistics first, solve later'' prediction (H2c).

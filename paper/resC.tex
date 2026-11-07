@@ -41,8 +41,7 @@ unchanged (\CBCfail\% to \CTFfail\%) and makes the failures more severe (mean \C
 \CbcMinusFt\ \CbcMinusFtci): the log objective compresses the tail. Objectives that weight the tail do not fix this: fine-tuning the same warm
 start on the raw cost or on the CVaR of the worst 10\% of plants diverged within 500--1000 steps (validation median
 above 18 and failures above 67\% for raw cost; median above 19 and failures above 74\% for CVaR by step 1500), and
-validation-based selection returned the warm start itself in both cases (Table~\ref{tab:pilots}). With gradients through
-open-loop-unstable closed loops, the catastrophic plants dominate any objective that does not compress them.
+validation-based selection returned the warm start itself in both cases (Table~\ref{tab:pilots}). The catastrophic plants dominate any objective that does not compress them.
 
 \paragraph{Exploratory: what the controller identifies, and where.} On its own closed-loop trajectories, the
 controller's feedback Jacobian $-\partial u_t/\partial x_t$, its functional gain, approaches the oracle LQR gain as the
