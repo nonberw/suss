@@ -37,12 +37,18 @@ mean = L.predict(theta.unsqueeze(1).expand(-1, T, -1, -1), tok)
 with torch.no_grad():
     y = model(tok)
 th_r = L.ridge_theta(S, C)
+jac_err = []  # distance of the query Jacobian (the estimate the network applies) from the true parameters
+for t in range(T):
+    f = lambda q: model(torch.cat([tok[:, :t], q.unsqueeze(1)], 1))[:, t].sum(0)
+    J = torch.autograd.functional.jacobian(f, tok[:, t].clone()).permute(1, 0, 2)
+    jac_err.append(float(((J - theta) ** 2).sum((-1, -2)).sqrt().mean()))
 r4 = lambda v: [round(float(x), 6) for x in v]
 ref = {
     "episodes": E,
     "excess_tf": r4(((y - mean) ** 2).sum(-1).mean(0)),
     "excess_bayes": r4(((L.predict(th_r, tok) - mean) ** 2).sum(-1).mean(0)),
     "param_err_bayes": r4(((th_r - theta.unsqueeze(1)) ** 2).sum((-1, -2)).sqrt().mean(0)),
+    "param_err_tf": r4(jac_err),
     "prior": {"sigma": L.SIGMA, "sd_a": L.SD_A, "sd_b": L.SD_B, "rho_max": L.RHO_MAX},
 }
 json.dump(ref, open("docs/demo/reference.json", "w"), separators=(",", ":"))

@@ -91,7 +91,7 @@
   </section>
   <section class="card">
     <h2>What it thinks the system is</h2>
-    <p class="sub">The hidden parameters [A&nbsp;B], the Bayes estimate from the context so far, and the transformer's own estimate: the matrix it applies to the newest input, &part;&#375;/&part;z.</p>
+    <p class="sub">The hidden parameters [A&nbsp;B], the Bayes estimate from the context so far, and the transformer's own estimate: the matrix it applies to the newest input, &part;&#375;/&part;z. In the first few steps the two disagree; with more context the transformer's estimate converges to the Bayes one.</p>
     <div class="mats" id="mats"></div>
   </section>
   <section class="card">
@@ -99,14 +99,14 @@
     <p class="sub">Top: prediction error against the noise-free next state. Bottom: distance of each estimate from the true [A&nbsp;B]. Faint bands: average over 4096 episodes.</p>
     <svg id="err" class="chart" viewBox="0 0 440 175" role="img" aria-label="Prediction error against context length"></svg>
     <svg id="perr" class="chart" viewBox="0 0 440 175" role="img" aria-label="Parameter error against context length"></svg>
-    <div class="legend"><span class="k-tf">transformer</span><span class="k-bayes">Bayes-optimal</span><span class="k-bayes k-avg">average</span></div>
+    <div class="legend"><span class="k-tf">transformer</span><span class="k-bayes">Bayes-optimal</span></div>
   </section>
 </div>
 
 <section class="explain">
   <h2>What you are looking at</h2>
   <p>The transformer was trained on many random systems, then frozen. It can only adapt through its context window, the way a language model picks up a pattern from a prompt. While data are scarce it is as good as the exact Bayes-optimal estimator; with more context it levels off slightly above it, 1.59&times; the Bayes excess risk on average.</p>
-  <p>The middle panel is the paper's functional test: the derivative of the prediction with respect to the newest input is the parameter estimate the network is effectively using, and it tracks the Bayes estimate. The paper then shows where the evidence for that estimate is stored: in the attention keys and values of the last two blocks, not in the residual stream. Swapping only those keys and values with another episode's moves 91&ndash;94% of the behaviour.</p>
+  <p>The middle panel is the paper's functional test: the derivative of the prediction with respect to the newest input is the parameter estimate the network is effectively using. After a handful of steps it tracks the Bayes estimate; in the first steps it does not, even though the predictions themselves are already close to optimal, so early on the network is not yet applying a linear estimate. The paper then shows where the evidence for that estimate is stored: in the attention keys and values of the last two blocks, not in the residual stream. Swapping only those keys and values with another episode's moves 91&ndash;94% of the behaviour.</p>
   <p><a href="../">Project page</a> &middot; <a href="https://github.com/nonberw/suss/blob/main/paper/main.pdf">Paper (PDF)</a> &middot; <a href="https://github.com/nonberw/suss">Code</a> &middot; <a href="https://github.com/nonberw/suss/blob/main/docs/demo/model.js">This model in 150 lines of JavaScript</a></p>
 </section>
 <footer>The network runs on your device in plain JavaScript (no server, no library). Seed <span id="seedv">&ndash;</span>: <a id="perma" href="#">link to this system</a>.</footer>
@@ -250,9 +250,9 @@
       pTf.push(frob(jac(t), ep.theta)); pB.push(frob(ep.bayes[t], ep.theta));
     }
     logChart("err", [{ v: eB, c: "--bayes", dash: true }, { v: eTf, c: "--tf" }],
-             [{ v: ref.excess_bayes, c: "--bayes" }], 1e-5, 3, "prediction error");
+             [{ v: ref.excess_tf, c: "--tf" }, { v: ref.excess_bayes, c: "--bayes" }], 1e-5, 3, "prediction error");
     logChart("perr", [{ v: pB, c: "--bayes", dash: true }, { v: pTf, c: "--tf" }],
-             [{ v: ref.param_err_bayes, c: "--bayes" }], 0.01, 2, "parameter error");
+             [{ v: ref.param_err_tf, c: "--tf" }, { v: ref.param_err_bayes, c: "--bayes" }], 0.01, 2, "parameter error");
   }
   function cellStyle(v) {
     var a = Math.min(Math.abs(v) / 1.1, 1) * 0.55;
