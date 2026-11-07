@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "If you use this code or the results, please cite it as below."
+title: "What a Transformer Learns When It Adapts to Unknown Physics In-Context: Probing, Patching and Controlling"
+authors:
+  - family-names: Zhambakin
+    given-names: Anuar
+repository-code: "https://github.com/nonberw/suss"
+url: "https://github.com/nonberw/suss"
+license: MIT
+version: "0.1.2"
+date-released: "2026-11-07"
+keywords:
+  - in-context learning
+  - system identification
+  - adaptive control
+  - dual control
+  - mechanistic interpretability
+  - transformers
+  - MuJoCo
+abstract: >-
+  A pre-registered mechanistic study of small transformers trained from scratch to adapt in-context to unknown
+  dynamics: linear systems with unknown parameters, one-degree-of-freedom MuJoCo systems with contact, and linear
+  adaptive control. The predictors are Bayes-optimal while data are scarce, then settle at an approximation floor;
+  the pre-registered residual-stream mechanism is rejected; exploratory analyses with dimension-matched controls
+  localise the sufficient statistics of the context in the attention key-value memory of the last two blocks.
+  The pre-registration is the commit tagged prereg-d134c5a.

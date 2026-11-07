@@ -14,7 +14,7 @@ Format rules (from the author-information page and the official template):
 ## What you (the author) must do
 
 1. **OpenReview account.** Create or log in at https://openreview.net. A profile can take a few days to be approved if you use a non-institutional email, so **do this first**.
-2. **Check the authors line** in `paper/main.tex` (`\coltauthor{...}`, marked `TODO(author)`): L4DC is single-blind, so put your real name, an email and an affiliation (or "Independent researcher"). The `\Name{}` macro of the jmlr class needs at least two words, so `\Name{First Last}` works and a single-word handle does not. Rebuild with `cd paper && tectonic main.tex`.
+2. **Authors line** in `paper/main.tex` is set to Anuar Zhambakin, Independent researcher, with the GitHub URL in the email slot. If you want a contact email in the paper instead, replace the URL in `\Email{...}` and rebuild with `bash scripts/package.sh`.
 3. Go to https://openreview.net/group?id=L4DC.org/2027 and click the submission link.
 4. Run `bash scripts/package.sh` (or `scripts/run_all.sh`, which ends with it). It writes `submission/main.pdf`, `submission/supplement.zip` (pre-registration, deviations log, literature check, code, tests, result summaries, pilot logs) and `submission/arxiv_source.zip`. Upload `submission/main.pdf` as the paper and `submission/supplement.zip` as the supplementary material.
 5. Fill in the title, abstract (copy it from the PDF), keywords and subject areas (learning-based control, system identification).
@@ -23,7 +23,7 @@ Format rules (from the author-information page and the official template):
 
 ## Pre-registration timestamp (recommended, 10 minutes)
 
-The pre-registration lives in the git history (tag `prereg-d134c5a`). To give it an independent timestamp: make the GitHub repo public, connect it to Zenodo (https://zenodo.org/account/settings/github/), create a GitHub release from the tag, and Zenodo will mint a DOI for that snapshot. Add the DOI to the paper's pre-registration paragraph.
+The pre-registration lives in the git history (tag `prereg-d134c5a`). The repo already contains `.zenodo.json` and `CITATION.cff`. To get a DOI: log in at https://zenodo.org with GitHub, open https://zenodo.org/account/settings/github/, switch `nonberw/suss` ON, then publish a new GitHub release (Zenodo only archives releases made after it is switched on). Note: the DOI time-stamps the archived snapshot (November 2026, after the experiments); it does not by itself prove that the pre-registration predates the experiments, which only the git commit date records.
 
 ## Backup venues if L4DC is missed or the paper is rejected
 

@@ -58,9 +58,13 @@ paper/           the paper: main.tex -> main.pdf, numbers.tex (generated), figs/
 docs/            LITERATURE.md (novelty check, every reference verified), DEVIATIONS.md, SUBMISSION.md
 ```
 
+## Cite
+
+Anuar Zhambakin. *What a Transformer Learns When It Adapts to Unknown Physics In-Context: Probing, Patching and Controlling.* Preprint, 2026. https://github.com/nonberw/suss (see `CITATION.cff`).
+
 ## Status
 
-Preprint (v0.1.x). Not peer reviewed. Target venue: L4DC 2027; see `docs/SUBMISSION.md`. Single author, with heavy AI assistance (disclosed in the paper). Issues and "you're wrong because" welcome.
+Preprint (v0.1.x). Not peer reviewed. Target venue: L4DC 2027; see `docs/SUBMISSION.md`. Single author (Anuar Zhambakin), with heavy AI assistance (disclosed in the paper). Issues and "you're wrong because" welcome.
 
 ## License
 

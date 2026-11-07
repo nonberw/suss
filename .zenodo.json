@@ -1,0 +1,29 @@
+{
+  "title": "SUSS: What a Transformer Learns When It Adapts to Unknown Physics In-Context (code, pre-registration, results, paper)",
+  "upload_type": "software",
+  "creators": [
+    {
+      "name": "Zhambakin, Anuar",
+      "affiliation": "Independent researcher"
+    }
+  ],
+  "description": "<p>Code, pre-registration, results and paper for a pre-registered mechanistic study of small transformers trained from scratch to adapt in-context to unknown dynamics (linear systems with unknown parameters, MuJoCo systems with contact, linear adaptive control).</p><p>The pre-registration (hypotheses, metrics, seeds and statistical tests) is the git commit tagged <code>prereg-d134c5a</code> (2026-11-05), made before the main experiments; this archive is a later snapshot of the repository and does not by itself time-stamp the pre-registration. All deviations are listed in <code>docs/DEVIATIONS.md</code>.</p>",
+  "license": "MIT",
+  "keywords": [
+    "in-context learning",
+    "system identification",
+    "adaptive control",
+    "dual control",
+    "mechanistic interpretability",
+    "transformers",
+    "pre-registration"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/nonberw/suss",
+      "relation": "isSupplementTo",
+      "scheme": "url"
+    }
+  ],
+  "access_right": "open"
+}
