@@ -1,0 +1,21 @@
+\begin{table}[h]
+\centering\footnotesize
+\caption{Pre-registration 2 (tag \texttt{prereg2-94b6cf8}), registered before these analyses ran. H6: one-sided episode-level bootstrap per model; H7: one-sided paired $t$-test over 10 training seeds (difference in mean squared distance of the $A$ block, $t{=}8,\dots,47$). Holm correction over all 11 tests.}\label{tab:confirm}
+\begin{tabular}{p{4.7cm}lrrc}
+\toprule
+test & model & estimate [95\% CI] & $p_{\rm Holm}$ & holds \\
+\midrule
+H6a: KV-only patching of the late blocks: $\tau\ge 0.8$ & long60k & 0.94 [0.93, 0.96] & $<10^{-3}$ & yes \\
+H6b: KV-only patching of block 1: $\tau\le 0.3$ & long60k & 0.13 [0.10, 0.17] & $<10^{-3}$ & yes \\
+H6c: fast weights vs.\ best residual readout ($d_{\rm model}$ dims): gap $\ge 0.15$ & long60k & 0.35 [0.33, 0.37] & $<10^{-3}$ & yes \\
+H6a: KV-only patching of the late blocks: $\tau\ge 0.8$ & deep8 & 0.85 [0.84, 0.86] & $<10^{-3}$ & yes \\
+H6b: KV-only patching of block 1: $\tau\le 0.3$ & deep8 & 0.01 [0.00, 0.02] & $<10^{-3}$ & yes \\
+H6c: fast weights vs.\ best residual readout ($d_{\rm model}$ dims): gap $\ge 0.15$ & deep8 & 0.30 [0.29, 0.31] & $<10^{-3}$ & yes \\
+H6a: KV-only patching of the late blocks: $\tau\ge 0.8$ & wide256 & 0.96 [0.95, 0.97] & $<10^{-3}$ & yes \\
+H6b: KV-only patching of block 1: $\tau\le 0.3$ & wide256 & 0.10 [0.06, 0.14] & $<10^{-3}$ & yes \\
+H6c: fast weights vs.\ best residual readout ($d_{\rm model}$ dims): gap $\ge 0.15$ & wide256 & 0.21 [0.20, 0.22] & $<10^{-3}$ & yes \\
+H7a: prior shift: $J$ closer to training-prior ridge than to new-prior Bayes & 10 seeds (10/10) & 0.0013 [0.0010, 0.0017] & $<10^{-3}$ & yes \\
+H7b: prior shift: $J$ closer to training-prior ridge than to OLS & 10 seeds (10/10) & 0.0094 [0.0093, 0.0095] & $<10^{-3}$ & yes \\
+\bottomrule
+\end{tabular}
+\end{table}

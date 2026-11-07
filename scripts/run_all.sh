@@ -50,6 +50,11 @@ python scripts/scale_a.py --tag wide256 --d_model 256
 python scripts/scale_a.py --tag small64 --d_model 64 --n_layer 2
 for s in 0 1 2; do python scripts/scale_a.py --tag n4m2_s$s --n 4 --m 2 --seed $s; done
 
+# ---- Pre-registration 2 (PREREGISTRATION_2.md, tag prereg2-94b6cf8): confirmatory tests, CPU
+$CPU python scripts/confirm_a.py                # KV account on long60k, deep8, wide256 (+ small64)
+$CPU python scripts/confirm_b.py                # prior shift: query Jacobian vs ridge (training / new prior) and OLS
+python scripts/confirm_stats.py                 # the 11 registered tests, Holm
+
 # ---- Statistics, numbers, figures, tables, paper, packages
 python scripts/analyze.py
 python scripts/make_numbers.py
@@ -59,6 +64,7 @@ python scripts/pilot_table.py
 python scripts/seed_table.py
 python scripts/scale_table.py
 python scripts/controls_table.py
+python scripts/confirm_table.py
 python scripts/check_macros.py
 (cd paper && "$TECTONIC" -X compile --keep-intermediates main.tex)
 bash scripts/package.sh

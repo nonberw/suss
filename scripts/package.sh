@@ -29,7 +29,7 @@ with zipfile.ZipFile("submission/arxiv_source.zip", "w", zipfile.ZIP_DEFLATED) a
 print("ok")
 EOF
 cp paper/main.pdf submission/main.pdf
-python scripts/arxiv_meta.py > /dev/null
 # check that the arXiv variant builds (XeTeX here; arXiv itself uses pdfLaTeX)
 rm -rf submission/arxiv_check && mkdir -p submission/arxiv_check && (cd submission/arxiv_check && unzip -q ../arxiv_source.zip && "$TECTONIC" -X compile main.tex > /dev/null && cp main.pdf ../main_arxiv_preview.pdf) && rm -rf submission/arxiv_check
+python scripts/arxiv_meta.py > /dev/null  # after the preview, so the page count is current
 ls -la submission

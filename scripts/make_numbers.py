@@ -1,11 +1,24 @@
 """Write paper/numbers.tex: every number quoted in the paper, as LaTeX macros computed from results/summary.json.
 Missing results render as '??' so nothing is ever typed by hand."""
 import json
+import re
 
 import numpy as np
 
 S = json.load(open("results/summary.json"))
 M = {}
+
+
+def tidy(s):
+    """Plain numbers and ranges ('a--b') must typeset the same in text and in math: '--' in math mode would print two
+    minus signs. Ranges get an en-dash in an \\mbox, negative numbers a real minus; equal ends collapse to one number."""
+    m = re.fullmatch(r"(-?[\d.]+)(?:--(-?[\d.]+))?", s)
+    if not m:
+        return s
+    ends = [e for e in m.groups() if e is not None]
+    if len(ends) == 2 and ends[0] == ends[1]:
+        ends = ends[:1]
+    return r"\mbox{--}".join(e.replace("-", r"\ensuremath{-}", 1) if e.startswith("-") else e for e in ends)
 
 
 def put(name, fn, fmt="{:.2f}"):
@@ -16,7 +29,7 @@ def put(name, fn, fmt="{:.2f}"):
             v = fn()
         if not isinstance(v, str) and (v != v):  # nan
             raise ValueError("missing")
-        M[name] = v if isinstance(v, str) else fmt.format(v)
+        M[name] = tidy(v if isinstance(v, str) else fmt.format(v))
     except Exception:
         M[name] = "??"
 
@@ -248,6 +261,26 @@ put("ScFourFinite", lambda: sc["n4m2_s0"]["npsigma2"] * 47 / (47 - (sc["n4m2_s0"
 put("ScFourTR", lambda: "{:.3f}".format(np.mean([sc[f"n4m2_s{s}"]["t_excess_ridge_47"] for s in range(3) if f"n4m2_s{s}" in sc])))
 put("ScFourRatio", lambda: rng_list([sc[f"n4m2_s{s}"]["ratio_mean_t4"] for s in range(3) if f"n4m2_s{s}" in sc], "{:.1f}"))
 put("ScFourJacEnd", lambda: rng_list([sc[f"n4m2_s{s}"]["jac_r2"]["47"] for s in range(3) if f"n4m2_s{s}" in sc]))
+# ---- pre-registration 2 (results/confirm/summary.json)
+try:
+    CF = json.load(open("results/confirm/summary.json"))
+except FileNotFoundError:
+    CF = {"tests": [], "a": {}, "b_per_seed": {}, "verdict": {}}
+CFT = {t["id"]: t for t in CF["tests"]}
+CFM = ("long60k", "deep8", "wide256")
+put("CfTauLate", lambda: rng_list([CF["a"][m]["tau_late"] for m in CFM]))
+put("CfTauOne", lambda: rng_list([CF["a"][m]["tau_block1"] for m in CFM]))
+put("CfKv", lambda: rng_list([CF["a"][m]["r2_best_kv"] for m in CFM]))
+put("CfRes", lambda: rng_list([CF["a"][m]["r2_best_resid"] for m in CFM]))
+put("CfGap", lambda: rng_list([CF["a"][m]["gap"] for m in CFM]))
+put("CfSmallTauLate", lambda: CF["a"]["small64"]["tau_late"]); put("CfSmallGap", lambda: CF["a"]["small64"]["gap"])
+put("CfNsix", lambda: sum(CFT[f"{h}|{m}"]["supported"] for h in ("H6a", "H6b", "H6c") for m in CFM), "{:d}")
+for h in ("H7a", "H7b"):
+    put(f"Cf{h[1:].replace('7', 'Seven')}N", lambda h=h: CFT[h]["n_pos"], "{:d}")
+    put(f"Cf{h[1:].replace('7', 'Seven')}P", lambda h=h: ("<10^{-3}" if CFT[h]["p_holm"] < 1e-3 else "={:.3f}".format(CFT[h]["p_holm"])))
+for k in ("ridge_train", "bayes_new", "ols"):
+    put("CfD" + k.replace("_", "").replace("ridgetrain", "Train").replace("bayesnew", "New").replace("ols", "Ols"),
+        lambda k=k: np.mean([v[k] for v in CF["b_per_seed"].values()]), "{:.3f}")
 # ---- Holm
 for k, v in S.get("holm", {}).items():
     put("P" + k.replace("1", "one").replace("2", "two").replace("3", "three").replace("4", "four").replace("5", "five"),

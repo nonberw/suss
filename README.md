@@ -7,6 +7,7 @@
 [![Paper](https://img.shields.io/badge/paper-PDF-b31b1b.svg)](paper/main.pdf)
 [![Project page](https://img.shields.io/badge/project-page-1f6feb.svg)](https://nonberw.github.io/suss/)
 [![Live demo](https://img.shields.io/badge/live-demo-8250df.svg)](https://nonberw.github.io/suss/demo/)
+[![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20models-nonberew%2Fsuss--models-ffd21e.svg)](https://huggingface.co/nonberew/suss-models)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24031898.svg)](https://doi.org/10.5281/zenodo.24031898)
 [![tests](https://github.com/nonberw/suss/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/nonberw/suss/actions/workflows/tests.yml)
 [![Pre-registered](https://img.shields.io/badge/pre--registered-prereg--d134c5a-2ea44f.svg)](https://github.com/nonberw/suss/blob/prereg-d134c5a/PREREGISTRATION.md)
@@ -19,7 +20,7 @@ You hand a small transformer 48 steps of a system it has never seen. Unknown mas
 
 A pre-registered, mechanistic study, trained from scratch on a laptop GPU (RTX 3050 Ti, 4 GB). Hypotheses were committed before any main experiment ran (tag `prereg-d134c5a`). Everything that changed afterwards, including two bugs we found in our own code and an external review we acted on, is in [`docs/DEVIATIONS.md`](docs/DEVIATIONS.md).
 
-**[Paper (PDF)](paper/main.pdf)** | **[Live demo](https://nonberw.github.io/suss/demo/)** | **[Project page](https://nonberw.github.io/suss/)** | **[Quickstart notebook](notebooks/quickstart.ipynb)** | **[Trained models](https://github.com/nonberw/suss/releases/tag/v0.1.3)** | **[Pre-registration](PREREGISTRATION.md)** | **[Deviations](docs/DEVIATIONS.md)**
+**[Paper (PDF)](paper/main.pdf)** | **[Live demo](https://nonberw.github.io/suss/demo/)** | **[Project page](https://nonberw.github.io/suss/)** | **[Quickstart notebook](notebooks/quickstart.ipynb)** | **[Trained models](https://huggingface.co/nonberew/suss-models)** | **[Pre-registration](PREREGISTRATION.md)** | **[Deviations](docs/DEVIATIONS.md)**
 
 ## TL;DR
 
@@ -29,7 +30,7 @@ Numbers are from `results/summary.json`: 3 pre-registered training seeds per mod
 
 **2. The pre-registered mechanism is wrong, and we say so.** We bet the model writes its parameter estimate into the residual stream. It doesn't, at least not linearly or causally: the best linear probe gets R^2 = 0.19 (threshold 0.8), steering along the probe does nothing, and swapping the probe subspace between episodes transfers 0.0001 of the behaviour. Linear decodability told us nothing about causal use.
 
-**3. The sufficient statistics live in the key-value memory.** Exploratory, with the controls a reviewer asked for. The attention fast weights Cov(v, k) of the last two blocks read the normalised sufficient statistics (S, C) with R^2 = 0.92 and the Bayes estimate with 0.90. Squash them to 128 dims and they still read 0.84-0.87; the residual stream tops out at 0.58-0.61 however you read it (query position, all 48 positions, mean-pooled, last context token). Shuffled labels: 0.00. Causally: swap only the context keys and values of blocks 3-4 with another episode's, touch nothing at the query, and 91-94% of the other episode's behaviour transfers. The same swap on block 1 alone: 7-16%. Two heads per block do most of it (0.78-0.82 vs 0.41-0.51 for two random heads). Replicated on 7 more seeds trained after the hypothesis was formed. The model's input Jacobian matches the Bayes estimate (R^2 = 0.92), which is what you'd expect if attention applies the stored statistics to the query. Fun twist: the pre-registered "statistics first, solve later" story was right about the *order* and wrong about the *place*.
+**3. The sufficient statistics live in the key-value memory.** Exploratory, with the controls a reviewer asked for. The attention fast weights Cov(v, k) of the last two blocks read the normalised sufficient statistics (S, C) with R^2 = 0.92 and the Bayes estimate with 0.90. Squash them to 128 dims and they still read 0.84-0.87; the residual stream tops out at 0.58-0.61 however you read it (query position, all 48 positions, mean-pooled, last context token). Shuffled labels: 0.00. Causally: swap only the context keys and values of blocks 3-4 with another episode's, touch nothing at the query, and 91-94% of the other episode's behaviour transfers. The same swap on block 1 alone: 7-16%. Two heads per block do most of it (0.78-0.82 vs 0.41-0.51 for two random heads). Replicated on 7 more seeds trained after the hypothesis was formed. Then a second pre-registration ([`PREREGISTRATION_2.md`](PREREGISTRATION_2.md), tag `prereg2-94b6cf8`) put it on the line before looking: on three architectures it was never derived from (deeper, wider, trained longer), all 9 tests hold. Swapping the late blocks' keys and values moves 0.85-0.96 of the behaviour, block 1 alone 0.01-0.13, and at matched dimension the key-value memory beats the residual stream by 0.21-0.35 R^2. Under a shifted prior the network keeps applying its *training* prior (10/10 seeds), which is exactly what a fixed Bayes estimator has to do. The 0.1M-parameter model is where it stops: there the residual stream reads better. The model's input Jacobian matches the Bayes estimate (R^2 = 0.92), which is what you'd expect if attention applies the stored statistics to the query. Fun twist: the pre-registered "statistics first, solve later" story was right about the *order* and wrong about the *place*.
 
 **4. Physics.** On a block pushed around with Coulomb friction, the transformer beats linear-in-parameters physics regression by 3.2x and even beats structured system identification with the exact MuJoCo simulator (0.0058 vs 0.011): from (x, xdot) alone the contact state is hidden, and the transformer recovers it from history. On the pendulum, 1/m reads from key-value memory with R^2 = 0.97-0.98 vs 0.32-0.44 from activations. On a bouncing ball added later, the story only half-repeats, and we say that too.
 
@@ -64,6 +65,16 @@ Plus: a scale study (longer, deeper, wider, a 4-state/2-input system), and the t
 | Replication on 7 new seeds, 10 in total | KV swap 0.93 +- 0.01, KV probe 0.91 +- 0.01 |
 | Pushed block: structured sysID with the exact MuJoCo simulator | 0.011, still behind the transformer's 0.0058 |
 | Controller: median cost / oracle and plants failed | 1.69 and 10% (CE + dither: 1.57 and 1.4%) |
+
+**Pre-registration 2** ([`PREREGISTRATION_2.md`](PREREGISTRATION_2.md), tag `prereg2-94b6cf8`, registered and pushed before the analyses ran): 11 of 11 tests hold, Holm-corrected. Details: [`results/confirm/SUMMARY.md`](results/confirm/SUMMARY.md).
+
+| Confirmatory test | Result | Verdict |
+|---|---|---|
+| H6a: swapping only the late blocks' context keys and values transfers >= 0.8 (long60k, deep8, wide256) | 0.85-0.96 | supported in all 3 |
+| H6b: block 1 alone transfers <= 0.3 | 0.01-0.13 | supported in all 3 |
+| H6c: key-value memory beats the best residual readout by >= 0.15 R^2 at matched dimension | 0.85-0.92 vs 0.52-0.71 | supported in all 3 |
+| H7a: under a shifted prior, the query Jacobian is closer to ridge with the training prior than to the new prior's Bayes estimate | 0.026 vs 0.028, 10/10 seeds | supported |
+| H7b: ... and closer than to OLS | 0.026 vs 0.036, 10/10 seeds | supported |
 
 ## Figures
 
@@ -112,7 +123,7 @@ ck = torch.load("runs/a/seed0.pt", map_location="cpu")
 model = GPT(GPTConfig(**ck["cfg"])).eval(); model.load_state_dict(ck["state"])
 ```
 
-All 51 checkpoints used in the paper (every seed of every experiment, the controller before and after fine-tuning, the scale study) are in `suss_models.zip` on the [v0.1.3 release](https://github.com/nonberw/suss/releases/tag/v0.1.3); the manifest is [`docs/MODELS.md`](docs/MODELS.md). Unzip at the repo root and every script finds them.
+All 51 checkpoints used in the paper (every seed of every experiment, the controller before and after fine-tuning, the scale study) are on the Hugging Face Hub at [nonberew/suss-models](https://huggingface.co/nonberew/suss-models) and in `suss_models.zip` on the [v0.1.3 release](https://github.com/nonberw/suss/releases/tag/v0.1.3); the manifest is [`docs/MODELS.md`](docs/MODELS.md). Unzip at the repo root and every script finds them.
 
 ## Reproduce everything
 

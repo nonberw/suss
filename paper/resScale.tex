@@ -1,4 +1,4 @@
-\section{Scale, training length and seeds}\label{sec:scale}
+\section{Scale, seeds and a pre-registered confirmation}\label{sec:scale}
 Table~\ref{tab:scale} (appendix; one seed per row, exploratory) asks whether the approximation floor of
 \S\ref{sec:expa} is an artefact of a small model or short training, and whether the Jacobian account survives a
 larger system. \emph{The floor is partly an optimisation and capacity limit.} Tripling the training steps lowers the
@@ -13,3 +13,13 @@ replicate the behaviour (mean excess ratio \RepRatio, mean $\pm$ s.d.\ over \Rep
 (KV-only patching of blocks 3--4 transfers \RepKv; minimum over seeds \RepKvMin), and the readability gap: the fast
 weights read $\hat\theta_{47}$ with \RepFwTheta\ (minimum \RepFwMin), the residual stream with \RepResQ\ at the query and
 \RepResCtx\ over all positions; the residual readout varies more across seeds and reaches \RepResMax\ in the best one.
+\emph{A pre-registered confirmation.} Before looking inside the long-trained, deep and wide models we registered
+(tag \texttt{prereg2-94b6cf8}, Appendix~\ref{app:confirm}) that replacing only the context keys and values of the second half of
+the blocks transfers $\tau{\ge}0.8$, block~1 alone $\tau{\le}0.3$, and that at matched dimension the fast weights read
+$\hat\theta_{47}$ at least 0.15 better than the residual stream. All \CfNsix\ tests hold (Holm over 11): $\tau{=}\CfTauLate$,
+block~1 \CfTauOne, $R^2$ \CfKv\ against \CfRes. The 0.1M-parameter model is the boundary: its fast weights read worse than
+its residual stream (gap \CfSmallGap). A prior shift tests the algorithm: with the $A$ entries four times smaller, the query
+Jacobian stays closer to ridge with the \emph{training} prior than to the Bayes estimate for the new prior (mean squared
+distance \CfDTrain\ vs.\ \CfDNew, $t{\ge}8$) or to OLS (\CfDOls), in \CfSevenaN\ of 10 seeds. Within one episode the network
+cannot know the population changed, so a fixed Bayes estimator must do this; the margin to the new-prior estimate is
+small because the two estimates differ little once $t{\ge}8$.

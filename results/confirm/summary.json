@@ -1,0 +1,341 @@
+{
+ "tests": [
+  {
+   "id": "H6a|long60k",
+   "what": "KV-only patching of the late blocks transfers tau >= 0.8",
+   "est": 0.9444384574890137,
+   "ci": [
+    0.9310945004224778,
+    0.9579458653926849
+   ],
+   "p": 9.999000099990002e-05,
+   "p_holm": 0.0008999100089991002,
+   "supported": true
+  },
+  {
+   "id": "H6b|long60k",
+   "what": "KV-only patching of block 1 transfers tau <= 0.3",
+   "est": 0.13341079652309418,
+   "ci": [
+    0.10171286538243293,
+    0.1673573825508356
+   ],
+   "p": 9.999000099990002e-05,
+   "p_holm": 0.0008999100089991002,
+   "supported": true
+  },
+  {
+   "id": "H6c|long60k",
+   "what": "fast-weight probe beats best residual readout by >= 0.15 R^2 (d_model dims)",
+   "est": 0.34953462885220643,
+   "ci": [
+    0.33404284664071016,
+    0.36796232193460626
+   ],
+   "p": 9.999000099990002e-05,
+   "p_holm": 0.0008999100089991002,
+   "supported": true
+  },
+  {
+   "id": "H6a|deep8",
+   "what": "KV-only patching of the late blocks transfers tau >= 0.8",
+   "est": 0.8456788659095764,
+   "ci": [
+    0.8360786318778992,
+    0.8554230213165284
+   ],
+   "p": 9.999000099990002e-05,
+   "p_holm": 0.0008999100089991002,
+   "supported": true
+  },
+  {
+   "id": "H6b|deep8",
+   "what": "KV-only patching of block 1 transfers tau <= 0.3",
+   "est": 0.010168267413973808,
+   "ci": [
+    0.003040019818581641,
+    0.01744500072672963
+   ],
+   "p": 9.999000099990002e-05,
+   "p_holm": 0.0008999100089991002,
+   "supported": true
+  },
+  {
+   "id": "H6c|deep8",
+   "what": "fast-weight probe beats best residual readout by >= 0.15 R^2 (d_model dims)",
+   "est": 0.300801817310576,
+   "ci": [
+    0.28826556951273197,
+    0.314213825150225
+   ],
+   "p": 9.999000099990002e-05,
+   "p_holm": 0.0008999100089991002,
+   "supported": true
+  },
+  {
+   "id": "H6a|wide256",
+   "what": "KV-only patching of the late blocks transfers tau >= 0.8",
+   "est": 0.9595154523849487,
+   "ci": [
+    0.9483711659908295,
+    0.971114656329155
+   ],
+   "p": 9.999000099990002e-05,
+   "p_holm": 0.0008999100089991002,
+   "supported": true
+  },
+  {
+   "id": "H6b|wide256",
+   "what": "KV-only patching of block 1 transfers tau <= 0.3",
+   "est": 0.09977885335683823,
+   "ci": [
+    0.06310605704784393,
+    0.1362468011677265
+   ],
+   "p": 9.999000099990002e-05,
+   "p_holm": 0.0008999100089991002,
+   "supported": true
+  },
+  {
+   "id": "H6c|wide256",
+   "what": "fast-weight probe beats best residual readout by >= 0.15 R^2 (d_model dims)",
+   "est": 0.2093351547873531,
+   "ci": [
+    0.20034643479465072,
+    0.21921150025944458
+   ],
+   "p": 9.999000099990002e-05,
+   "p_holm": 0.0008999100089991002,
+   "supported": true
+  },
+  {
+   "id": "H7a",
+   "what": "Jacobian closer to training-prior ridge than to new-prior Bayes",
+   "est": 0.001347608474357082,
+   "ci": [
+    0.000989419742589064,
+    0.0017057972061250998
+   ],
+   "p": 6.7308008592812055e-06,
+   "n_pos": 10,
+   "n": 10,
+   "p_holm": 6.730800859281205e-05,
+   "supported": true
+  },
+  {
+   "id": "H7b",
+   "what": "Jacobian closer to training-prior ridge than to OLS",
+   "est": 0.009368715671764727,
+   "ci": [
+    0.009252622921591744,
+    0.00948480842193771
+   ],
+   "p": 1.1299338084284466e-17,
+   "n_pos": 10,
+   "n": 10,
+   "p_holm": 1.2429271892712912e-16,
+   "supported": true
+  }
+ ],
+ "verdict": {
+  "H6a": true,
+  "H6b": true,
+  "H6c": true,
+  "H7a": true,
+  "H7b": true
+ },
+ "a": {
+  "long60k": {
+   "n_layer": 4,
+   "d_model": 128,
+   "late_blocks": [
+    3,
+    4
+   ],
+   "tau_late": 0.9444384574890137,
+   "tau_block1": 0.13341079652309418,
+   "tau_single_block": {
+    "1": 0.13341079652309418,
+    "2": 0.503856897354126,
+    "3": 0.40395691990852356,
+    "4": 0.4414138197898865
+   },
+   "r2": {
+    "resid_query|block1": 0.03746137359535221,
+    "resid_mean|block1": 0.2719014898381948,
+    "resid_query|block2": 0.10812809108284295,
+    "resid_mean|block2": 0.518745477595787,
+    "resid_query|block3": 0.14655224964559596,
+    "resid_mean|block3": 0.5115664782910615,
+    "resid_query|block4": 0.14827632698796864,
+    "resid_mean|block4": 0.5071171788401708,
+    "kv_rp|block3": 0.7694944368592052,
+    "kv_rp|block4": 0.8682801064479935
+   },
+   "best_kv": "kv_rp|block4",
+   "best_resid": "resid_mean|block2",
+   "r2_best_kv": 0.8682801064479935,
+   "r2_best_resid": 0.518745477595787,
+   "gap": 0.34953462885220643
+  },
+  "deep8": {
+   "n_layer": 8,
+   "d_model": 128,
+   "late_blocks": [
+    5,
+    6,
+    7,
+    8
+   ],
+   "tau_late": 0.8456788659095764,
+   "tau_block1": 0.010168267413973808,
+   "tau_single_block": {
+    "1": 0.010168267413973808,
+    "2": 0.021483227610588074,
+    "3": 0.21338337659835815,
+    "4": 0.06473315507173538,
+    "5": -0.03748360276222229,
+    "6": 0.4868183135986328,
+    "7": 0.09974413365125656,
+    "8": 0.09460823982954025
+   },
+   "r2": {
+    "resid_query|block1": 0.015014662830467687,
+    "resid_mean|block1": 0.3161012487325873,
+    "resid_query|block2": 0.05701470021587527,
+    "resid_mean|block2": 0.3268287349715009,
+    "resid_query|block3": 0.10618400379866544,
+    "resid_mean|block3": 0.4883013432223186,
+    "resid_query|block4": 0.13360857201867718,
+    "resid_mean|block4": 0.5197152691072268,
+    "resid_query|block5": 0.15656858724859166,
+    "resid_mean|block5": 0.5479643424324504,
+    "resid_query|block6": 0.14730718148606214,
+    "resid_mean|block6": 0.5319514905635497,
+    "resid_query|block7": 0.1588430912492825,
+    "resid_mean|block7": 0.5030560086067695,
+    "resid_query|block8": 0.15899293155052793,
+    "resid_mean|block8": 0.5018854177490631,
+    "kv_rp|block5": 0.7271720005706942,
+    "kv_rp|block6": 0.8072096618640606,
+    "kv_rp|block7": 0.8487661597430264,
+    "kv_rp|block8": 0.8425656396429767
+   },
+   "best_kv": "kv_rp|block7",
+   "best_resid": "resid_mean|block5",
+   "r2_best_kv": 0.8487661597430264,
+   "r2_best_resid": 0.5479643424324504,
+   "gap": 0.300801817310576
+  },
+  "wide256": {
+   "n_layer": 4,
+   "d_model": 256,
+   "late_blocks": [
+    3,
+    4
+   ],
+   "tau_late": 0.9595154523849487,
+   "tau_block1": 0.09977885335683823,
+   "tau_single_block": {
+    "1": 0.09977885335683823,
+    "2": 0.24595682322978973,
+    "3": 0.544909656047821,
+    "4": 0.12301817536354065
+   },
+   "r2": {
+    "resid_query|block1": 0.11081246546198832,
+    "resid_mean|block1": 0.48982955445262116,
+    "resid_query|block2": 0.2224967864454314,
+    "resid_mean|block2": 0.7135651818280401,
+    "resid_query|block3": 0.2668459903147093,
+    "resid_mean|block3": 0.7102369825999987,
+    "resid_query|block4": 0.26601394359245006,
+    "resid_mean|block4": 0.6922306764248917,
+    "kv_rp|block3": 0.821625491689467,
+    "kv_rp|block4": 0.9229003366153932
+   },
+   "best_kv": "kv_rp|block4",
+   "best_resid": "resid_mean|block2",
+   "r2_best_kv": 0.9229003366153932,
+   "r2_best_resid": 0.7135651818280401,
+   "gap": 0.2093351547873531
+  },
+  "small64": {
+   "n_layer": 2,
+   "d_model": 64,
+   "late_blocks": [
+    2
+   ],
+   "tau_late": 0.9736122488975525,
+   "tau_block1": 0.4836776554584503,
+   "tau_single_block": {
+    "1": 0.4836776554584503,
+    "2": 0.9736122488975525
+   },
+   "r2": {
+    "resid_query|block1": 0.01797334352409119,
+    "resid_mean|block1": 0.5226485788810947,
+    "resid_query|block2": 0.6318193940635392,
+    "resid_mean|block2": 0.714967060228903,
+    "kv_rp|block2": 0.6461399438041892
+   },
+   "best_kv": "kv_rp|block2",
+   "best_resid": "resid_mean|block2",
+   "r2_best_kv": 0.6461399438041892,
+   "r2_best_resid": 0.714967060228903,
+   "gap": -0.06882711642471384
+  }
+ },
+ "b_per_seed": {
+  "0": {
+   "ridge_train": 0.026614935562623,
+   "bayes_new": 0.027699544171777925,
+   "ols": 0.03612226162742085
+  },
+  "1": {
+   "ridge_train": 0.02623443947759576,
+   "bayes_new": 0.028014237385148348,
+   "ols": 0.03543936824990142
+  },
+  "2": {
+   "ridge_train": 0.027223654023563044,
+   "bayes_new": 0.02756949454587554,
+   "ols": 0.03690747862239509
+  },
+  "3": {
+   "ridge_train": 0.02703510727867985,
+   "bayes_new": 0.02771765100607334,
+   "ols": 0.03658093803595066
+  },
+  "4": {
+   "ridge_train": 0.026233941019487006,
+   "bayes_new": 0.027618894188182263,
+   "ols": 0.03559477556124008
+  },
+  "5": {
+   "ridge_train": 0.02663809807798635,
+   "bayes_new": 0.02816586903192342,
+   "ols": 0.035915442305505293
+  },
+  "6": {
+   "ridge_train": 0.024477438652872923,
+   "bayes_new": 0.02601707887315493,
+   "ols": 0.03377593789010614
+  },
+  "7": {
+   "ridge_train": 0.025727485559305808,
+   "bayes_new": 0.027466026082167437,
+   "ols": 0.03493867830605957
+  },
+  "8": {
+   "ridge_train": 0.026685100017668884,
+   "bayes_new": 0.028171116639189912,
+   "ols": 0.03606252862820086
+  },
+  "9": {
+   "ridge_train": 0.027397447339547066,
+   "bayes_new": 0.029303819829407395,
+   "ols": 0.036617394500197
+  }
+ }
+}

@@ -62,7 +62,8 @@ baseline and the scale study. (8)~\emph{Controller training.} Pure closed-loop B
 unstable in pilots (Table~\ref{tab:pilots}). The final controller uses a DAgger warm start (imitating the oracle LQR
 action from its own history) followed by BPTT fine-tuning on $\log(J/J_{\rm oracle})$, with 8-step truncation and
 learning rate $10^{-4}$, for the pre-registered 6000 BPTT steps. (9)~Execution only: BPTT is replayed as a CUDA graph; the
-constant-gain baselines are trained on the CPU. The full log is in \texttt{docs/DEVIATIONS.md}.
+constant-gain baselines are trained on the CPU. (10)~A second pre-registration (Appendix~\ref{app:confirm}) tested the
+key--value account after it was formed. The full log is in \texttt{docs/DEVIATIONS.md}.
 
 \section{Implementation details}\label{app:impl}
 \textbf{Exact Bayes predictor (A).} Each row of $\theta$ has the Gaussian posterior of Theorem~\ref{thm:bayes}, and
@@ -79,6 +80,17 @@ episode $A$'s context followed by episode $B$'s query token. \textbf{Compute.} E
 \input{pilot_table}
 \input{seed_table}
 \input{scale_table}
+\section{Second pre-registration: confirmatory tests}\label{app:confirm}
+Registered in \texttt{PREREGISTRATION\_2.md} (commit \texttt{94b6cf8}, tag \texttt{prereg2-94b6cf8}, pushed publicly) before
+any of these analyses ran, on models whose internals had not been analysed: the long-trained (60k steps), deep (8 blocks)
+and wide ($d_{\rm model}{=}256$) models of \S\ref{sec:scale}. Data and procedure are those of the exploratory analyses: the
+4096 reference episodes, probes fit on 2048 and evaluated on the other 2048, patching pairs as in Fig.~\ref{fig:mech}c;
+``late blocks'' are the second half of the blocks. The prior-shift test uses 1024 new episodes with $A$ entries
+$\sim\mathcal N(0,0.1^2)$ instead of $\mathcal N(0,0.4^2)$ and the 10 training seeds of the main model; $t$ starts at 8 because
+the Jacobian departs from the Bayes estimate before that even in distribution. A first run on the GPU ran out of memory; all
+numbers come from an identical re-run on the CPU (\texttt{scripts/confirm\_a.py}, \texttt{confirm\_b.py}, \texttt{confirm\_stats.py}).
+\input{confirm_table}
+
 \section{Dimension-matched probe controls}\label{app:controls}
 \input{controls_table}
 

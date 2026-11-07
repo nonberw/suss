@@ -21,6 +21,7 @@ Small GPT-style transformers (0.1M to 3.2M parameters, plus the baselines) train
 - On linear systems the predictor tracks the exact Bayes predictor while data are scarce, then settles at 1.59x the Bayes excess risk.
 - The pre-registered mechanism, a parameter estimate in the residual stream, is rejected (probe R^2 = 0.19).
 - Exploratory, with dimension-matched controls: the sufficient statistics live in the attention key-value memory of the last two blocks. Swapping only those keys and values between episodes transfers 91-94% of the behaviour; replicated over 10 seeds.
+- A second pre-registration (tag `prereg2-94b6cf8`), pushed before the analyses ran, confirms this on three other architectures (deeper, wider, longer-trained): 11 of 11 tests hold, including a prior-shift test where the network keeps applying its training prior.
 
 ## Files
 

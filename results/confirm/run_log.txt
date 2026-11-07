@@ -1,0 +1,15 @@
+long60k: tau_late=0.944 tau_b1=0.133 kv=0.868 (kv_rp|block4) resid=0.519 (resid_mean|block2) gap=0.350
+deep8: tau_late=0.846 tau_b1=0.010 kv=0.849 (kv_rp|block7) resid=0.548 (resid_mean|block5) gap=0.301
+wide256: tau_late=0.960 tau_b1=0.100 kv=0.923 (kv_rp|block4) resid=0.714 (resid_mean|block2) gap=0.209
+small64: tau_late=0.974 tau_b1=0.484 kv=0.646 (kv_rp|block2) resid=0.715 (resid_mean|block2) gap=-0.069
+=== B
+seed 0: D_ridge_train=0.0266, D_bayes_new=0.0277, D_ols=0.0361
+seed 1: D_ridge_train=0.0262, D_bayes_new=0.0280, D_ols=0.0354
+seed 2: D_ridge_train=0.0272, D_bayes_new=0.0276, D_ols=0.0369
+seed 3: D_ridge_train=0.0270, D_bayes_new=0.0277, D_ols=0.0366
+seed 4: D_ridge_train=0.0262, D_bayes_new=0.0276, D_ols=0.0356
+seed 5: D_ridge_train=0.0266, D_bayes_new=0.0282, D_ols=0.0359
+seed 6: D_ridge_train=0.0245, D_bayes_new=0.0260, D_ols=0.0338
+seed 7: D_ridge_train=0.0257, D_bayes_new=0.0275, D_ols=0.0349
+seed 8: D_ridge_train=0.0267, D_bayes_new=0.0282, D_ols=0.0361
+seed 9: D_ridge_train=0.0274, D_bayes_new=0.0293, D_ols=0.0366
