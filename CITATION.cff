@@ -10,8 +10,8 @@ identifiers:
     value: "10.5281/zenodo.24031898"
     description: "Concept DOI (all versions) on Zenodo"
   - type: doi
-    value: "10.5281/zenodo.24032754"
-    description: "Version 0.1.3 on Zenodo"
+    value: "10.5281/zenodo.24042349"
+    description: "Version 0.2.0 on Zenodo"
 repository-code: "https://github.com/nonberw/suss"
 url: "https://github.com/nonberw/suss"
 license: MIT
